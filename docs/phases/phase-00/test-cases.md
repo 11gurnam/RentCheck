@@ -17,7 +17,7 @@ Run date: 2026-10-05. Data: synthetic environment URL/public/private placeholder
 | F00-11 Phone visual | Manual screenshot inspection | Inspect evidence/phone.png; stacked hero, navigation/wrapping/trust/footer | Readable mobile layout, all content visible | Inspected full page; readable, no clipping | PASS |
 | F00-12 Tablet visual | Manual screenshot inspection | Inspect evidence/tablet.png at 768 width | Columns/wrapping remain usable | Inspected full page; readable, no clipping | PASS |
 | F00-13 Clean lockfile install / quality | Automated commands | npm ci; lint; typecheck (route typegen); unit; build | Fresh dependency installation and all checks pass | Clean install, lint, strict types, 4 unit tests and production build all passed; zero install audit vulnerabilities | PASS |
-| F00-14 Remote branch / CI | Git + Actions | Commit tested files, push phase branch, compare local SHA with ls-remote; inspect CI | Matching remote final commit and green CI | Pending push | NOT RUN |
+| F00-14 Remote branch / CI | Git + Actions | Commit tested files, push phase branch, compare local SHA with ls-remote; inspect CI | Matching remote final commit and green CI | Local implementation commit e8b50c6; push denied HTTP403 to okruti-rairon; no remote phase branch; remote CI not run | BLOCKED |
 | F00-15 Live account identity/authorization/persistence | Future integration | Requires Phase 1 auth/schema/provider config | Sessions and policy tests | Not implemented or executed in Phase 0 | NOT RUN |
 | F00-16 Review/claim/moderation/recommendation/merge rules | Future unit/integration/browser | Requires Phases 4–7 workflow/schema | Full mandatory rule suite per specification | Not implemented or executed in Phase 0 | NOT RUN |
 
