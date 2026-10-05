@@ -1,4 +1,4 @@
-name: Foundation checks
+name: RentCheck checks
 on:
   push:
     branches: ['**']
@@ -8,7 +8,7 @@ permissions:
 jobs:
   checks:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -16,6 +16,13 @@ jobs:
           node-version: 24
           cache: npm
       - run: npm ci
+      - name: Start isolated account backend
+        run: |
+          mkdir -p work
+          npm run backend:start > work/backend-start.log 2>&1
+          npm run backend:env
+      - run: npm run test:db
+      - run: npm run test:integration
       - run: npm run check
       - run: npx playwright install --with-deps chromium
       - run: npm run test:e2e
@@ -27,3 +34,6 @@ jobs:
             playwright-report/
             test-results/
           retention-days: 7
+      - name: Stop isolated backend
+        if: always()
+        run: npx supabase stop

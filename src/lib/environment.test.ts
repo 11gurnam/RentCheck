@@ -2,6 +2,17 @@ import { describe, expect, it } from "vitest";
 import { parsePublicEnvironment } from "./environment";
 
 describe("public backend configuration", () => {
+  it.each([
+    "sb_secret_synthetic",
+    `header.${btoa(JSON.stringify({ role: "service_role" }))}.signature`,
+  ])("rejects a privileged key %s", (key) => {
+    expect(() =>
+      parsePublicEnvironment({
+        NEXT_PUBLIC_SUPABASE_URL: "https://example.supabase.co",
+        NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: key,
+      }),
+    ).toThrow();
+  });
   it("accepts a URL and publishable key without including privileged variables", () => {
     expect(
       parsePublicEnvironment({

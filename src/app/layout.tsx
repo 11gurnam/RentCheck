@@ -4,7 +4,7 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "RentCheck — A little more clarity before you move",
   description:
-    "A Jaipur accommodation research prototype built around tenant experiences, property ratings and landlord reputations.",
+    "An India-wide accommodation research prototype built around tenant experiences, property ratings and landlord reputations.",
 };
 
 export default function RootLayout({

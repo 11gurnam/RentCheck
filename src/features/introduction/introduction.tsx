@@ -18,7 +18,7 @@ const principles = [
   },
 ];
 
-function JaipurIllustration() {
+function NeighbourhoodIllustration() {
   return (
     <svg
       className="city-art"
@@ -27,7 +27,7 @@ function JaipurIllustration() {
       aria-labelledby="city-title"
     >
       <title id="city-title">
-        Illustration of Jaipur architecture and neighbourhood homes
+        Illustration of neighbourhood homes in India
       </title>
       <rect width="640" height="460" fill="#f0e9dc" />
       <circle cx="495" cy="103" r="57" fill="#e3bb76" />
@@ -82,18 +82,20 @@ export function Introduction() {
         Skip to content
       </a>
       <header className="site-header shell">
-        <Brand />
+        <Brand href="#top" />
         <nav aria-label="Main navigation">
           <a href="#how-it-works">How it works</a>
           <a href="#our-principles">Our principles</a>
-          <span className="preview-label">Foundation preview</span>
+          <a className="preview-label" href="/sign-in">
+            Sign in
+          </a>
         </nav>
       </header>
       <main id="main">
         <section className="hero shell" aria-labelledby="hero-heading">
           <div className="hero-copy">
             <p className="eyebrow">
-              <span /> A MORE INFORMED MOVE · JAIPUR
+              <span /> A MORE INFORMED MOVE · INDIA
             </p>
             <h1 id="hero-heading">
               A little more clarity
@@ -105,26 +107,25 @@ export function Introduction() {
               understand what it’s like to live there.
             </p>
             <p className="hero-detail">
-              Get to know Jaipur’s flats, houses, PGs and hostels — and the
+              Get to know flats, houses, PGs and hostels across India — and the
               people who manage them.
             </p>
             <a className="primary-link" href="#how-it-works">
               Get to know RentCheck <span aria-hidden="true">↗</span>
             </a>
             <p className="availability">
-              An early prototype. Search and accounts are coming in later
-              phases.
+              An early prototype. Property search is coming in a later phase.
             </p>
           </div>
           <div className="hero-visual">
             <div className="illustration-frame">
               <div className="illustration-caption">
-                <span>THE PINK CITY</span>
-                <span>26.91° N · 75.79° E</span>
+                <span>ACROSS INDIA</span>
+                <span>NEIGHBOURHOODS & HOMES</span>
               </div>
-              <JaipurIllustration />
+              <NeighbourhoodIllustration />
               <div className="illustration-bottom">
-                <span>Find your place in Jaipur.</span>
+                <span>Find your place. Feel informed.</span>
                 <span aria-hidden="true">✳</span>
               </div>
             </div>
@@ -218,9 +219,9 @@ export function Introduction() {
         </section>
       </main>
       <footer className="site-footer shell">
-        <Brand />
+        <Brand href="#top" />
         <p>Made for a more informed move.</p>
-        <span>Jaipur · Foundation preview</span>
+        <span>India · Early prototype</span>
       </footer>
     </div>
   );

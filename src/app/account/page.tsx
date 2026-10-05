@@ -1,0 +1,59 @@
+import { AccountShell } from "@/components/ui/account-shell";
+import { AliasForm, SignOutForm } from "@/features/accounts/forms";
+import { getOwnProfile, requireUser } from "@/lib/auth/session";
+
+export default async function AccountPage() {
+  const user = await requireUser();
+  const profile = await getOwnProfile();
+  return (
+    <AccountShell>
+      <div className="dashboard-heading">
+        <div>
+          <p className="eyebrow">YOUR PRIVATE SPACE</p>
+          <h1>Your account.</h1>
+        </div>
+        <SignOutForm />
+      </div>
+      {profile ? (
+        <div className="dashboard-grid">
+          <section className="dashboard-card">
+            <h2>Your public voice</h2>
+            <AliasForm alias={profile.public_alias} />
+          </section>
+          <section className="dashboard-card">
+            <h2>Private account details</h2>
+            <dl>
+              <dt>Email address</dt>
+              <dd>{user.email}</dd>
+              <dt>Account access</dt>
+              <dd>Renter and future landlord claimant</dd>
+              <dt>Administrator access</dt>
+              <dd>
+                {profile.is_administrator
+                  ? "Granted by a trusted administrator"
+                  : "Not granted"}
+              </dd>
+            </dl>
+            <p className="field-hint">
+              Email and account identity are visible only to you. Claims and
+              review tools arrive in later phases.
+            </p>
+            {profile.is_administrator && (
+              <a className="text-link" href="/admin">
+                Administrator area →
+              </a>
+            )}
+          </section>
+        </div>
+      ) : (
+        <div className="setup-notice" role="alert">
+          <strong>We couldn’t load your account profile.</strong>
+          <p>
+            Refresh to try again. If this continues, the account database setup
+            needs attention.
+          </p>
+        </div>
+      )}
+    </AccountShell>
+  );
+}

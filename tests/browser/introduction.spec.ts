@@ -1,7 +1,7 @@
 import { test, expect } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
 
-test("public introduction loads without backend configuration", async ({
+test("public introduction remains accessible with India-wide scope", async ({
   page,
 }) => {
   const errors: string[] = [];
@@ -12,12 +12,17 @@ test("public introduction loads without backend configuration", async ({
     "before you move",
   );
   await expect(
-    page.getByText("Search and accounts are coming", { exact: false }),
+    page.getByText("Property search is coming", { exact: false }),
   ).toBeVisible();
   await expect(
     page.getByText("never a platform safety guarantee", { exact: false }),
   ).toBeVisible();
   await expect(page.getByRole("button")).toHaveCount(0);
+  await expect(
+    page.getByRole("link", { name: "Sign in", exact: true }),
+  ).toBeVisible();
+  await expect(page.locator("header")).toContainText("INDIA");
+  await expect(page.locator("main")).toContainText("across India");
   expect(errors).toEqual([]);
   expect(
     await page.evaluate(
