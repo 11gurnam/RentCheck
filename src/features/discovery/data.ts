@@ -18,6 +18,9 @@ export type Property = {
   total_count: number;
   property_rating: number | null;
   review_count: number;
+  positive_count: number;
+  eligible_count: number;
+  recommended: boolean;
 };
 export type Association = {
   id: string;
@@ -34,7 +37,7 @@ export type Landlord = {
 };
 export async function searchProperties(filters: Filters) {
   const db = await createDatabaseClient();
-  const { data, error } = await db.rpc("search_properties_rated", {
+  const { data, error } = await db.rpc("search_properties_verified", {
     p_query: filters.q,
     p_state: filters.state,
     p_city: filters.city,
@@ -44,6 +47,7 @@ export async function searchProperties(filters: Filters) {
     p_max: filters.max,
     p_page: filters.page,
     p_rating: filters.rating,
+    p_women: filters.women === "recommended",
   });
   if (error) throw new Error("Discovery unavailable");
   return data as Property[];
@@ -65,7 +69,23 @@ export async function getProperty(id: string) {
     .eq("id", id)
     .maybeSingle();
   if (error) throw new Error("Property unavailable");
-  return data as Property | null;
+  if (!data) return null;
+  const scores = await db
+    .from("property_scores")
+    .select("property_rating,review_count")
+    .eq("property_id", id)
+    .maybeSingle();
+  const counts = await db.rpc("womens_recommendation_counts", {
+    p_property: id,
+  });
+  if (scores.error || counts.error)
+    throw new Error("Property scores unavailable");
+  return {
+    ...data,
+    property_rating: scores.data?.property_rating ?? null,
+    review_count: scores.data?.review_count ?? 0,
+    ...counts.data?.[0],
+  } as Property;
 }
 export async function getAssociations(
   propertyId?: string,

@@ -3,6 +3,8 @@ import { AccountShell } from "@/components/ui/account-shell";
 import { requireUser } from "@/lib/auth/session";
 import { ownReviews } from "@/features/reviews/data";
 import { ReviewForm } from "@/features/reviews/forms";
+import { VerificationForm } from "@/features/verification/forms";
+import { myVerifications } from "@/features/verification/data";
 import { PhotoForm } from "@/features/reviews/photo-form";
 import { createDatabaseClient } from "@/lib/database/server";
 export default async function EditReview({
@@ -30,6 +32,10 @@ export default async function EditReview({
         />
       </section>
       <PhotoForm review={id} photos={data} />
+      <VerificationForm
+        review={id}
+        requests={(await myVerifications()).filter((v) => v.review_id === id)}
+      />
     </AccountShell>
   );
 }

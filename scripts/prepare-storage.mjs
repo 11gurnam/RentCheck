@@ -9,7 +9,10 @@ const db = createClient(
   env.SUPABASE_SERVICE_ROLE_KEY,
   { auth: { persistSession: false } },
 );
-for (const [name, mimes] of [["review-photos", ["image/jpeg"]]]) {
+for (const [name, mimes] of [
+  ["review-photos", ["image/jpeg"]],
+  ["rental-documents", ["image/jpeg"]],
+]) {
   const { data, error } = await db.storage.getBucket(name);
   if (!data) {
     if (error?.message && !/not found/i.test(error.message))
@@ -22,4 +25,4 @@ for (const [name, mimes] of [["review-photos", ["image/jpeg"]]]) {
     if (e) throw new Error("Bucket creation failed");
   }
 }
-console.log("Private review photo bucket ready.");
+console.log("Private media buckets ready.");

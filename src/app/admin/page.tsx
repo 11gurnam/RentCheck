@@ -13,9 +13,15 @@ export default async function AdminPage() {
         </h1>
         <p>
           {permitted
-            ? "Your account has administrator access. Verification, claims and moderation tools arrive in their planned phases."
+            ? "Your account has administrator access. Demonstration verification and audit tools are ready."
             : "This account does not have administrator access. A public alias or account setting cannot grant it."}
         </p>
+        {permitted && (
+          <p>
+            <a href="/admin/verification">Verification requests</a> ·{" "}
+            <a href="/admin/audit">Audit records</a>
+          </p>
+        )}
         <a className="primary-link" href="/account">
           Back to your account
         </a>

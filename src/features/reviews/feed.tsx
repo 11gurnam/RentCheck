@@ -19,6 +19,15 @@ export async function ReviewFeed({
   if (score.error) throw new Error("Ratings unavailable");
   const rating = score.data?.[landlord ? "landlord_rating" : "property_rating"];
   const count = score.data?.review_count ?? 0;
+  const verified = await Promise.all(
+    rows.map(async (r) => {
+      const { data, error } = await db.rpc("review_is_verified", {
+        p_review: r.id,
+      });
+      if (error) throw new Error("Verification unavailable");
+      return { id: r.id, verified: data === true };
+    }),
+  );
   const photos = await Promise.all(
     rows.map(async (r) => {
       const { data, error } = await db.rpc("get_review_photos", {
@@ -43,8 +52,10 @@ export async function ReviewFeed({
         <article key={r.id} className="dashboard-card">
           <h3>{r.alias}</h3>
           <p className="demo-tag">
-            Unverified tenant · synthetic example{" "}
-            {r.was_edited ? "· Updated" : ""}
+            {verified.find((v) => v.id === r.id)?.verified
+              ? "Demonstration verified tenant"
+              : "Unverified tenant"}{" "}
+            · synthetic example {r.was_edited ? "· Updated" : ""}
           </p>
           <p>
             Property {r.property_rating} / 5 · Management{" "}

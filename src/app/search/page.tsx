@@ -145,6 +145,13 @@ export default async function SearchPage({
             ))}
           </select>
         </div>
+        <div>
+          <label htmlFor="women">Women’s tenant recommendations</label>
+          <select id="women" name="women" defaultValue={f.women}>
+            <option value="">Any status</option>
+            <option value="recommended">Threshold reached</option>
+          </select>
+        </div>
         <div className="filter-actions">
           <button className="button" type="submit">
             Apply filters

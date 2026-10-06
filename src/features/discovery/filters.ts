@@ -8,6 +8,7 @@ export const filtersSchema = z
     type: z.enum(["", "Flat", "House", "PG", "Hostel"]).default(""),
     min: z.coerce.number().int().min(0).max(10000000).default(0),
     max: z.coerce.number().int().min(0).max(10000000).default(10000000),
+    women: z.enum(["", "recommended"]).default(""),
     rating: z.coerce.number().min(0).max(5).default(0),
     page: z.coerce.number().int().min(1).max(10000).default(1),
   })

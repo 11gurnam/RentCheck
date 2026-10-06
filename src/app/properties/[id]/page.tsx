@@ -10,6 +10,7 @@ import { money } from "@/features/discovery/filters";
 import { getVerifiedUser } from "@/lib/auth/session";
 import { createDatabaseClient } from "@/lib/database/server";
 import { SaveForm } from "@/features/contributions/forms";
+import { womensCounts } from "@/features/verification/data";
 import { ReviewFeed } from "@/features/reviews/feed";
 export default async function PropertyPage({
   params,
@@ -27,6 +28,7 @@ export default async function PropertyPage({
   const isSaved = !!saved?.data?.some(
     (row: { property_id: string }) => row.property_id === id,
   );
+  const women = await womensCounts(id);
   const associations = await getAssociations(id);
   const history = await Promise.all(
     associations.map(async (a) => ({
@@ -72,13 +74,17 @@ export default async function PropertyPage({
           )}
         </section>
         <section className="dashboard-card">
-          <h2>Reading tenant feedback</h2>
+          <h2>Women’s tenant recommendations</h2>
 
           <p className="field-hint">
             Property and management ratings remain separate.
           </p>
           <p>
-            No eligible women’s recommendation responses yet. Tenant
+            {women?.recommended
+              ? "Recommended by eligible women tenants."
+              : "Recommendation threshold not reached."}{" "}
+            {women?.positive_count ?? 0}/{women?.eligible_count ?? 0} eligible
+            positive responses. Demonstration verification only. Tenant
             recommendations are never a safety guarantee.
           </p>
         </section>

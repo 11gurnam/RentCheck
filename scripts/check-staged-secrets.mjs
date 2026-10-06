@@ -13,6 +13,12 @@ const secrets = [".env.google.local", ".env.test.local", ".env.local"]
     const env = parseEnv(readFileSync(file, "utf8"));
     return sensitiveNames.map((name) => env[name]).filter(Boolean);
   });
+if (existsSync("work/demo-accounts.json"))
+  secrets.push(
+    ...JSON.parse(readFileSync("work/demo-accounts.json", "utf8")).map(
+      (account) => account.password,
+    ),
+  );
 const files = execFileSync("git", ["diff", "--cached", "--name-only", "-z"])
   .toString()
   .split("\0")

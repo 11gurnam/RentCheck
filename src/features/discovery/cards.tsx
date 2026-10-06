@@ -29,6 +29,11 @@ export function PropertyCard({ property: p }: { property: Property }) {
               p.review_count +
               " property ratings"}
         </p>
+        <p className="field-hint">
+          {p.positive_count ?? 0}/{p.eligible_count ?? 0} eligible women’s
+          positive responses ·{" "}
+          {p.recommended ? "Recommended" : "Threshold not reached"}
+        </p>
         {p.is_demo && <span className="demo-tag">Synthetic example</span>}
       </div>
     </article>

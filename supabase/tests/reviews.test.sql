@@ -1,4 +1,7 @@
-begin;set search_path to public,extensions;select plan(19);
+begin;set search_path to public,extensions;select plan(20);
+create temporary table score_baseline as select coalesce((select review_count from public.property_scores where property_id='20000000-0000-4000-8000-000000000001'),0)::bigint n;
+grant select on score_baseline to authenticated;
+insert into public.properties(id,name,address,state,city,locality,property_type,rent_min,rent_max) values('40000000-0000-4000-8000-000000000100','Fictional unrated SQL property','Fictional unrated SQL lane','Delhi','Review SQL fixture city','Fictional area','Flat',1000,2000);
 insert into auth.users(id,email) values('40000000-0000-4000-8000-000000000001','sql-review@example.test');
 set local role anon;
 select throws_ok($$select create_review('{}')$$,'42501',null,'Anonymous publication denied');
@@ -13,7 +16,8 @@ select throws_ok($$update reviews set body='Hacked'$$,'42501',null,'Direct updat
 select throws_ok($$select register_review_photo('40000000-0000-4000-8000-000000000001',gen_random_uuid(),gen_random_uuid())$$,'42501',null,'Media registration cannot bypass validation');
 select lives_ok($$select delete_review((get_my_reviews()->0->>'id')::uuid)$$,'Author soft delete');
 select is((select count(*)::int from get_review_feed('20000000-0000-4000-8000-000000000001') where body='Synthetic review SQL fixture.'),0,'Deleted excluded from feed');
-select is((select count(*)::int from property_scores where property_id='20000000-0000-4000-8000-000000000001'),0,'No rating is no row, not zero');
+select is(coalesce((select review_count from property_scores where property_id='20000000-0000-4000-8000-000000000001'),0),(select n from score_baseline),'Deleted fixture excluded; other genuine reviews preserved');
+select is((select count(*)::int from property_scores where property_id='40000000-0000-4000-8000-000000000100'),0,'No rating is no row, not zero');
 reset role;
 select throws_ok($$insert into private.tenancies(user_id,property_id,start_date,is_current,rent_paid) values('40000000-0000-4000-8000-000000000001','20000000-0000-4000-8000-000000000001','2024-01-01',true,15000)$$,'23505',null,'Canonical tenancy unique constraint independent of RPC');
 select throws_ok($$insert into public.reviews(tenancy_id,profile_id,property_id,property_rating,body) select tenancy_id,profile_id,property_id,4,'Another fictional review' from public.reviews where body='Synthetic review SQL fixture.'$$,'23505',null,'One review per tenancy database key');

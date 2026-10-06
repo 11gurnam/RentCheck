@@ -1,0 +1,14 @@
+# Phase 5 — Private demonstration verification
+Branch phase-05-verification depends on Phase4 final documentation3d14f57827d1c086585ac66f9399dbe57b3bb13e. Phase4 implementation and final-docs CI both passed. No merge/deployment.
+
+Adds private fictional rental-document images, trusted administrator approval/rejection/revocation with required reasons, immutable private audit, demonstration verification labels, aggregate women's counts and a URL recommendation filter before pagination. Server validation restricts images to PNG/JPEG/WebP, 5MiB/20M pixels/non-animation and strips metadata. PDFs are not accepted in this prototype. Storage bucket rental-documents is private, denies direct API roles and is provisioned after local startup. SUPABASE_SERVICE_ROLE_KEY stays server-only and ignored.
+
+Author ownership and visible review are rechecked when service-only registration commits. One pending/approved request per review; rejected/revoked can submit a new document. Owner or currently trusted administrator receives private no-store attachment through /api/documents/id, after live getUser and SQL authorization; other users and anonymous callers denied. No signed URLs, public document identifiers or public gender answers.
+
+Counts derive fresh from visible reviews on published properties, explicit self-identification, answered yes/no and approved demonstration verification. Positive>=3 AND positive*2>eligible. Unanswered/unverified/nonwoman/deleted/removed/revoked excluded. Live derivation recalculates on edits/deletion/moderation/decisions, never stores a stale recommendation flag. Public status never promises safety or real verification.
+
+Migrations006/007 apply incrementally; backend:env provisions private buckets, Google helper preserves provider/volume. Fictional local accounts/helper/sample image support beginner walkthroughs; no default admin in migrations/hosted seeds, no grant to real Google account. Credentials live only in ignored work/demo-accounts.json and private local outputs, not repository/logs. Audit entries intentionally survive fixture account/review cleanup and are immutable; only admin-scoped function exposes them.
+
+Regression fixtures now preserve existing user reviews rather than assuming seed properties have zero ratings. Shortlist cards load fresh score/count data too. Commands: npmruncheck, test:db, test:integration, Chrome browsers. [Execution](test-cases.md), [beginner checklist](review-checklist.md).
+
+Local acceptance PASS: lint/types/unit62/build, SQL87, API8, full browser57 plus scoped3; axe across3 sizes, desktop/phone screenshots inspected,21 browser assets scanned without service key/demo passwords. User manual walkthrough pending. Push/CI pending.
