@@ -22,4 +22,4 @@ For each check, write **works**, **does not work**, or **could not check**. For 
 Use the [Phase 1 checklist](phases/phase-01/review-checklist.md). I will tell you which checks are ready and which need external setup. Do not assume a sign-in works just because its screen looks finished.
 
 ## Every later phase
-Each phase will include a separate `review-checklist.md` linked from its README and my delivery message. It will list exact pages/actions, a small example, expected outcomes and things that are not ready. No need to run commands or read test code for your review. We stop after each phase so you can request changes before the next one starts.
+Each phase includes a separate `review-checklist.md` linked from its README and my delivery message. It lists exact pages/actions, examples, expected outcomes and things that are not ready. No need to run commands or read test code. You authorized continuing all remaining phases sequentially on 2026-10-06, so I will report each phase and continue automatically unless your input is required. You can report a problem or ask me to stop at any time.
