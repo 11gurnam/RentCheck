@@ -114,7 +114,8 @@ export function Introduction() {
               Get to know RentCheck <span aria-hidden="true">↗</span>
             </a>
             <p className="availability">
-              An early prototype. Property search is coming in a later phase.
+              An early prototype. Explore synthetic accommodation across India.
+              {" "}<a href="/search">Explore accommodation →</a>
             </p>
           </div>
           <div className="hero-visual">

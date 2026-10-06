@@ -1,6 +1,6 @@
 # Phase delivery plan
 
-Each phase reads the canonical docs, inspects Git state/prior merge, implements only its scope, records tests, runs relevant prior regression checks and lint/types/tests/build, visually reviews phone/desktop, inspects staged diff/secrets, commits and pushes a phase branch. Verify remote commit, report implementation and push separately, then STOP for user review. Never merge main, force-push, deploy, delete remotes or change visibility without explicit authorization. Split oversized phases into complete documented subphases before implementation.
+Each phase reads the canonical docs, inspects Git state/prior merge, implements only its scope, records tests, runs relevant prior regression checks and lint/types/tests/build, visually reviews phone/desktop, inspects staged diff/secrets, commits and pushes a phase branch. Verify remote commit and report implementation, push and a beginner checklist separately. On 2026-10-06 the user authorized continuing Phases 2–8 sequentially without stopping for routine review; pause only for required user input or a real blocker. Never merge main, force-push, deploy, delete remotes or change visibility without explicit authorization. Split oversized phases into complete documented subphases before implementation.
 
 | Phase | Branch | Scope and exit criteria |
 | --- | --- | --- |

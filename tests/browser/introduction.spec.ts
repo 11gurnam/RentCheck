@@ -12,7 +12,7 @@ test("public introduction remains accessible with India-wide scope", async ({
     "before you move",
   );
   await expect(
-    page.getByText("Property search is coming", { exact: false }),
+    page.getByRole("link", { name: "Explore accommodation →" }),
   ).toBeVisible();
   await expect(
     page.getByText("never a platform safety guarantee", { exact: false }),
