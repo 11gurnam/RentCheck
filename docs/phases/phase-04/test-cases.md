@@ -11,7 +11,7 @@
 | R04-06 | Quality | Lint/types/unit/build | PASS final lint/types/unit55/build. Initial client-array type inference corrected |
 | R04-07 | Privacy | Privileged key absent from browser assets | PASS,20 browser assets scanned |
 | R04-08 | Visual | Phone/desktop form/feed screenshots and axe/nooverflow | PASS desktop/phone form/feed final captures inspected; axe and no-overflow all3 sizes |
-| R04-09 | Delivery | Staged secret scan, pushSHA/CI | Pending |
+| R04-09 | Delivery | Staged secret scan, pushSHA/CI | PASS52files;6a02bf4 remoteverified; Actions37420907217 success including all54 cases |
 
 Initial photo migration attempted to provision bucket before disabled storage schema existed; transaction rolled back. Corrected to API provisioning after storage startup, incremental migrations passed. No database reset.
 
