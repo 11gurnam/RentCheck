@@ -56,9 +56,10 @@ Links: [unit validation](../../../src/features/accounts/validation.test.ts), [en
 Implementation acceptance: PASS. Email/password, real Google sign-in/logout, persistent aliases, public/private identity boundaries, protected access and trusted administrator permissions are verified. User Google review and local automated/visual checks pass. Remote delivery verification is recorded separately below; Phase 2 has not started.
 
 - Branch: `phase-01-accounts`, based on merged Phase 0.
-- Commit/push status: prepared for commit/push after implementation acceptance. Final delivery record follows remote verification.
+- Commit/push status: PASS. Implementation commit `ed6209a9c2234147eaf4dd6669a8681c797d932b` pushed and verified against `git ls-remote`. A documentation-only follow-up records delivery; obtain the latest branch commit with `git rev-parse HEAD`.
 - Branch URL: https://github.com/11gurnam/RentCheck/tree/phase-01-accounts.
-- CI workflow starts isolated Supabase, then database/API/quality/build/browser checks; remote result pending push.
+- Implementation CI: PASS, [verified Actions run](https://github.com/11gurnam/RentCheck/actions/runs/37304738550) on `ed6209a9c2234147eaf4dd6669a8681c797d932b`. Clean install, isolated Supabase, SQL/API tests, lint/types/unit/build, bundled Chromium browser tests and evidence upload all succeeded. Documentation-only follow-ups trigger their own branch CI; see Actions for their status.
+- Phase 1 implementation and delivery complete. Stop at the review boundary; Phase 2 has not started.
 - No merge, deployment, visibility change or production test performed.
 
 ## Limits
