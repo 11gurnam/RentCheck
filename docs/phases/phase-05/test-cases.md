@@ -10,6 +10,6 @@
 | V05-05 | Quality | Lint/types/unit/build | PASS; final helper change lintPASS |
 | V05-06 | Accessibility/visual | Verification/admin/profile axe and desktop/phone screenshots | PASS axe3sizes and desktop/phone final screenshots inspected |
 | V05-07 | Local user setup | Separate fictional demo accounts and sample document | PASS helper executed and image inspected; Google user privilege unchanged |
-| V05-08 | Secrets/delivery | Bundle/staged key/password exclusion, pushSHA/CI | BundlePASS21assets; staged/push/CI pending |
+| V05-08 | Secrets/delivery | Bundle/staged key/password exclusion, pushSHA/CI | PASS21assets/37stagedfiles; c3418c6 remoteverified; Actions37422880430 success all57 |
 
 Initial desktop browser assertion expected an extra space in1/1; UI count was correct. Corrected assertion, scoped3 passed. No failed checks counted as passes. SQL fixture document metadata is inserted transactionally for threshold rules; live API/browser cases separately prove storage upload and authorization. Audit retains synthetic fixture records intentionally. User manual walkthrough pending.
