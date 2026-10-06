@@ -11,6 +11,6 @@
 | C03-05 Browser journeys | Playwright ×3 | Sign-in gates, save/reload/remove, retained duplicate form inputs, existing-profile links, distinct creation and search/profile | Full51 browser casesPASS. Visual review caught native checkbox reset; prevented reset, added assertion and affected3 journeys rerunPASS | PASS |
 | C03-06 Accessibility/visual | Axe + screenshots | Add/duplicate/shortlist phone/desktop, no overflow/violations | Add form axe/overflowPASS all3 sizes. Desktop/phone shortlist, duplicate and add screenshots inspected; corrected checkbox capture reinspected | PASS |
 | C03-07 Quality/regressions | Commands | Lint/types/unit/build, all previous DB/API/browser cases | Final npmcheckPASS lint/types/unit53/build. SQL46/API6PASS. All51 browser cases plus final targeted3PASS. Initial type inference error fixed before passing checks | PASS |
-| C03-08 Delivery | Git/Actions | Staged secret scan, push/remote SHA, isolated CI | Pending | NOT RUN |
+| C03-08 Delivery | Git/Actions | Staged secret scan, push/remote SHA, isolated CI | 33 staged files scanned; d8c4cce9cc4f1f0b971818d8b084c84965752baa matches remote. Actions37418515790 completed success, including all51 bundled-Chromium cases | PASS |
 
 User manual review not yet reported. No fake management grants, cross-account save visibility, automatic uncertain merges or anonymous mutation paths claimed.
