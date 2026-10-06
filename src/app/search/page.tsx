@@ -134,6 +134,17 @@ export default async function SearchPage({
             defaultValue={f.max === 10000000 ? "" : f.max}
           />
         </div>
+        <div>
+          <label htmlFor="rating">Minimum property rating</label>
+          <select id="rating" name="rating" defaultValue={f.rating}>
+            <option value="0">Any rating / unrated</option>
+            {[3, 4, 5].map((n) => (
+              <option key={n} value={n}>
+                {n} / 5 or higher
+              </option>
+            ))}
+          </select>
+        </div>
         <div className="filter-actions">
           <button className="button" type="submit">
             Apply filters

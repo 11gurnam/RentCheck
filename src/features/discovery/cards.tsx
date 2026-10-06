@@ -21,7 +21,14 @@ export function PropertyCard({ property: p }: { property: Property }) {
         <p className="field-hint">
           {p.landlord_name ?? "Manager not recorded"}
         </p>
-        <p className="field-hint">No tenant ratings yet</p>
+        <p className="field-hint">
+          {p.property_rating == null
+            ? "No tenant ratings yet"
+            : p.property_rating +
+              " / 5 · " +
+              p.review_count +
+              " property ratings"}
+        </p>
         {p.is_demo && <span className="demo-tag">Synthetic example</span>}
       </div>
     </article>

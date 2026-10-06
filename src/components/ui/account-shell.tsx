@@ -11,6 +11,7 @@ export function AccountShell({ children }: { children: React.ReactNode }) {
         <nav className="account-nav" aria-label="Main navigation">
           <a href="/search">Explore</a>
           <a href="/saved">Shortlist</a>
+          <a href="/account/reviews">Your reviews</a>
           <a href="/properties/new">Add a place</a>
           <a href="/account">Your account</a>
           <a className="text-link" href="/">

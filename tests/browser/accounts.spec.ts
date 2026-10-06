@@ -152,7 +152,7 @@ test("live account persists, public alias changes, admin remains denied, and log
     await page.getByRole("button", { name: "Sign in", exact: true }).click();
     await expect(page).toHaveURL(/\/reviews\/new$/);
     await expect(
-      page.getByRole("heading", { name: "Your perspective matters." }),
+      page.getByRole("heading", { name: "Share your tenancy experience" }),
     ).toBeVisible();
     await page.screenshot({
       path: testInfo.outputPath("review-boundary.png"),

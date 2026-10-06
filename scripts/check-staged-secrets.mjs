@@ -5,8 +5,9 @@ const sensitiveNames = [
   "SUPABASE_AUTH_EXTERNAL_GOOGLE_SECRET",
   "SUPABASE_AUTH_EXTERNAL_GOOGLE_CLIENT_ID",
   "SUPABASE_TEST_SERVICE_ROLE_KEY",
+  "SUPABASE_SERVICE_ROLE_KEY",
 ];
-const secrets = [".env.google.local", ".env.test.local"]
+const secrets = [".env.google.local", ".env.test.local", ".env.local"]
   .filter(existsSync)
   .flatMap((file) => {
     const env = parseEnv(readFileSync(file, "utf8"));

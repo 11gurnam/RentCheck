@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { z } from "zod";
 import { AccountShell } from "@/components/ui/account-shell";
+import { ReviewFeed } from "@/features/reviews/feed";
 import {
   getLandlord,
   getAssociations,
@@ -33,12 +34,12 @@ export default async function LandlordPage({
       </div>
       <section className="dashboard-card">
         <h2>Management experiences</h2>
-        <p>No management ratings yet.</p>
         <p>
           Management ratings stay with the manager responsible for the reviewed
           tenancy, even after a place changes hands.
         </p>
       </section>
+      <ReviewFeed landlord={id} />
       <section className="history-panel">
         <h2>Associated accommodation</h2>
         <ul>

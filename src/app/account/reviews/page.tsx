@@ -1,0 +1,36 @@
+import { AccountShell } from "@/components/ui/account-shell";
+import { requireUser } from "@/lib/auth/session";
+import { ownReviews } from "@/features/reviews/data";
+import { DeleteReview, CloseTenancy } from "@/features/reviews/forms";
+export default async function MyReviews() {
+  await requireUser("/account/reviews");
+  const rows = await ownReviews();
+  return (
+    <AccountShell>
+      <h1>Your reviews</h1>
+      <p>
+        <a href="/search">Find a place to review</a>
+      </p>
+      {!rows.length && <p>No reviews yet.</p>}
+      {rows.map((r) => (
+        <section key={r.id} className="dashboard-card">
+          <h2>
+            <a href={"/properties/" + r.property_id}>{r.property_name}</a>
+          </h2>
+          <p>
+            {r.status} · {r.start} → {r.end ?? "Current"}
+          </p>
+          <p>{r.body}</p>
+          {r.status === "visible" ? (
+            <>
+              <a href={"/reviews/" + r.id + "/edit"}>Edit review and photos</a>
+              <DeleteReview id={r.id} />
+            </>
+          ) : (
+            <CloseTenancy review={r} />
+          )}
+        </section>
+      ))}
+    </AccountShell>
+  );
+}

@@ -1,20 +1,31 @@
 import { AccountShell } from "@/components/ui/account-shell";
 import { requireUser } from "@/lib/auth/session";
-
-export default async function NewReviewPage() {
+import { getProperty } from "@/features/discovery/data";
+import { ReviewForm } from "@/features/reviews/forms";
+import { z } from "zod";
+export default async function NewReviewPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ property?: string }>;
+}) {
   await requireUser("/reviews/new");
+  const { property } = await searchParams;
+  const p =
+    property && z.uuid().safeParse(property).success
+      ? await getProperty(property)
+      : null;
   return (
     <AccountShell>
-      <section className="dashboard-card boundary-card">
-        <p className="eyebrow">TENANT EXPERIENCES</p>
-        <h1>Your perspective matters.</h1>
-        <p>
-          You’re signed in. Review writing will be available in Phase 4, after
-          properties and tenancies are in place.
-        </p>
-        <a className="primary-link" href="/account">
-          Back to your account
-        </a>
+      <section className="dashboard-card">
+        <h1>Share your tenancy experience</h1>
+        {p ? (
+          <ReviewForm property={p} />
+        ) : (
+          <p>
+            <a href="/search">Find a property</a>, open its profile and choose
+            Write a review.
+          </p>
+        )}
       </section>
     </AccountShell>
   );

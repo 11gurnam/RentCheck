@@ -776,3 +776,13 @@ h3 {
     margin: 10px 0;
   }
 }
+.auth-form {display:grid;gap:18px;max-width:720px;}
+.auth-form label {display:grid;gap:7px;font-weight:600;}
+.auth-form input:not([type=checkbox]),.auth-form select,.auth-form textarea {width:100%;min-width:0;border:1px solid #8b9f98;border-radius:5px;padding:12px;background:white;color:#173d32;font:inherit;}
+.auth-form label:has(input[type=checkbox]) {display:flex;align-items:flex-start;gap:12px;font-weight:400;}
+.auth-form input[type=checkbox] {margin-top:5px;width:18px;height:18px;flex-shrink:0;}
+.dashboard-card + .dashboard-card {margin-top:20px;}
+.review-photo {max-width:100%;height:auto;border-radius:8px;}
+.auth-form button,.dashboard-card form button {border:1px solid #214f42;background:#214f42;color:white;padding:12px 20px;min-height:44px;border-radius:5px;cursor:pointer;}
+.auth-form button:disabled,.dashboard-card form button:disabled {opacity:.65;cursor:wait;}
+.history-panel article p {margin:8px 0;}

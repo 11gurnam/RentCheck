@@ -16,6 +16,8 @@ export type Property = {
   landlord_id: string | null;
   landlord_name: string | null;
   total_count: number;
+  property_rating: number | null;
+  review_count: number;
 };
 export type Association = {
   id: string;
@@ -32,7 +34,7 @@ export type Landlord = {
 };
 export async function searchProperties(filters: Filters) {
   const db = await createDatabaseClient();
-  const { data, error } = await db.rpc("search_properties", {
+  const { data, error } = await db.rpc("search_properties_rated", {
     p_query: filters.q,
     p_state: filters.state,
     p_city: filters.city,
@@ -41,6 +43,7 @@ export async function searchProperties(filters: Filters) {
     p_min: filters.min,
     p_max: filters.max,
     p_page: filters.page,
+    p_rating: filters.rating,
   });
   if (error) throw new Error("Discovery unavailable");
   return data as Property[];

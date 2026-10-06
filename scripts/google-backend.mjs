@@ -74,6 +74,7 @@ for (const [name, value] of Object.entries({
   NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY:
     status.PUBLISHABLE_KEY ?? status.ANON_KEY,
   GOOGLE_AUTH_ENABLED: "true",
+  SUPABASE_SERVICE_ROLE_KEY: status.SECRET_KEY ?? status.SERVICE_ROLE_KEY,
 })) {
   const pattern = new RegExp(`^${name}=.*$`, "m");
   updated = pattern.test(updated)
@@ -88,3 +89,5 @@ writeFileSync(
 console.log(
   "Google provider configured locally. Restart the RentCheck preview and verify the Google journey yourself. No provider secret was printed or added to app configuration.",
 );
+
+await import("./prepare-storage.mjs");

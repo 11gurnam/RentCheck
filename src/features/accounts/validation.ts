@@ -41,6 +41,7 @@ export function safeDestination(value: unknown) {
   return typeof value === "string" &&
     ([
       "/account",
+      "/account/reviews",
       "/reviews/new",
       "/admin",
       "/saved",

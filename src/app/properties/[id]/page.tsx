@@ -10,6 +10,7 @@ import { money } from "@/features/discovery/filters";
 import { getVerifiedUser } from "@/lib/auth/session";
 import { createDatabaseClient } from "@/lib/database/server";
 import { SaveForm } from "@/features/contributions/forms";
+import { ReviewFeed } from "@/features/reviews/feed";
 export default async function PropertyPage({
   params,
 }: {
@@ -54,6 +55,11 @@ export default async function PropertyPage({
         )}
       </div>
       <SaveForm property={id} saved={isSaved} />
+      <p>
+        <a className="primary-link" href={`/reviews/new?property=${id}`}>
+          Write a review
+        </a>
+      </p>
       <div className="dashboard-grid">
         <section className="dashboard-card">
           <h2>About this place</h2>
@@ -66,11 +72,10 @@ export default async function PropertyPage({
           )}
         </section>
         <section className="dashboard-card">
-          <h2>Tenant experiences</h2>
-          <p>No tenant ratings yet.</p>
+          <h2>Reading tenant feedback</h2>
+
           <p className="field-hint">
-            Property and management ratings will remain separate. Reviews arrive
-            in Phase 4.
+            Property and management ratings remain separate.
           </p>
           <p>
             No eligible women’s recommendation responses yet. Tenant
@@ -78,6 +83,7 @@ export default async function PropertyPage({
           </p>
         </section>
       </div>
+      <ReviewFeed property={id} />
       <section className="history-panel">
         <h2>Management history</h2>
         <p>
