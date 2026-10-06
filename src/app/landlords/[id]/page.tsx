@@ -32,6 +32,11 @@ export default async function LandlordPage({
         <p>{l.description}</p>
         <span className="demo-tag">Synthetic manager</span>
       </div>
+      <p>
+        <a href={`/claims/new?kind=landlord&target=${id}`}>
+          Claim this profile
+        </a>
+      </p>
       <section className="dashboard-card">
         <h2>Management experiences</h2>
         <p>

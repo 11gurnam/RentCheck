@@ -20,6 +20,8 @@ export default async function AdminPage() {
           <p>
             <a href="/admin/verification">Verification requests</a> ·{" "}
             <a href="/admin/audit">Audit records</a>
+            {" · "}
+            <a href="/admin/claims">Profile claims</a>
           </p>
         )}
         <a className="primary-link" href="/account">

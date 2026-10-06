@@ -2,6 +2,9 @@ import { reviewFeed } from "./data";
 import { money } from "@/features/discovery/filters";
 import { createDatabaseClient } from "@/lib/database/server";
 import Image from "next/image";
+import { getVerifiedUser } from "@/lib/auth/session";
+import { myClaims } from "@/features/claims/data";
+import { ReplyForm } from "@/features/claims/forms";
 export async function ReviewFeed({
   property,
   landlord,
@@ -11,6 +14,26 @@ export async function ReviewFeed({
 }) {
   const rows = await reviewFeed(property, landlord);
   const db = await createDatabaseClient();
+  const claims = (await getVerifiedUser())
+    ? (await myClaims()).filter((c) => c.status === "approved")
+    : [];
+  const replies = await Promise.all(
+    rows.map(async (r) => {
+      const { data, error } = await db.rpc("get_claimant_replies", {
+        p_review: r.id,
+      });
+      if (error) throw new Error("Replies unavailable");
+      return {
+        review: r.id,
+        rows: data as {
+          id: string;
+          body: string;
+          alias: string;
+          representative: string;
+        }[],
+      };
+    }),
+  );
   const score = await db
     .from(landlord ? "landlord_scores" : "property_scores")
     .select("*")
@@ -63,6 +86,30 @@ export async function ReviewFeed({
             {r.landlord_rating ? " / 5" : ""}
           </p>
           <p>{r.body}</p>
+          {replies
+            .find((x) => x.review === r.id)
+            ?.rows.map((reply) => (
+              <aside key={reply.id} className="dashboard-card">
+                <h4>
+                  {reply.representative} · {reply.alias}
+                </h4>
+                <p>{reply.body}</p>
+              </aside>
+            ))}
+          {claims.some(
+            (c) =>
+              c.property_id === r.property_id ||
+              (c.landlord_id !== null && c.landlord_id === r.landlord_id),
+          ) && (
+            <ReplyForm
+              review={r.id}
+              claims={claims.filter(
+                (c) =>
+                  c.property_id === r.property_id ||
+                  (c.landlord_id !== null && c.landlord_id === r.landlord_id),
+              )}
+            />
+          )}
           {photos
             .find((x) => x.review === r.id)
             ?.photos.map((ph) => (

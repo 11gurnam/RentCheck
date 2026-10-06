@@ -117,9 +117,7 @@ test("author creates, edits, uploads and deletes a review without exposing priva
     await expect(
       page.getByText("Updated fictional experience:", { exact: false }),
     ).toBeVisible();
-    await expect(
-      page.getByRole("img", { name: "Synthetic tenant review photo" }),
-    ).toBeVisible();
+    await expect(page.locator('img[src="' + url + '"]')).toBeVisible();
     await expect(page.locator("main")).not.toContainText(email);
     await expect(page.locator("main")).not.toContainText("self-identify");
     await page.screenshot({

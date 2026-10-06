@@ -42,6 +42,7 @@ export function safeDestination(value: unknown) {
     ([
       "/account",
       "/account/reviews",
+      "/claims",
       "/reviews/new",
       "/admin",
       "/saved",

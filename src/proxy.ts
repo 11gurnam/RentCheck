@@ -49,6 +49,7 @@ export const config = {
     "/reviews/:path*",
     "/api/:path*",
     "/saved",
+    "/claims/:path*",
     "/properties/:path*",
   ],
 };

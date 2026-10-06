@@ -58,6 +58,11 @@ export default async function PropertyPage({
       </div>
       <SaveForm property={id} saved={isSaved} />
       <p>
+        <a href={`/claims/new?kind=property&target=${id}`}>
+          Claim this profile
+        </a>
+      </p>
+      <p>
         <a className="primary-link" href={`/reviews/new?property=${id}`}>
           Write a review
         </a>
