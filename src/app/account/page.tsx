@@ -26,7 +26,7 @@ export default async function AccountPage() {
               <dt>Email address</dt>
               <dd>{user.email}</dd>
               <dt>Account access</dt>
-              <dd>Renter and future landlord claimant</dd>
+              <dd>Renter and representative claimant</dd>
               <dt>Administrator access</dt>
               <dd>
                 {profile.is_administrator
@@ -35,8 +35,8 @@ export default async function AccountPage() {
               </dd>
             </dl>
             <p className="field-hint">
-              Email and account identity are visible only to you. Claims and
-              review tools arrive in later phases.
+              Email and account identity are visible only to you. Representative
+              controls require an approved demonstration claim.
             </p>
             {profile.is_administrator && (
               <a className="text-link" href="/admin">

@@ -80,7 +80,7 @@ test("invalid callbacks cannot create a session or redirect outside the site", a
   ]) {
     await page.goto(path);
     await expect(page).toHaveURL(/\/sign-in\?notice=auth-error$/);
-    await expect(page.locator("main").getByRole("alert")).toContainText(
+    await expect(page.getByRole("main").getByRole("alert")).toContainText(
       "Sign-in couldn’t finish",
     );
   }
@@ -94,7 +94,7 @@ test("server validates account forms without sending invalid data to auth", asyn
   await page
     .getByRole("button", { name: "Create account", exact: true })
     .click();
-  await expect(page.locator("main").getByRole("alert")).toContainText(
+  await expect(page.getByRole("main").getByRole("alert")).toContainText(
     "highlighted fields",
   );
   await page.getByLabel("Email address").fill("bad-email");
@@ -110,7 +110,9 @@ test("server validates account forms without sending invalid data to auth", asyn
   await expect(page.locator("#confirmPassword-error")).toBeVisible();
   await expect(page.locator(".skip-link")).toHaveCSS("opacity", "0");
   expect(
-    await page.locator(".skip-link").evaluate((link) => link.getBoundingClientRect().bottom),
+    await page
+      .locator(".skip-link")
+      .evaluate((link) => link.getBoundingClientRect().bottom),
   ).toBeLessThanOrEqual(0);
   await page.screenshot({
     path: testInfo.outputPath("validation.png"),
@@ -144,7 +146,7 @@ test("live account persists, public alias changes, admin remains denied, and log
       .getByLabel("Password", { exact: true })
       .fill("Incorrect synthetic password");
     await page.getByRole("button", { name: "Sign in", exact: true }).click();
-    await expect(page.locator("main").getByRole("alert")).toContainText(
+    await expect(page.getByRole("main").getByRole("alert")).toContainText(
       "couldn’t sign you in",
     );
     await page.getByLabel("Email address").fill(email);

@@ -90,7 +90,8 @@ export default async function MergePage({
           {preview.associations.map((a) => (
             <p key={a.id}>
               {a.property_id === params.source ? "Source" : "Target"} ·{" "}
-              {a.landlord_id} · {a.start_date} → {a.end_date ?? "Ongoing"}
+              {a.manager_name ?? "Manager"} · {a.start_date} →{" "}
+              {a.end_date ?? "Ongoing"}
             </p>
           ))}
           <MergeForm

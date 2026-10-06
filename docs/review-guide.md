@@ -23,3 +23,14 @@ Use the [Phase 1 checklist](phases/phase-01/review-checklist.md). I will tell yo
 
 ## Every later phase
 Each phase includes a separate `review-checklist.md` linked from its README and my delivery message. It lists exact pages/actions, examples, expected outcomes and things that are not ready. No need to run commands or read test code. You authorized continuing all remaining phases sequentially on 2026-10-06, so I will report each phase and continue automatically unless your input is required. You can report a problem or ask me to stop at any time.
+
+## All phase checklists
+- [Phase2: search and profiles](phases/phase-02/review-checklist.md)
+- [Phase3: saves and contributions](phases/phase-03/review-checklist.md)
+- [Phase4: reviews and photos](phases/phase-04/review-checklist.md)
+- [Phase5: fictional document verification](phases/phase-05/review-checklist.md)
+- [Phase6: representative claims and replies](phases/phase-06/review-checklist.md)
+- [Phase7: reports/history/duplicate resolutions](phases/phase-07/review-checklist.md)
+- [Phase8: final end-to-end walkthrough](phases/phase-08/review-checklist.md)
+
+Use the final checklist for one complete review. The private local-demo-accounts.md and fictional-rental-document.png supplied in this chat support the role checks. Your actual Google account stays ordinary; use the separate fictional administrator account. No credentials are stored in this repository. The complete source branch is phase-08-release; it has not been deployed or merged to main by this task.

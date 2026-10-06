@@ -25,12 +25,14 @@ export type FeedReview = {
 export async function reviewFeed(
   property?: string,
   landlord?: string,
-): Promise<FeedReview[]> {
+  page = 1,
+): Promise<{ rows: FeedReview[]; total: number }> {
   const { data, error } = await (
     await createDatabaseClient()
-  ).rpc("get_review_feed", {
+  ).rpc("get_review_page", {
     p_property: property ?? null,
     p_landlord: landlord ?? null,
+    p_page: page,
   });
   if (error) throw new Error("Reviews unavailable");
   return data;

@@ -29,7 +29,7 @@ test("empty, invalid filters, literal wildcard and qualified locality", async ({
     page.getByRole("heading", { name: "No matching places" }),
   ).toBeVisible();
   await page.goto("/search?min=200&max=100");
-  await expect(page.locator("main").getByRole("alert")).toContainText(
+  await expect(page.getByRole("main").getByRole("alert")).toContainText(
     "Maximum rent",
   );
   await page.goto("/search?city=Jaipur&locality=Central+Park");
@@ -53,7 +53,9 @@ test("profiles preserve dated historic associations and unknown profiles return 
   await expect(
     page.getByRole("heading", { name: "Management history" }),
   ).toBeVisible();
-  await expect(page.locator(".history-panel").last()).toContainText("2025-01-01");
+  await expect(page.locator(".history-panel").last()).toContainText(
+    "2025-01-01",
+  );
   await page.screenshot({
     path: info.outputPath("property.png"),
     fullPage: true,
@@ -62,7 +64,9 @@ test("profiles preserve dated historic associations and unknown profiles return 
   await expect(page.getByRole("heading", { level: 1 })).toHaveText(
     "Demo Previous Management",
   );
-  await expect(page.locator(".history-panel").last()).toContainText("Demo Neem");
+  await expect(page.locator(".history-panel").last()).toContainText(
+    "Demo Neem",
+  );
   await page.screenshot({
     path: info.outputPath("landlord.png"),
     fullPage: true,

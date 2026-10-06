@@ -786,3 +786,4 @@ h3 {
 .auth-form button,.dashboard-card form button {border:1px solid #214f42;background:#214f42;color:white;padding:12px 20px;min-height:44px;border-radius:5px;cursor:pointer;}
 .auth-form button:disabled,.dashboard-card form button:disabled {opacity:.65;cursor:wait;}
 .history-panel article p {margin:8px 0;}
+:is(select,textarea,summary):focus-visible {outline:3px solid #b36b46;outline-offset:4px;} .audit-values {white-space:pre-wrap;overflow-wrap:anywhere;font-size:13px;margin:16px 0;} .auth-form fieldset {border:1px solid var(--line);padding:16px;border-radius:6px;} .auth-form fieldset label span {display:block;}

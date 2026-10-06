@@ -22,7 +22,7 @@ test("public introduction remains accessible with India-wide scope", async ({
     page.getByRole("link", { name: "Sign in", exact: true }),
   ).toBeVisible();
   await expect(page.locator("header")).toContainText("INDIA");
-  await expect(page.locator("main")).toContainText("across India");
+  await expect(page.getByRole("main")).toContainText("across India");
   expect(errors).toEqual([]);
   expect(
     await page.evaluate(

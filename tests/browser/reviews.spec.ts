@@ -118,8 +118,8 @@ test("author creates, edits, uploads and deletes a review without exposing priva
       page.getByText("Updated fictional experience:", { exact: false }),
     ).toBeVisible();
     await expect(page.locator('img[src="' + url + '"]')).toBeVisible();
-    await expect(page.locator("main")).not.toContainText(email);
-    await expect(page.locator("main")).not.toContainText("self-identify");
+    await expect(page.getByRole("main")).not.toContainText(email);
+    await expect(page.getByRole("main")).not.toContainText("self-identify");
     await page.screenshot({
       path: info.outputPath("review-profile.png"),
       fullPage: true,
@@ -127,7 +127,7 @@ test("author creates, edits, uploads and deletes a review without exposing priva
     await page.goto("/account/reviews");
     await page.getByLabel("Confirm deleting").check();
     await page.getByRole("button", { name: "Delete review" }).click();
-    await expect(page.locator("main")).toContainText("deleted · 2024-01-01");
+    await expect(page.getByRole("main")).toContainText("deleted · 2024-01-01");
     expect((await page.request.get(url!)).status()).toBe(404);
   } finally {
     if (paths.length) await admin.storage.from("review-photos").remove(paths);

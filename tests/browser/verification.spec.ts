@@ -98,13 +98,11 @@ test("private demonstration documents, trusted approval, recommendation threshol
       identities[n].review = r.data.id;
       await login(page, n);
       await page.goto("/reviews/" + r.data.id + "/edit");
-      await page
-        .getByLabel("Fictional rental document image")
-        .setInputFiles({
-          name: "synthetic-document.png",
-          mimeType: "image/png",
-          buffer: png,
-        });
+      await page.getByLabel("Fictional rental document image").setInputFiles({
+        name: "synthetic-document.png",
+        mimeType: "image/png",
+        buffer: png,
+      });
       await page.getByLabel("This document contains only invented").check();
       await page
         .getByRole("button", { name: "Request demonstration verification" })
@@ -116,7 +114,8 @@ test("private demonstration documents, trusted approval, recommendation threshol
         .getByRole("link", { name: "Download your private document" })
         .getAttribute("href");
       documents.push("verification/" + docUrl!.split("/").at(-1) + ".jpg");
-      const downloaded = await page.request.get(docUrl!);
+      // Retry transport resets only; every HTTP response must satisfy the same checks.
+      const downloaded = await page.request.get(docUrl!, { maxRetries: 2 });
       expect(downloaded.status()).toBe(200);
       expect(downloaded.headers()["cache-control"]).toContain("no-store");
       expect(downloaded.headers()["content-disposition"]).toContain(
@@ -124,7 +123,9 @@ test("private demonstration documents, trusted approval, recommendation threshol
       );
       expect(
         (
-          await anonymous.request.get("http://127.0.0.1:3000" + docUrl!)
+          await anonymous.request.get("http://127.0.0.1:3000" + docUrl!, {
+            maxRetries: 2,
+          })
         ).status(),
       ).toBe(401);
       if (n === 0) {
@@ -148,17 +149,15 @@ test("private demonstration documents, trusted approval, recommendation threshol
     await login(adminPage, 3);
     await adminPage.goto("/admin/verification");
     for (let n = 0; n < 3; n++) {
-      const card = adminPage
-        .locator("section.dashboard-card")
-        .filter({
-          has: adminPage.getByRole("heading", {
-            name:
-              name +
-              " · " +
-              (await clients[n].rpc("get_my_account")).data[0].public_alias,
-            exact: true,
-          }),
-        });
+      const card = adminPage.locator("section.dashboard-card").filter({
+        has: adminPage.getByRole("heading", {
+          name:
+            name +
+            " · " +
+            (await clients[n].rpc("get_my_account")).data[0].public_alias,
+          exact: true,
+        }),
+      });
       await card
         .getByLabel("Decision reason")
         .fill("Fictional demonstration document checked for testing.");
@@ -167,10 +166,10 @@ test("private demonstration documents, trusted approval, recommendation threshol
         .click();
       await expect(card).toContainText("approved");
       await page.goto("/properties/" + property);
-      await expect(page.locator("main")).toContainText(n + 1 + "/" + (n + 1));
+      await expect(page.getByRole("main")).toContainText(n + 1 + "/" + (n + 1));
     }
     await page.goto("/properties/" + property);
-    await expect(page.locator("main")).toContainText(
+    await expect(page.getByRole("main")).toContainText(
       "Recommended by eligible women tenants.",
     );
     await expect(
@@ -178,7 +177,7 @@ test("private demonstration documents, trusted approval, recommendation threshol
         exact: false,
       }),
     ).toHaveCount(3);
-    await expect(page.locator("main")).not.toContainText("verification/");
+    await expect(page.getByRole("main")).not.toContainText("verification/");
     expect(
       (
         await new AxeBuilder({ page })
@@ -194,17 +193,15 @@ test("private demonstration documents, trusted approval, recommendation threshol
       "/search?q=" + encodeURIComponent(name) + "&women=recommended",
     );
     await expect(page.locator(".property-card")).toHaveCount(1);
-    const firstCard = adminPage
-      .locator("section.dashboard-card")
-      .filter({
-        has: adminPage.getByRole("heading", {
-          name:
-            name +
-            " · " +
-            (await clients[0].rpc("get_my_account")).data[0].public_alias,
-          exact: true,
-        }),
-      });
+    const firstCard = adminPage.locator("section.dashboard-card").filter({
+      has: adminPage.getByRole("heading", {
+        name:
+          name +
+          " · " +
+          (await clients[0].rpc("get_my_account")).data[0].public_alias,
+        exact: true,
+      }),
+    });
     await firstCard
       .getByLabel("Decision reason")
       .fill("Fictional verification revoked to test recalculation.");
@@ -239,17 +236,21 @@ test("private demonstration documents, trusted approval, recommendation threshol
       adminPage.getByRole("heading", { name: "Access restricted." }),
     ).toBeVisible();
   } finally {
-    await adminContext.close();
-    await anonymous.close();
-    if (documents.length)
-      await service.storage.from("rental-documents").remove(documents);
-    for (const u of identities) {
-      cleanupReviewUser(u.id);
-      expect((await service.auth.admin.deleteUser(u.id)).error).toBeNull();
+    try {
+      await adminContext.close();
+      await anonymous.close();
+    } finally {
+      // Fixture cleanup must also run if browser trace/context shutdown fails.
+      if (documents.length)
+        await service.storage.from("rental-documents").remove(documents);
+      for (const u of identities) {
+        cleanupReviewUser(u.id);
+        expect((await service.auth.admin.deleteUser(u.id)).error).toBeNull();
+      }
+      if (property)
+        expect(
+          (await service.from("properties").delete().eq("id", property)).error,
+        ).toBeNull();
     }
-    if (property)
-      expect(
-        (await service.from("properties").delete().eq("id", property)).error,
-      ).toBeNull();
   }
 });

@@ -209,7 +209,7 @@ test("reports stay visible, history preserves snapshots, and merge requires expl
         { exact: true },
       ),
     ).toHaveCount(0);
-    await expect(page.locator("main")).toContainText("Demo North Homes");
+    await expect(page.getByRole("main")).toContainText("Demo North Homes");
     await page.screenshot({
       path: info.outputPath("merged-profile.png"),
       fullPage: true,
@@ -240,7 +240,7 @@ test("reports stay visible, history preserves snapshots, and merge requires expl
     await expect(page.getByText(body, { exact: true })).toHaveCount(0);
     expect((await page.request.get(photoUrl!)).status()).toBe(404);
     await admin.goto("/admin/audit");
-    await expect(admin.locator("main")).toContainText("property_merge");
+    await expect(admin.getByRole("main")).toContainText("property_merge");
   } finally {
     await adminContext.close();
     if (photoPaths.length)

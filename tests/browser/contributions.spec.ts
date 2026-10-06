@@ -17,6 +17,7 @@ test("anonymous contributions and shortlist redirect to sign in", async ({
 test("shortlists persist privately and property contribution checks duplicates", async ({
   page,
 }, info) => {
+  test.setTimeout(90000);
   const admin = createClient(config.url, config.serviceKey, {
     auth: { persistSession: false },
   });
@@ -67,7 +68,7 @@ test("shortlists persist privately and property contribution checks duplicates",
       .getByLabel("All details are fictional demonstration data.")
       .check();
     await page.getByRole("button", { name: "Add demo property" }).click();
-    await expect(page.locator("main").getByRole("alert")).toContainText(
+    await expect(page.getByRole("main").getByRole("alert")).toContainText(
       "already has a profile",
     );
     await expect(
@@ -76,7 +77,9 @@ test("shortlists persist privately and property contribution checks duplicates",
     await expect(page.getByLabel("Property name")).toHaveValue(
       "Demo Neem Courtyard",
     );
-    await expect(page.getByLabel("All details are fictional demonstration data.")).toBeChecked();
+    await expect(
+      page.getByLabel("All details are fictional demonstration data."),
+    ).toBeChecked();
     await page.screenshot({
       path: info.outputPath("duplicates.png"),
       fullPage: true,

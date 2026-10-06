@@ -34,6 +34,7 @@ export type History = {
   landlord_id: string;
   start_date: string;
   end_date: string | null;
+  manager_name?: string;
 };
 export type Preview = {
   profiles: (Profile & {

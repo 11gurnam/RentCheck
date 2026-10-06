@@ -12,16 +12,25 @@ import { createDatabaseClient } from "@/lib/database/server";
 import { SaveForm } from "@/features/contributions/forms";
 import { womensCounts } from "@/features/verification/data";
 import { ReviewFeed } from "@/features/reviews/feed";
+import { reviewPage } from "@/features/reviews/pagination";
 export default async function PropertyPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ reviews?: string }>;
 }) {
   const { id } = await params;
   if (!z.uuid().safeParse(id).success) notFound();
   const p = await getProperty(id);
   if (!p) notFound();
   const user = await getVerifiedUser();
+  const allowed = user
+    ? await (
+        await createDatabaseClient()
+      ).rpc("can_review_property", { p_property: id })
+    : null;
+  if (allowed?.error) throw new Error("Review access unavailable");
   const saved = user
     ? await (await createDatabaseClient()).rpc("get_saved_properties")
     : null;
@@ -63,9 +72,13 @@ export default async function PropertyPage({
         </a>
       </p>
       <p>
-        <a className="primary-link" href={`/reviews/new?property=${id}`}>
-          Write a review
-        </a>
+        {allowed?.data === false ? (
+          <span>You cannot review your own property.</span>
+        ) : (
+          <a className="primary-link" href={`/reviews/new?property=${id}`}>
+            Write a review
+          </a>
+        )}
       </p>
       <div className="dashboard-grid">
         <section className="dashboard-card">
@@ -94,7 +107,10 @@ export default async function PropertyPage({
           </p>
         </section>
       </div>
-      <ReviewFeed property={id} />
+      <ReviewFeed
+        property={id}
+        page={reviewPage((await searchParams).reviews)}
+      />
       <section className="history-panel">
         <h2>Management history</h2>
         <p>

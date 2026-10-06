@@ -92,7 +92,7 @@ test("claim upload, trusted approval, details, separate reply and revocation", a
       .click();
     await expect(page.getByRole("status")).toContainText("claim submitted");
     await page.goto("/claims");
-    await expect(page.locator("main")).toContainText("pending");
+    await expect(page.getByRole("main")).toContainText("pending");
     await expect(
       page.getByRole("button", { name: "Save claimed details" }),
     ).toHaveCount(0);
@@ -129,10 +129,10 @@ test("claim upload, trusted approval, details, separate reply and revocation", a
     await page
       .getByRole("button", { name: "Save representative reply" })
       .click();
-    await expect(page.locator("main")).toContainText(
+    await expect(page.getByRole("main")).toContainText(
       "Fictional representative response recorded separately.",
     );
-    await expect(page.locator("main")).toContainText(
+    await expect(page.getByRole("main")).toContainText(
       "Fictional tenant experience preserved during representative reply.",
     );
     expect(
@@ -157,7 +157,7 @@ test("claim upload, trusted approval, details, separate reply and revocation", a
     await card.getByRole("button", { name: "Save claim decision" }).click();
     await expect(card).toContainText("revoked");
     await page.reload();
-    await expect(page.locator("main")).not.toContainText(
+    await expect(page.getByRole("main")).not.toContainText(
       "Fictional representative response recorded separately.",
     );
     await expect(

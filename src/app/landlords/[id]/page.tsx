@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { z } from "zod";
 import { AccountShell } from "@/components/ui/account-shell";
 import { ReviewFeed } from "@/features/reviews/feed";
+import { reviewPage } from "@/features/reviews/pagination";
 import {
   getLandlord,
   getAssociations,
@@ -9,8 +10,10 @@ import {
 } from "@/features/discovery/data";
 export default async function LandlordPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ reviews?: string }>;
 }) {
   const { id } = await params;
   if (!z.uuid().safeParse(id).success) notFound();
@@ -44,7 +47,10 @@ export default async function LandlordPage({
           tenancy, even after a place changes hands.
         </p>
       </section>
-      <ReviewFeed landlord={id} />
+      <ReviewFeed
+        landlord={id}
+        page={reviewPage((await searchParams).reviews)}
+      />
       <section className="history-panel">
         <h2>Associated accommodation</h2>
         <ul>

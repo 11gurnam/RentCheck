@@ -15,7 +15,11 @@ export default async function MyReviews() {
       {rows.map((r) => (
         <section key={r.id} className="dashboard-card">
           <h2>
-            <a href={"/properties/" + r.property_id}>{r.property_name}</a>
+            {r.archived ? (
+              r.property_name
+            ) : (
+              <a href={"/properties/" + r.property_id}>{r.property_name}</a>
+            )}
           </h2>
           <p>
             {r.status} · {r.start} → {r.end ?? "Current"}

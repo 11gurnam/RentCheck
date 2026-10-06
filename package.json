@@ -17,7 +17,8 @@
     "backend:start": "supabase start",
     "backend:env": "node scripts/local-environment.mjs",
     "test:db": "supabase test db",
-    "test:integration": "vitest run --config vitest.integration.config.ts"
+    "test:integration": "vitest run --config vitest.integration.config.ts",
+    "test:recovery": "playwright test --config playwright.recovery.config.ts"
   },
   "dependencies": {
     "@supabase/ssr": "0.12.7",

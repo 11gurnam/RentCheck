@@ -9,11 +9,18 @@ import { ReportForm } from "@/features/moderation/forms";
 export async function ReviewFeed({
   property,
   landlord,
+  page = 1,
 }: {
   property?: string;
   landlord?: string;
+  page?: number;
 }) {
-  const rows = await reviewFeed(property, landlord);
+  const { rows, total } = await reviewFeed(property, landlord, page);
+  const href = (n: number) =>
+    (landlord ? "/landlords/" + landlord : "/properties/" + property) +
+    "?reviews=" +
+    n +
+    "#experiences";
   const db = await createDatabaseClient();
   const user = await getVerifiedUser();
   const claims = user
@@ -63,7 +70,7 @@ export async function ReviewFeed({
     }),
   );
   return (
-    <section className="history-panel">
+    <section className="history-panel" id="experiences">
       <h2>{landlord ? "Management experiences" : "Tenant experiences"}</h2>
       <p>
         {rating != null
@@ -72,7 +79,18 @@ export async function ReviewFeed({
             ? "No management ratings yet."
             : "No tenant ratings yet."}
       </p>
-      {!rows.length && <p>Be the first to share a fictional experience.</p>}
+      <p>
+        {total} experiences · Page {page}
+      </p>
+      {!rows.length &&
+        (total ? (
+          <p>
+            No experiences on this page.{" "}
+            <a href={href(1)}>Return to the first experiences page</a>.
+          </p>
+        ) : (
+          <p>Be the first to share a fictional experience.</p>
+        ))}
       {rows.map((r) => (
         <article key={r.id} className="dashboard-card">
           <h3>{r.alias}</h3>
@@ -145,6 +163,12 @@ export async function ReviewFeed({
           </p>
         </article>
       ))}
+      <nav className="pagination" aria-label="Experience pages">
+        {page > 1 && <a href={href(page - 1)}>Previous experiences page</a>}
+        {page * 20 < total && (
+          <a href={href(page + 1)}>Next experiences page</a>
+        )}
+      </nav>
     </section>
   );
 }
