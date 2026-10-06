@@ -152,8 +152,8 @@ export function CloseTenancy({ review }: { review: OwnReview }) {
     <form action={a} className="auth-form">
       <input type="hidden" name="review" value={review.id} />
       <p>
-        Your deleted review cannot be republished. You can end its tenancy to
-        record a later distinct stay.
+        This deleted or removed review cannot be republished. You can end its
+        tenancy to record a later distinct stay.
       </p>
       <label>
         Tenancy end

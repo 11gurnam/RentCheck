@@ -22,6 +22,12 @@ export default async function AdminPage() {
             <a href="/admin/audit">Audit records</a>
             {" · "}
             <a href="/admin/claims">Profile claims</a>
+            {" · "}
+            <a href="/admin/reports">Review reports</a>
+            {" · "}
+            <a href="/admin/duplicates">Possible duplicates</a>
+            {" · "}
+            <a href="/admin/associations">Management history</a>
           </p>
         )}
         <a className="primary-link" href="/account">

@@ -26,6 +26,8 @@ export default async function MyReviews() {
               <a href={"/reviews/" + r.id + "/edit"}>Edit review and photos</a>
               <DeleteReview id={r.id} />
             </>
+          ) : r.archived ? (
+            <p>Archived duplicate tenancy retained for audit.</p>
           ) : (
             <CloseTenancy review={r} />
           )}

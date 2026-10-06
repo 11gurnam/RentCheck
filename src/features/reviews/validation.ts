@@ -41,6 +41,7 @@ export type OwnReview = {
   property_id: string;
   property_name: string;
   status: string;
+  archived: boolean;
   body: string;
   propertyRating: number;
   managerRating: number | null;

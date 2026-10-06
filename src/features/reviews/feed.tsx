@@ -5,6 +5,7 @@ import Image from "next/image";
 import { getVerifiedUser } from "@/lib/auth/session";
 import { myClaims } from "@/features/claims/data";
 import { ReplyForm } from "@/features/claims/forms";
+import { ReportForm } from "@/features/moderation/forms";
 export async function ReviewFeed({
   property,
   landlord,
@@ -14,7 +15,8 @@ export async function ReviewFeed({
 }) {
   const rows = await reviewFeed(property, landlord);
   const db = await createDatabaseClient();
-  const claims = (await getVerifiedUser())
+  const user = await getVerifiedUser();
+  const claims = user
     ? (await myClaims()).filter((c) => c.status === "approved")
     : [];
   const replies = await Promise.all(
@@ -86,6 +88,13 @@ export async function ReviewFeed({
             {r.landlord_rating ? " / 5" : ""}
           </p>
           <p>{r.body}</p>
+          {user ? (
+            <ReportForm review={r.id} />
+          ) : (
+            <p>
+              <a href="/sign-in">Sign in to report this review</a>
+            </p>
+          )}
           {replies
             .find((x) => x.review === r.id)
             ?.rows.map((reply) => (
