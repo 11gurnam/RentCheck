@@ -86,7 +86,7 @@ describe("account input validation", () => {
 });
 
 describe("post-auth destinations", () => {
-  it.each(["/account", "/reviews/new", "/admin"])(
+  it.each(["/account", "/reviews/new", "/admin", "/saved", "/properties/new", "/properties/20000000-0000-4000-8000-000000000001"])(
     "preserves allowed path %s",
     (path) => expect(safeDestination(path)).toBe(path),
   );

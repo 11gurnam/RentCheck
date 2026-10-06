@@ -7,6 +7,9 @@ import {
   getLandlord,
 } from "@/features/discovery/data";
 import { money } from "@/features/discovery/filters";
+import { getVerifiedUser } from "@/lib/auth/session";
+import { createDatabaseClient } from "@/lib/database/server";
+import { SaveForm } from "@/features/contributions/forms";
 export default async function PropertyPage({
   params,
 }: {
@@ -16,6 +19,13 @@ export default async function PropertyPage({
   if (!z.uuid().safeParse(id).success) notFound();
   const p = await getProperty(id);
   if (!p) notFound();
+  const user = await getVerifiedUser();
+  const saved = user
+    ? await (await createDatabaseClient()).rpc("get_saved_properties")
+    : null;
+  const isSaved = !!saved?.data?.some(
+    (row: { property_id: string }) => row.property_id === id,
+  );
   const associations = await getAssociations(id);
   const history = await Promise.all(
     associations.map(async (a) => ({
@@ -43,6 +53,7 @@ export default async function PropertyPage({
           </span>
         )}
       </div>
+      <SaveForm property={id} saved={isSaved} />
       <div className="dashboard-grid">
         <section className="dashboard-card">
           <h2>About this place</h2>

@@ -8,9 +8,15 @@ export function AccountShell({ children }: { children: React.ReactNode }) {
       </a>
       <header className="site-header shell">
         <Brand />
-        <nav className="account-nav" aria-label="Main navigation"><a href="/search">Explore</a><a href="/account">Your account</a><a className="text-link" href="/">
-          About RentCheck
-        </a></nav>
+        <nav className="account-nav" aria-label="Main navigation">
+          <a href="/search">Explore</a>
+          <a href="/saved">Shortlist</a>
+          <a href="/properties/new">Add a place</a>
+          <a href="/account">Your account</a>
+          <a className="text-link" href="/">
+            About RentCheck
+          </a>
+        </nav>
       </header>
       <main id="main" className="account-shell shell">
         {children}

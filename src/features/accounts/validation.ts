@@ -39,7 +39,16 @@ export const registerSchema = z
 // Only known internal destinations can be carried through authentication.
 export function safeDestination(value: unknown) {
   return typeof value === "string" &&
-    ["/account", "/reviews/new", "/admin"].includes(value)
+    ([
+      "/account",
+      "/reviews/new",
+      "/admin",
+      "/saved",
+      "/properties/new",
+    ].includes(value) ||
+      /^\/properties\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
+        value,
+      ))
     ? value
     : "/account";
 }

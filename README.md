@@ -1,6 +1,6 @@
 # RentCheck
 
-A phased India-wide accommodation research prototype. Phase 0 provides the public introduction, Phase 1 adds tested email/password and Google accounts, and Phase 2 adds public multi-city discovery and dated property/manager profiles on an isolated Supabase backend. Tenant reviews and shortlists arrive in subsequent phases.
+A phased India-wide accommodation research prototype. Introduction, email/password and Google accounts, public multi-city discovery, dated property/manager profiles, persistent private shortlists and synthetic property contributions are implemented on an isolated Supabase backend. Tenant reviews and verification arrive in subsequent phases.
 
 ## Local setup
 Prerequisites: Node.js 24 LTS, npm 11 or newer, Git. Clone this repository, then:

@@ -1,13 +1,13 @@
 begin;
 set search_path to public,extensions;
 select plan(13);
-select is((select count(*)::int from public.properties where is_demo),8,'Eight synthetic multi-city records');
+select is((select count(*)::int from public.properties where id::text like '20000000-%' and is_demo),8,'Eight synthetic multi-city seed records');
 select throws_ok($$insert into public.management_associations(property_id,landlord_id,start_date) values('20000000-0000-4000-8000-000000000001','10000000-0000-4000-8000-000000000003','2024-01-01')$$,'23P01',null,'Overlapping management periods rejected');
 select is((select landlord_name from public.property_discovery where id='20000000-0000-4000-8000-000000000001'),'Demo North Homes','Current manager resolved from dates');
 select is((select count(*)::int from public.management_associations where property_id='20000000-0000-4000-8000-000000000001'),2,'History preserved');
 insert into public.properties(name,address,state,city,locality,property_type,rent_min,rent_max,status) values('Hidden fixture','Demo Hidden Lane','Delhi','New Delhi','Central Park','Flat',1,2,'hidden');
 set local role anon;
-select is((select count(*)::int from public.properties),8,'Hidden records denied to anonymous role');
+select is((select count(*)::int from public.properties where name='Hidden fixture'),0,'Hidden records denied to anonymous role');
 select is((select count(*)::int from public.search_properties(p_query=>'Neem',p_city=>'New Delhi',p_type=>'Flat',p_min=>20000,p_max=>22000)),1,'Combined filters use rent overlap');
 select is((select count(*)::int from public.search_properties(p_city=>'Jaipur',p_locality=>'Central Park')),1,'Locality is city-qualified');
 select is((select count(*)::int from public.search_properties(p_locality=>'Central Park')),0,'Locality alone cannot mix cities');

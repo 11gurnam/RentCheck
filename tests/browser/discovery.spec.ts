@@ -4,18 +4,22 @@ test("search combines URL filters and reset restores all examples", async ({
   page,
 }) => {
   await page.goto("/search");
-  await expect(page.locator(".property-card")).toHaveCount(8);
+  await expect(
+    page.getByRole("heading", { name: /accommodation examples/ }),
+  ).toBeVisible();
   await page.getByLabel("City", { exact: true }).selectOption("Mumbai");
   await page.getByLabel("Accommodation type").selectOption("PG");
   await page.getByLabel("Maximum rent").fill("12000");
   await page.getByRole("button", { name: "Apply filters" }).click();
   await expect(page).toHaveURL(/city=Mumbai/);
-  await expect(page.locator(".property-card")).toHaveCount(1);
-  await expect(page.locator(".property-card")).toContainText("Demo Sea Breeze");
+  await expect(
+    page.getByRole("link", { name: "Demo Sea Breeze PG" }),
+  ).toBeVisible();
   await page.reload();
   await expect(page.getByLabel("City", { exact: true })).toHaveValue("Mumbai");
   await page.getByRole("link", { name: "Reset", exact: true }).click();
-  await expect(page.locator(".property-card")).toHaveCount(8);
+  await expect(page.getByLabel("City", { exact: true })).toHaveValue("");
+  await expect(page).toHaveURL(/\/search$/);
 });
 test("empty, invalid filters, literal wildcard and qualified locality", async ({
   page,
@@ -29,8 +33,12 @@ test("empty, invalid filters, literal wildcard and qualified locality", async ({
     "Maximum rent",
   );
   await page.goto("/search?city=Jaipur&locality=Central+Park");
-  await expect(page.locator(".property-card")).toHaveCount(1);
-  await expect(page.locator(".property-card")).toContainText("Rose Studio");
+  await expect(
+    page.getByRole("link", { name: "Demo Rose Studio" }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("link", { name: "Demo Neem Courtyard" }),
+  ).toHaveCount(0);
   await page.goto("/search?q=%25");
   await expect(page.locator(".property-card")).toHaveCount(0);
 });
@@ -93,9 +101,9 @@ test("discovery screens have no overflow or detected accessibility violations", 
       fullPage: true,
     });
     if (path === "/search") {
-      await page.screenshot({path:info.outputPath("search-top.png")});
+      await page.screenshot({ path: info.outputPath("search-top.png") });
       await page.locator(".property-card").first().scrollIntoViewIfNeeded();
-      await page.screenshot({path:info.outputPath("search-cards.png")});
+      await page.screenshot({ path: info.outputPath("search-cards.png") });
     }
   }
 });
