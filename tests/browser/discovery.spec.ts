@@ -71,6 +71,20 @@ test("profiles preserve dated historic associations and unknown profiles return 
     path: info.outputPath("landlord.png"),
     fullPage: true,
   });
+  await page
+    .getByRole("link", { name: "Review this landlord", exact: true })
+    .click();
+  await page
+    .getByRole("link", {
+      name: "Review your tenancy at Demo Neem Courtyard",
+      exact: true,
+    })
+    .click();
+  const destination =
+    "/reviews/new?property=20000000-0000-4000-8000-000000000001";
+  await expect(page).toHaveURL(
+    "http://127.0.0.1:3000/sign-in?next=" + encodeURIComponent(destination),
+  );
   expect((await page.goto("/properties/not-a-uuid"))?.status()).toBe(404);
 });
 test("discovery screens have no overflow or detected accessibility violations", async ({

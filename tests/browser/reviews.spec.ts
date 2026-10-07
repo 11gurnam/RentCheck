@@ -23,13 +23,22 @@ test("author creates, edits, uploads and deletes a review without exposing priva
   expect(u.error).toBeNull();
   const paths: string[] = [];
   try {
-    await page.goto("/sign-in");
+    await page.goto("/landlords/10000000-0000-4000-8000-000000000004");
+    await page
+      .getByRole("link", { name: "Review this landlord", exact: true })
+      .click();
+    await page
+      .getByRole("link", {
+        name: "Review your tenancy at Demo Neem Courtyard",
+        exact: true,
+      })
+      .click();
     await page.getByLabel("Email address").fill(email);
     await page.getByLabel("Password", { exact: true }).fill(password);
     await page.getByRole("button", { name: "Sign in", exact: true }).click();
-    await expect(page).toHaveURL(/\/account$/);
-    await page.goto("/properties/20000000-0000-4000-8000-000000000001");
-    await page.getByRole("link", { name: "Write a review" }).click();
+    await expect(page).toHaveURL(
+      /\/reviews\/new\?property=20000000-0000-4000-8000-000000000001$/,
+    );
     await page.getByLabel("Tenancy start").fill("2024-01-01");
     await page.getByLabel("Tenancy status").selectOption("false");
     await page.getByLabel("Tenancy end").fill("2024-12-01");
@@ -38,7 +47,10 @@ test("author creates, edits, uploads and deletes a review without exposing priva
       .getByRole("combobox", { name: "Property rating", exact: true })
       .selectOption("4");
     await page
-      .getByRole("combobox", { name: "Management rating", exact: true })
+      .getByRole("combobox", {
+        name: "Landlord / management rating",
+        exact: true,
+      })
       .selectOption("2");
     await page
       .getByLabel("Your experience")
@@ -122,6 +134,15 @@ test("author creates, edits, uploads and deletes a review without exposing priva
     await expect(page.getByRole("main")).not.toContainText("self-identify");
     await page.screenshot({
       path: info.outputPath("review-profile.png"),
+      fullPage: true,
+    });
+    await page.goto("/landlords/10000000-0000-4000-8000-000000000004");
+    await expect(
+      page.getByText("Updated fictional experience:", { exact: false }),
+    ).toBeVisible();
+    await expect(page.getByRole("main")).toContainText("Management 2 / 5");
+    await page.screenshot({
+      path: info.outputPath("landlord-review-result.png"),
       fullPage: true,
     });
     await page.goto("/account/reviews");

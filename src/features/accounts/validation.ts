@@ -48,6 +48,9 @@ export function safeDestination(value: unknown) {
       "/saved",
       "/properties/new",
     ].includes(value) ||
+      /^\/reviews\/new\?property=[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
+        value,
+      ) ||
       /^\/properties\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
         value,
       ))

@@ -9,8 +9,12 @@ export default async function NewReviewPage({
 }: {
   searchParams: Promise<{ property?: string }>;
 }) {
-  await requireUser("/reviews/new");
   const { property } = await searchParams;
+  await requireUser(
+    property && z.uuid().safeParse(property).success
+      ? `/reviews/new?property=${property}`
+      : "/reviews/new",
+  );
   const p =
     property && z.uuid().safeParse(property).success
       ? await getProperty(property)

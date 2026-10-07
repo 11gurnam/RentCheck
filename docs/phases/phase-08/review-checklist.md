@@ -7,7 +7,7 @@ You can review in short sections; no terminal commands or code reading required.
 ## Public website and your account
 1. Open the introduction: expect India-wide RentCheck, no booking/payment or vacancy promises. Narrow the window and press Tab: everything should fit; Skip to content should take you to the page content.
 2. Explore: search Demo Neem Courtyard. Try state Delhi, city New Delhi, locality Central Park, type Flat and a rent range including ₹18,000–₹26,000. Expect Neem. Reset filters; examples from multiple Indian cities return. Nonsense searches give a useful empty state.
-3. Open Neem: current Demo North Homes and historic Demo Previous Management appear with dated history. Ratings for place and manager are separate. Unrated examples say no ratings rather than zero.
+3. Open Neem: current Demo North Homes and historic Demo Previous Management appear with dated history. Ratings for place and manager are separate. Open either landlord profile, click Review this landlord, then Review your tenancy at Demo Neem Courtyard. Sign-in should preserve the selected place. In the review form, use Landlord / management rating; tenancy dates determine which recorded landlord receives it. Unrated examples say no ratings rather than zero.
 4. Sign in with Google. On Your account choose a public alias, Save alias, refresh, sign out and sign in again. Expect the alias stays and Administrator access Not granted. You already confirmed these checks; repeat only if reviewing the final version.
 5. Save a property to shortlist. Refresh/sign out/back in: expect it stays for that account. A different fictional account should have its own shortlist.
 

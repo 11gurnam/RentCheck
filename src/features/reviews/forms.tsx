@@ -80,7 +80,7 @@ export function ReviewForm({
         </select>
       </label>
       <label>
-        Management rating
+        Landlord / management rating
         <select name="managerRating" defaultValue={review?.managerRating ?? ""}>
           <option value="">Unanswered / manager unknown</option>
           {[5, 4, 3, 2, 1].map((n) => (

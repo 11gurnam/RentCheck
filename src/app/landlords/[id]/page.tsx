@@ -30,18 +30,29 @@ export default async function LandlordPage({
     <AccountShell>
       <a href="/search">← Explore accommodation</a>
       <div className="profile-hero">
-        <p className="eyebrow">MANAGEMENT PROFILE</p>
+        <p className="eyebrow">LANDLORD / MANAGEMENT PROFILE</p>
         <h1>{l.name}</h1>
         <p>{l.description}</p>
         <span className="demo-tag">Synthetic manager</span>
       </div>
       <p>
+        <a className="primary-link" href="#review-landlord">
+          Review this landlord
+        </a>
+      </p>
+      <p>
         <a href={`/claims/new?kind=landlord&target=${id}`}>
           Claim this profile
         </a>
       </p>
-      <section className="dashboard-card">
-        <h2>Management experiences</h2>
+      <section className="dashboard-card" id="review-landlord">
+        <h2>How to review this landlord</h2>
+        <p>
+          Choose the accommodation you rented from the list below, then rate
+          Landlord / management in your tenancy review. Your tenancy dates
+          determine which recorded landlord receives the management rating.
+          Check the listed management period before submitting.
+        </p>
         <p>
           Management ratings stay with the manager responsible for the reviewed
           tenancy, even after a place changes hands.
@@ -59,6 +70,11 @@ export default async function LandlordPage({
               <div>
                 <a href={`/properties/${a.property_id}`}>{a.property?.name}</a>
                 <p>{a.property?.city}</p>
+                {a.property && (
+                  <a href={`/reviews/new?property=${a.property_id}`}>
+                    Review your tenancy at {a.property.name}
+                  </a>
+                )}
               </div>
               <span>
                 {a.start_date} → {a.end_date ?? "Ongoing"}
@@ -66,7 +82,13 @@ export default async function LandlordPage({
             </li>
           ))}
         </ul>
-        {!properties.length && <p>No associated properties recorded.</p>}
+        {!properties.length && (
+          <p>
+            No associated properties recorded. Find or add the place you rented;
+            an administrator must record its management history before a review
+            can be attributed to this landlord.
+          </p>
+        )}
       </section>
     </AccountShell>
   );

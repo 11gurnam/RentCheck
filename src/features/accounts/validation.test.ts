@@ -86,9 +86,25 @@ describe("account input validation", () => {
 });
 
 describe("post-auth destinations", () => {
-  it.each(["/account", "/reviews/new", "/admin", "/saved", "/properties/new", "/properties/20000000-0000-4000-8000-000000000001"])(
-    "preserves allowed path %s",
-    (path) => expect(safeDestination(path)).toBe(path),
+  it("preserves a property-specific review destination and refuses extra parameters", () => {
+    const path = "/reviews/new?property=20000000-0000-4000-8000-000000000001";
+    expect(safeDestination(path)).toBe(path);
+    for (const invalid of [
+      path + "&next=https://evil.example",
+      path + "#elsewhere",
+      "/reviews/new?property=not-a-uuid",
+    ])
+      expect(safeDestination(invalid)).toBe("/account");
+  });
+  it.each([
+    "/account",
+    "/reviews/new",
+    "/admin",
+    "/saved",
+    "/properties/new",
+    "/properties/20000000-0000-4000-8000-000000000001",
+  ])("preserves allowed path %s", (path) =>
+    expect(safeDestination(path)).toBe(path),
   );
   it.each([
     undefined,
