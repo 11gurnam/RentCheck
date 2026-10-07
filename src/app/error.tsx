@@ -1,5 +1,5 @@
 "use client";
-import { AccountShell } from "@/components/ui/account-shell";
+import { AccountFrame as AccountShell } from "@/components/ui/account-frame";
 import { useRouter } from "next/navigation";
 import { useTransition } from "react";
 export default function ErrorPage({ reset }: { reset: () => void }) {

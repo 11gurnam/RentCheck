@@ -1,4 +1,5 @@
 import { Brand } from "@/components/ui/brand";
+import { SiteHeader } from "@/components/ui/site-header";
 
 const principles = [
   {
@@ -81,16 +82,7 @@ export function Introduction() {
       <a className="skip-link" href="#main">
         Skip to content
       </a>
-      <header className="site-header shell">
-        <Brand href="#top" />
-        <nav aria-label="Main navigation">
-          <a href="#how-it-works">How it works</a>
-          <a href="#our-principles">Our principles</a>
-          <a className="preview-label" href="/sign-in">
-            Sign in
-          </a>
-        </nav>
-      </header>
+      <SiteHeader home />
       <main id="main">
         <section className="hero shell" aria-labelledby="hero-heading">
           <div className="hero-copy">

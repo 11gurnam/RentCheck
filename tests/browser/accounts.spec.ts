@@ -86,28 +86,36 @@ test("invalid callbacks cannot create a session or redirect outside the site", a
   }
 });
 
-test("server validates account forms without sending invalid data to auth", async ({
+test("registration stays disabled until every field is valid", async ({
   page,
 }, testInfo) => {
   test.skip(!configured, "No account backend configuration in this run.");
   await page.goto("/register");
-  await page
-    .getByRole("button", { name: "Create account", exact: true })
-    .click();
-  await expect(page.getByRole("main").getByRole("alert")).toContainText(
-    "highlighted fields",
-  );
+  const submit = page.getByRole("button", { name: "Create account", exact: true });
+  await expect(submit).toBeDisabled();
   await page.getByLabel("Email address").fill("bad-email");
   await page.getByLabel("Public alias").fill("tenant@example.test");
   await page.getByLabel("Password", { exact: true }).fill("short");
   await page.getByLabel("Confirm password").fill("different");
-  await page
-    .getByRole("button", { name: "Create account", exact: true })
-    .click();
+  await expect(submit).toBeDisabled();
   await expect(page.locator("#email-error")).toBeVisible();
   await expect(page.locator("#alias-error")).toBeVisible();
   await expect(page.locator("#password-error")).toBeVisible();
   await expect(page.locator("#confirmPassword-error")).toBeVisible();
+  await page.getByLabel("Public alias").fill("QuietTenant");
+  await page.getByLabel("Email address").fill("tenant@example.test");
+  await page.getByLabel("Password", { exact: true }).fill("Valid passphrase 2026");
+  await expect(submit).toBeDisabled();
+  await page.getByLabel("Confirm password").fill("Valid passphrase 2026");
+  await expect(submit).toBeEnabled();
+  await expect(page.locator(".field-error")).toHaveCount(0);
+  await page.getByLabel("Password", { exact: true }).fill("Changed passphrase 2026");
+  await expect(submit).toBeDisabled();
+  await expect(page.locator("#confirmPassword-error")).toBeVisible();
+  await page.getByLabel("Confirm password").fill("Changed passphrase 2026");
+  await expect(submit).toBeEnabled();
+  await page.getByLabel("Email address").fill("");
+  await expect(submit).toBeDisabled();
   await expect(page.locator(".skip-link")).toHaveCSS("opacity", "0");
   expect(
     await page
