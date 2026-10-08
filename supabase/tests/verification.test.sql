@@ -1,4 +1,4 @@
-begin;set search_path to public,extensions;select plan(21);
+begin;set search_path to public,extensions;select plan(25);
 insert into public.properties(id,name,address,state,city,locality,property_type,rent_min,rent_max) values('50000000-0000-4000-8000-000000000100','Fictional verification property','Fictional verification lane','Delhi','Verification fixture city','Fixture area','Flat',1000,2000);
 do $$declare n integer;uid uuid;rid uuid;did uuid;vid uuid;begin
 for n in 1..9 loop
@@ -12,7 +12,10 @@ insert into private.review_answers(review_id,self_identifies_woman,recommendatio
 insert into private.documents(id,owner_id,object_path) values(did,uid,'verification/'||did||'.jpg');
 insert into private.verification_requests(id,review_id,document_id,status) values(vid,rid,did,case when n in(1,2,6,8) then 'approved' else 'pending' end);
 end loop;end;$$;
+insert into private.review_photos(id,review_id,object_path) values('54000000-0000-4000-8000-000000000003','51000000-0000-4000-8000-000000000003','51000000-0000-4000-8000-000000000003/54000000-0000-4000-8000-000000000003.jpg');
 set local role anon;
+select is((select role from get_review_photos('51000000-0000-4000-8000-000000000003')),'tenant','Tenant photo source');
+select ok(not (select verified from get_review_photos('51000000-0000-4000-8000-000000000003')),'Pending tenant photo unverified');
 select throws_ok($$select get_authorized_document('52000000-0000-4000-8000-000000000001')$$,'42501',null,'Anonymous document authorization denied');
 select is((select positive_count from womens_recommendation_counts('50000000-0000-4000-8000-000000000100')),2::bigint,'Only visible verified explicit positive responses count');
 select ok(not (select recommended from womens_recommendation_counts('50000000-0000-4000-8000-000000000100')),'Below three is not recommended');
@@ -24,6 +27,7 @@ select throws_ok($$select get_admin_verifications()$$,'42501',null,'Ordinary acc
 select throws_ok($$select decide_verification('53000000-0000-4000-8000-000000000003','approved','Synthetic testing reason')$$,'42501',null,'Self approval denied');
 select set_config('request.jwt.claim.sub','50000000-0000-4000-8000-000000000009',true);
 select lives_ok($$select decide_verification('53000000-0000-4000-8000-000000000003','approved','Synthetic demonstration approval')$$,'Trusted admin approves third');
+select ok((select verified from get_review_photos('51000000-0000-4000-8000-000000000003')),'Approved tenant photo verified');
 select ok((select recommended from womens_recommendation_counts('50000000-0000-4000-8000-000000000100')),'Exactly three positives with majority qualifies');
 select is((select eligible_count from womens_recommendation_counts('50000000-0000-4000-8000-000000000100')),3::bigint,'Unanswered/unverified/nonwoman/deleted excluded');
 select lives_ok($$select decide_verification('53000000-0000-4000-8000-000000000004','approved','Synthetic negative response approval')$$,'Approve negative response');
@@ -36,6 +40,7 @@ update public.reviews set status='removed' where id='51000000-0000-4000-8000-000
 select ok((select recommended from womens_recommendation_counts('50000000-0000-4000-8000-000000000100')),'Removal recalculates three of five');
 set local role authenticated;select lives_ok($$select decide_verification('53000000-0000-4000-8000-000000000003','revoked','Synthetic verification revoked')$$,'Revoke approved third');
 select ok(not (select recommended from womens_recommendation_counts('50000000-0000-4000-8000-000000000100')),'Revocation drops below three');
+select ok(not (select verified from get_review_photos('51000000-0000-4000-8000-000000000003')),'Revocation downgrades tenant photo');
 reset role;update public.reviews set status='removed' where id='51000000-0000-4000-8000-000000000003';set local role authenticated;
 select is((select count(*)::int from jsonb_array_elements(get_admin_audit()) e where e->>'entity_id' like '53000000%'),4,'All fixture decisions retained after public removal');
 reset role;select throws_ok($$update private.audit_events set reason='Tampered reason' where entity_id::text like '53000000%'$$,'P0001','Audit records are immutable','Audit cannot be overwritten');

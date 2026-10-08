@@ -13,6 +13,7 @@ import { SaveForm } from "@/features/contributions/forms";
 import { womensCounts } from "@/features/verification/data";
 import { ReviewFeed } from "@/features/reviews/feed";
 import { reviewPage } from "@/features/reviews/pagination";
+import { PropertyGallery } from "@/features/photos/gallery";
 export default async function PropertyPage({
   params,
   searchParams,
@@ -107,6 +108,7 @@ export default async function PropertyPage({
           </p>
         </section>
       </div>
+      <PropertyGallery property={id} />
       <ReviewFeed
         property={id}
         page={reviewPage((await searchParams).reviews)}

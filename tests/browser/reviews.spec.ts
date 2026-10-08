@@ -40,6 +40,9 @@ test("author creates, edits, uploads and deletes a review without exposing priva
       /\/reviews\/new\?property=20000000-0000-4000-8000-000000000001$/,
     );
     await page.getByLabel("Tenancy start").fill("2024-01-01");
+    await expect(page.getByRole("status")).toContainText(
+      "Your landlord rating will go to:",
+    );
     await page.getByLabel("Tenancy status").selectOption("false");
     await page.getByLabel("Tenancy end").fill("2024-12-01");
     await page.getByLabel("Monthly rent paid (INR)").fill("15000");
@@ -130,6 +133,16 @@ test("author creates, edits, uploads and deletes a review without exposing priva
       page.getByText("Updated fictional experience:", { exact: false }),
     ).toBeVisible();
     await expect(page.locator('img[src="' + url + '"]')).toBeVisible();
+    await expect(
+      page
+        .locator("figure")
+        .filter({ has: page.locator('img[src="' + url + '"]') }),
+    ).toContainText("Shared by tenant");
+    await expect(
+      page
+        .locator("figure")
+        .filter({ has: page.locator('img[src="' + url + '"]') }),
+    ).toContainText("Unverified tenant");
     await expect(page.getByRole("main")).not.toContainText(email);
     await expect(page.getByRole("main")).not.toContainText("self-identify");
     await page.screenshot({

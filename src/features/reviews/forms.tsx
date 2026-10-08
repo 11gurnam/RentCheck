@@ -2,6 +2,7 @@
 import { useActionState, useState } from "react";
 import { submitReview, removeReview, closeTenancy } from "./actions";
 import type { OwnReview } from "./validation";
+import { LandlordPreview } from "./landlord-preview";
 export function ReviewForm({
   property,
   review,
@@ -11,6 +12,8 @@ export function ReviewForm({
 }) {
   const [state, action, pending] = useActionState(submitReview, {});
   const [current, setCurrent] = useState(review?.current ?? true);
+  const [start, setStart] = useState(review?.start ?? "");
+  const [landlordAvailable, setLandlordAvailable] = useState(false);
   return (
     <form
       action={action}
@@ -31,6 +34,7 @@ export function ReviewForm({
           required
           defaultValue={review?.start}
           readOnly={!!review}
+          onChange={(e) => setStart(e.target.value)}
         />
       </label>
       <label>
@@ -79,9 +83,20 @@ export function ReviewForm({
           ))}
         </select>
       </label>
+      {!review && (
+        <LandlordPreview
+          property={property.id}
+          start={start}
+          onAvailable={setLandlordAvailable}
+        />
+      )}
       <label>
         Landlord / management rating
-        <select name="managerRating" defaultValue={review?.managerRating ?? ""}>
+        <select
+          name="managerRating"
+          disabled={!review && !landlordAvailable}
+          defaultValue={review?.managerRating ?? ""}
+        >
           <option value="">Unanswered / manager unknown</option>
           {[5, 4, 3, 2, 1].map((n) => (
             <option key={n} value={n}>
@@ -90,6 +105,9 @@ export function ReviewForm({
           ))}
         </select>
       </label>
+      {!review && !landlordAvailable && (
+        <input type="hidden" name="managerRating" value="" />
+      )}
       <p className="field-hint">
         Management is attributed to the manager recorded on your tenancy start
         date. Leave its rating unanswered if none is recorded.

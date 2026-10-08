@@ -6,6 +6,7 @@ import { getVerifiedUser } from "@/lib/auth/session";
 import { myClaims } from "@/features/claims/data";
 import { ReplyForm } from "@/features/claims/forms";
 import { ReportForm } from "@/features/moderation/forms";
+import { PhotoCaption, type PhotoSource } from "@/features/photos/caption";
 export async function ReviewFeed({
   property,
   landlord,
@@ -66,7 +67,7 @@ export async function ReviewFeed({
         p_review: r.id,
       });
       if (error) throw new Error("Photos unavailable");
-      return { review: r.id, photos: data as { id: string }[] };
+      return { review: r.id, photos: data as PhotoSource[] };
     }),
   );
   return (
@@ -140,16 +141,19 @@ export async function ReviewFeed({
           {photos
             .find((x) => x.review === r.id)
             ?.photos.map((ph) => (
-              <a key={ph.id} href={"/api/photos/" + ph.id}>
-                <Image
-                  className="review-photo"
-                  src={"/api/photos/" + ph.id}
-                  width={400}
-                  height={300}
-                  unoptimized
-                  alt="Synthetic tenant review photo"
-                />
-              </a>
+              <figure key={ph.id} className="photo-card">
+                <a href={"/api/photos/" + ph.id}>
+                  <Image
+                    className="review-photo"
+                    src={"/api/photos/" + ph.id}
+                    width={400}
+                    height={300}
+                    unoptimized
+                    alt="Photo shared by a tenant"
+                  />
+                </a>
+                <PhotoCaption photo={ph} />
+              </figure>
             ))}
           <p>
             {r.start_date} → {r.end_date ?? "Current"} · {money(r.rent_paid)} /

@@ -1,0 +1,18 @@
+# Requested enhancements — 2026-10-08
+
+User authorizes all missing items listed in chat, tenant/landlord image uploads with provenance and verification labels, testing and push. Base361157a on phase-08-release; preserve real Google account/backend and unrelated Docker services. No subagents authorized. Read current AGENTS.md and bundled Next server-action/route-handler/form guides before implementation.
+
+Deliver sequential, tested increments with beginner walkthroughs:
+
+1. Photo provenance and landlord gallery, moderation and current verification labels; selected landlord preview before review submission. Tenant verification comes from approved visible review; landlord verification comes from approved matching claim, never client role metadata. Approved prototype claims retain demonstration wording. Unverified landlord submissions derive from declared ownership or pending claims; rejected/revoked claim-only photos become unavailable. Existing review photos remain tenant photos. Photo routes recheck public visibility. Preserve merge history and transfer appropriate property gallery records transactionally.
+2. Password recovery, safe account deletion/retention controls, PDF evidence and in-app decision/reply notifications. Confirm local email recovery against real auth service. Define explicit evidence visibility and purge flows without silently purging immutable audit.
+3. Opt-in private tenant/landlord conversations with reporting/blocking; side-by-side property comparison; map view with explicit optional coordinates (no invented geocoding).
+4. Backup/restore verification, health/monitoring hooks, administrator verification checklist/operations documentation and configurable real-data workflows. User explicitly deferred deployment; do not deploy. Prepare real-user/document handling while retaining honest demo labels for existing fictional records; manual evidence review is not independent identity certification.
+
+Every increment: real SQL/API authorization and relevant responsive browser journeys, lint/types/unit/build, synthetic evidence screenshots, staged/browser secret checks, commit/push and remote SHA verification. Update this file with actual results. User manual results recorded separately. Concrete hosted staging must be reviewable before any final publishing approval if needed.
+
+User clarification: skip deployment, prepare real users/documents, use different numbered phase branches and distinct commit names. Phase09 photos/attribution; Phase10 account/privacy/documents/notifications; Phase11 messaging/maps/comparison; Phase12 real-data operation/backup/health. Branch each from the preceding tested final commit. Do not keep pushing these enhancements to phase-08-release.
+
+Phase 09 implemented and locally validated: lint/types, 68 unit tests, production build, 163 rolled-back SQL checks and 11 live API checks passed. The clean full browser regression passed 83/84 before exposing an upstream mobile menu scroll race. After fixing that race, all 27 affected introduction/navigation checks and all six photo/review journeys passed against the final build, across desktop/tablet/phone; all three serial service-recovery checks also passed. The first full run was invalidated by overlapping a rebuild; its navigation failures are not counted as passes. Final full CI will run all 84 cases. Staged/browser private-value scans required before push. Photo screenshots are committed under evidence/phase-09. No actual-user records were deleted or backend volumes reset.
+
+Next: Phase 10 account privacy, recovery, PDFs and notifications. Draft implementation is held in ignored work/phase-10-draft pending the Phase 09 commit. Phases 10–12 are not complete; deployment is deferred.

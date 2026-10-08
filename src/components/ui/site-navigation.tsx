@@ -41,10 +41,14 @@ export function SiteNavigation({ links }: {
     };
     document.addEventListener("pointerdown", closeOutside);
     const closeOnScroll = () => setOpen(false);
-    window.addEventListener("scroll", closeOnScroll, { passive: true });
+    // Browser focus/scroll-into-view can emit scroll immediately after opening.
+    // Close for a user's scroll gesture, keeping keyboard and anchor navigation usable.
+    window.addEventListener("wheel", closeOnScroll, { passive: true });
+    window.addEventListener("touchmove", closeOnScroll, { passive: true });
     return () => {
       document.removeEventListener("pointerdown", closeOutside);
-      window.removeEventListener("scroll", closeOnScroll);
+      window.removeEventListener("wheel", closeOnScroll);
+      window.removeEventListener("touchmove", closeOnScroll);
     };
   }, [open]);
   return (

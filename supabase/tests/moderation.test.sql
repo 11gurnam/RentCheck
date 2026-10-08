@@ -1,9 +1,10 @@
-begin;set search_path to public,extensions;select plan(16);
+begin;set search_path to public,extensions;select plan(19);
 insert into auth.users(id,email) values('70000000-0000-4000-8000-000000000001','moderation-admin-sql@example.test'),('70000000-0000-4000-8000-000000000002','moderation-tenant-sql@example.test');
 insert into private.administrator_grants(user_id,reason) values('70000000-0000-4000-8000-000000000001','Synthetic moderation administrator');
 insert into public.properties(id,name,address,state,city,locality,property_type,rent_min,rent_max) values('71000000-0000-4000-8000-000000000001','Fictional merge source','Invented SQL source street','Delhi','Merge SQL city','Test area','Flat',1000,2000),('71000000-0000-4000-8000-000000000002','Fictional merge target','Invented SQL target street','Delhi','Merge SQL city','Test area','Flat',1000,2000);
 insert into public.properties(id,name,address,state,city,locality,property_type,rent_min,rent_max) values('71000000-0000-4000-8000-000000000003','Fictional third candidate','Invented SQL third street','Delhi','Merge SQL city','Test area','Flat',1000,2000);
 insert into private.duplicate_candidates(source_id,target_id,reason) values('71000000-0000-4000-8000-000000000001','71000000-0000-4000-8000-000000000003','Uncertain third profile remains for administrator review');
+insert into private.property_photos(id,property_id,owner_id,declared_owner,object_path) values('73000000-0000-4000-8000-000000000001','71000000-0000-4000-8000-000000000001','70000000-0000-4000-8000-000000000001',true,'property/71000000-0000-4000-8000-000000000001/73000000-0000-4000-8000-000000000001.jpg');
 set local role authenticated;select set_config('request.jwt.claim.sub','70000000-0000-4000-8000-000000000002',true);
 select create_review('{"property":"71000000-0000-4000-8000-000000000001","start":"2025-01-01","current":true,"paid":1000,"propertyRating":4,"body":"Fictional source duplicate SQL review","synthetic":true}');
 select create_review('{"property":"71000000-0000-4000-8000-000000000002","start":"2025-01-01","current":true,"paid":1000,"propertyRating":2,"body":"Fictional target duplicate SQL review","synthetic":true}');
@@ -19,6 +20,8 @@ select set_config('request.jwt.claim.sub','70000000-0000-4000-8000-000000000001'
 select throws_ok($$select merge_properties('71000000-0000-4000-8000-000000000001','71000000-0000-4000-8000-000000000002','{}','{}','target','target','Fictional unresolved duplicate tenancy')$$,'P0001',null,'Unresolved merge refuses');
 select is((select count(*)::integer from public.properties where id in('71000000-0000-4000-8000-000000000001','71000000-0000-4000-8000-000000000002')),2,'Refusal leaves profiles unchanged');
 select lives_ok($$select merge_properties('71000000-0000-4000-8000-000000000001','71000000-0000-4000-8000-000000000002',array[(select id from merge_reviews where property_id='71000000-0000-4000-8000-000000000002')],'{}','target','target','Fictional explicit loser archived')$$,'Explicit resolution merges atomically');
+select is(jsonb_array_length(get_property_photos('71000000-0000-4000-8000-000000000002')),1,'Merge moves source gallery');
+select is(jsonb_array_length(get_property_photos('71000000-0000-4000-8000-000000000001')),0,'Archived source gallery hidden');
 select is((select count(*)::integer from get_review_feed('71000000-0000-4000-8000-000000000002')),1,'Only canonical winner visible');
 select set_config('request.jwt.claim.sub','70000000-0000-4000-8000-000000000002',true);
 select throws_ok($$select update_tenancy((select id from merge_reviews where property_id='71000000-0000-4000-8000-000000000002'),false,'2025-12-01',1000)$$,'P0001',null,'Archived loser cannot change tenancy');
@@ -28,6 +31,7 @@ select lives_ok($$select decide_report((get_admin_reports()->0->>'id')::uuid,'re
 select is((select count(*)::integer from get_review_feed('71000000-0000-4000-8000-000000000002')),0,'Removed review excluded');
 select throws_ok($$select * from private.audit_events$$,'42501',null,'Audit direct access denied even for admin');
 reset role;
+select is((select object_path from private.property_photos where id='73000000-0000-4000-8000-000000000001'),'property/71000000-0000-4000-8000-000000000001/73000000-0000-4000-8000-000000000001.jpg','Merge preserves blob reference');
 select is((select count(*)::integer from private.audit_events where entity_id='71000000-0000-4000-8000-000000000002' and action='property_merge'),1,'Merge retained in immutable audit');
 select is((select count(*)::integer from private.duplicate_candidates where source_id='71000000-0000-4000-8000-000000000002' and target_id='71000000-0000-4000-8000-000000000003' and status='pending'),1,'Other uncertain candidate transfers without silent dismissal');
 select * from finish();rollback;

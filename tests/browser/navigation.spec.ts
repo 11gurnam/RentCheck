@@ -38,6 +38,10 @@ test("mobile menus open, close with Escape, and fit narrow screens", async ({ pa
       await toggle.click();
       await page.mouse.click(5, 100);
       await expect(nav).toBeHidden();
+      await toggle.click();
+      await expect(nav).toBeVisible();
+      await page.mouse.wheel(0, 100);
+      await expect(nav).toBeHidden();
     }
   }
 });

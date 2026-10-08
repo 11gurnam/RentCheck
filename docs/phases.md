@@ -13,6 +13,10 @@ Each phase reads the canonical docs, inspects Git state/prior merge, implements 
 | 6 | phase-06-claims | Claims/admin decisions/dashboard/detail updates/replies; approved permissions, no tenant review edits |
 | 7 | phase-07-moderation | Reports/decisions/audit/history/merges; pending visibility, historical attribution, atomic conflict resolution |
 | 8 | phase-08-release | All role journeys/security/accessibility/responsiveness/errors, acceptance and deploy instructions; deployable build without deploying |
+| 9 | phase-09-photo-provenance | Tenant/landlord photo source and live verification labels, landlord gallery, photo reporting/moderation, landlord rating preview |
+| 10 | phase-10-account-privacy | Recovery, account deletion, PDF evidence and private activity notifications |
+| 11 | phase-11-messaging-discovery | Opt-in messages, blocking/reporting, map and property comparison |
+| 12 | phase-12-real-data-operations | Real-data/manual verification workflows, backup/restore and health/retention operations; deployment deferred |
 
 If prior phase unmerged, branch from its verified final commit and document dependency. Every phase includes `docs/phases/phase-XX/README.md`, `test-cases.md` and a plain-language `review-checklist.md`: objectives, prerequisites/env without secrets, migrations/seed/reset, commands/manual checks, evidence, limitations/acceptance, branch/commit/push URL. The user checklist supplies exact pages/clicks, example inputs, expected results, readiness/blockers and how to report issues without technical knowledge. Case IDs/names, automated/manual, prerequisites/data, inputs/steps, expected/actual, PASS/FAIL/BLOCKED/NOT RUN. Never mark unexecuted checks PASS.
 

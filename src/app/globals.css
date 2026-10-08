@@ -879,3 +879,8 @@ h3 {
   .auth-grid > *, .dashboard-grid > *, .auth-form, .contribution-form { min-width: 0; }
   .account-shell { overflow-wrap: anywhere; }
 }
+
+.photo-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr)); gap: 1rem; }
+.photo-card, .photo-grid figure { margin: 1rem 0; min-width: 0; }
+.photo-grid img, .photo-card img { max-width: 100%; height: auto; }
+.photo-grid figcaption, .photo-card figcaption { display: flex; flex-wrap: wrap; gap: .5rem; padding: .75rem 0; }

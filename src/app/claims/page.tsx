@@ -27,6 +27,17 @@ export default async function ClaimsPage() {
               <a href={"/api/documents/" + c.document_id}>
                 Download your private claim evidence
               </a>
+              <p>
+                <a
+                  href={
+                    c.property_id
+                      ? "/properties/" + c.property_id
+                      : "/landlords/" + c.landlord_id
+                  }
+                >
+                  View profile and share property photos
+                </a>
+              </p>
               {c.status === "approved" && profile && (
                 <DetailsForm claim={c} profile={profile} />
               )}

@@ -25,3 +25,7 @@ Local production preview is running on127.0.0.1:3000 (managed terminal55759). St
 Outstanding acceptance outside implementation: the user's Phase2–8 manual walkthrough, physical phone/Safari testing and hosted staging setup/callbacks. Manual status NOT RUN. Deployment preparation is written; hosted accounts/domain were not supplied and no deployment performed. Prototype verification/evidence remains fictional, with retained private audit and archived media; no physical purge or real tenancy certification is claimed.
 
 Use [final walkthrough](phases/phase-08/review-checklist.md), [phase evidence](phases/phase-08/README.md) and [deployment preparation](deployment.md). Task outputs contain the private local-demo-accounts.md, fictional-rental-document.png and every phase's checklist.
+
+## New enhancement scope — 2026-10-08
+
+The completion records above describe the original prototype phases. The user has now requested Phases 09–12, with distinct numbered branches and commits. See [the enhancement plan](enhancements/plan.md) and [Phase 09 checking guide](enhancements/phase-09-photo-provenance.md). Deployment is explicitly deferred. Preparation for real users and documents is part of the new scope; historical demonstration approvals must remain labelled accordingly. New phase completion and test results are tracked in the enhancement plan.
