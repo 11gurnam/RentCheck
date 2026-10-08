@@ -29,3 +29,6 @@ Use [final walkthrough](phases/phase-08/review-checklist.md), [phase evidence](p
 ## New enhancement scope — 2026-10-08
 
 The completion records above describe the original prototype phases. The user has now requested Phases 09–12, with distinct numbered branches and commits. See [the enhancement plan](enhancements/plan.md) and [Phase 09 checking guide](enhancements/phase-09-photo-provenance.md). Deployment is explicitly deferred. Preparation for real users and documents is part of the new scope; historical demonstration approvals must remain labelled accordingly. New phase completion and test results are tracked in the enhancement plan.
+
+
+Current demo checkpoint (2026-10-08): Phase 09 is pushed with green CI; Phase 10 passed 72 units, 185 SQL, 11 API, 90 browser and three recovery checks and is being committed on phase-10-account-privacy. Use [the current demo walkthrough](enhancements/demo-walkthrough.md). Phase 10 adds physical cleanup of registered media during account deletion; durable jobs remain when storage is unavailable. The older Phase 08 retention/preview notes above describe its historical checkpoint. Phases 11–12 and deployment are deferred at the user's request. Real-data operation is not enabled.

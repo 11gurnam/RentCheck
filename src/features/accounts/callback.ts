@@ -24,17 +24,17 @@ export async function completeAuthentication(
       if (
         !token ||
         token.length > 2048 ||
-        !["email", "signup"].includes(params.get("type") ?? "")
+        !["email", "signup", "recovery"].includes(params.get("type") ?? "")
       )
         return failure();
       const { error } = await client.auth.verifyOtp({
         token_hash: token,
-        type: "email",
+        type: params.get("type") === "recovery" ? "recovery" : "email",
       });
       if (error) return failure();
     }
     return NextResponse.redirect(
-      `${getSiteOrigin()}${safeDestination(params.get("next"))}`,
+      `${getSiteOrigin()}${mode === "email" && params.get("type") === "recovery" ? "/account/password" : safeDestination(params.get("next"))}`,
       { headers: { "Cache-Control": "private, no-store" } },
     );
   } catch {

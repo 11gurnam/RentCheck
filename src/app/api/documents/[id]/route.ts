@@ -30,8 +30,10 @@ export async function GET(
   if (downloadError || !data) return new Response(null, { status: 404 });
   return new Response(await data.arrayBuffer(), {
     headers: {
-      "Content-Type": "image/jpeg",
-      "Content-Disposition": 'attachment; filename="synthetic-document.jpg"',
+      "Content-Type": path.endsWith(".pdf") ? "application/pdf" : "image/jpeg",
+      "Content-Disposition":
+        'attachment; filename="rental-evidence.' +
+        (path.endsWith(".pdf") ? 'pdf"' : 'jpg"'),
       "Cache-Control": "private, no-store",
       "X-Content-Type-Options": "nosniff",
       "Content-Security-Policy": "default-src 'none'; sandbox",

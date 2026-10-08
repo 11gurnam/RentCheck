@@ -33,8 +33,8 @@ export function AuthScreen({
             <li>Your voice stays yours.</li>
           </ul>
           <p className="field-hint">
-            Property discovery, reviews and landlord claims arrive in later
-            phases.
+            Explore properties, share tenancy experiences and request
+            representative access through reviewed claims.
           </p>
         </aside>
         <section className="auth-card" aria-labelledby="auth-heading">
@@ -56,6 +56,15 @@ export function AuthScreen({
             <p className="form-feedback error" role="alert">
               Sign-in couldn’t finish. Try again, or request a new confirmation
               email by registering again.
+            </p>
+          )}
+          {(notice === "account-deleted" ||
+            notice === "account-deleted-purge-pending") && (
+            <p role="status">
+              Your account and content access have been deleted.{" "}
+              {notice === "account-deleted-purge-pending"
+                ? "Stored-file cleanup is queued for retry."
+                : "Registered uploaded files have been deleted."}
             </p>
           )}
           {configured ? (
@@ -91,6 +100,11 @@ export function AuthScreen({
             Your email and account identity are private. Only your chosen alias
             appears publicly.
           </p>
+          {mode === "sign-in" && (
+            <p>
+              <a href="/forgot-password">Forgot your password?</a>
+            </p>
+          )}
         </section>
       </div>
     </AccountShell>

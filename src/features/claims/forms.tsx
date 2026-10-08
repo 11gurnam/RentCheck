@@ -27,11 +27,11 @@ export function ClaimForm({
         permitted detail/reply controls.
       </p>
       <label>
-        Fictional claim evidence image
+        Fictional claim evidence image or PDF
         <input
           type="file"
           name="document"
-          accept="image/jpeg,image/png,image/webp"
+          accept="image/jpeg,image/png,image/webp,application/pdf"
           required
         />
       </label>

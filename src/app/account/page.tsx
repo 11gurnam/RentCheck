@@ -14,6 +14,11 @@ export default async function AccountPage() {
         </div>
         <SignOutForm />
       </div>
+      <nav className="pagination" aria-label="Account settings">
+        <a href="/account/notifications">Notifications</a>
+        <a href="/account/password">Change password</a>
+        <a href="/account/privacy">Privacy and deletion</a>
+      </nav>
       {profile ? (
         <div className="dashboard-grid">
           <section className="dashboard-card">

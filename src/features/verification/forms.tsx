@@ -17,8 +17,8 @@ export function VerificationForm({
     <section className="dashboard-card">
       <h2>Demonstration tenant verification</h2>
       <p>
-        Use fictional rental-document images only. This prototype simulates
-        verification; it never verifies a real tenancy.
+        Use fictional rental-document images or PDFs only. This prototype
+        simulates verification; it never verifies a real tenancy.
       </p>
       {requests.map((r) => (
         <div key={r.id}>
@@ -38,11 +38,11 @@ export function VerificationForm({
         >
           <input name="review" type="hidden" value={review} />
           <label>
-            Fictional rental document image
+            Fictional rental document image or PDF
             <input
               type="file"
               name="document"
-              accept="image/jpeg,image/png,image/webp"
+              accept="image/jpeg,image/png,image/webp,application/pdf"
               required
             />
           </label>

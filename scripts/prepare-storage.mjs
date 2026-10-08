@@ -11,7 +11,7 @@ const db = createClient(
 );
 for (const [name, mimes] of [
   ["review-photos", ["image/jpeg"]],
-  ["rental-documents", ["image/jpeg"]],
+  ["rental-documents", ["image/jpeg", "application/pdf"]],
 ]) {
   const { data, error } = await db.storage.getBucket(name);
   if (!data) {
@@ -23,6 +23,13 @@ for (const [name, mimes] of [
       allowedMimeTypes: mimes,
     });
     if (e) throw new Error("Bucket creation failed");
+  } else {
+    const { error: e } = await db.storage.updateBucket(name, {
+      public: false,
+      fileSizeLimit: 5242880,
+      allowedMimeTypes: mimes,
+    });
+    if (e) throw new Error("Bucket configuration failed");
   }
 }
 console.log("Private media buckets ready.");
