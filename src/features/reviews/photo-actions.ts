@@ -26,7 +26,7 @@ export async function addPhoto(
   } catch {
     return {
       message:
-        "Photo rejected. Use a valid non-animated JPEG, PNG or WebP, at most 5 MiB and 20 million pixels.",
+        "Photo rejected. Use a valid non-animated JPEG, PNG or WebP, at most 3 MiB and 20 million pixels.",
     };
   }
   const media = createMediaClient();

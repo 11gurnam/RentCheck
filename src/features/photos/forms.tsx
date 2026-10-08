@@ -18,7 +18,7 @@ export function PropertyPhotoForm({
     <section className="dashboard-card">
       <h3>Add landlord photos</h3>
       <p>
-        Up to ten photos per property, 5 MiB each. Only an approved matching
+        Up to ten photos per property, 3 MiB each. Only an approved matching
         claim earns a verified label. Pending-claim photos are hidden if the
         claim is rejected or revoked.
         Photos are public. Only upload images you have permission to share; avoid faces and private documents.

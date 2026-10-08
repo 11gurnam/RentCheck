@@ -36,7 +36,7 @@ export async function requestClaim(
   } catch {
     return {
       message:
-        "Use a valid fictional JPEG, PNG, WebP or PDF, up to 5 MiB. PDFs must have at most 30 pages, without encryption, scripts, attachments or interactive forms.",
+        "Use a valid fictional JPEG, PNG, WebP or PDF, up to 3 MiB. PDFs must have at most 30 pages, without encryption, scripts, attachments or interactive forms.",
     };
   }
   const media = createMediaClient();

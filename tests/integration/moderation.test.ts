@@ -66,6 +66,7 @@ it("reports, stable management snapshots and atomic merge conflict resolutions t
       p_reason: "Synthetic original management period",
     });
     expect(a.error).toBeNull();
+    expect(a.data).toMatch(/^[a-f0-9-]{36}$/);
     expect(
       (
         await clients[2].rpc("maintain_association", {

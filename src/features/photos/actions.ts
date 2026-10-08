@@ -33,7 +33,7 @@ export async function uploadPropertyPhoto(
   } catch {
     return {
       message:
-        "Choose a valid JPEG, PNG or WebP image, at most 5 MiB and 20 million pixels.",
+        "Choose a valid JPEG, PNG or WebP image, at most 3 MiB and 20 million pixels.",
     };
   }
   const media = createMediaClient(),

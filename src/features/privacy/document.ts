@@ -1,6 +1,6 @@
 import { Worker } from "node:worker_threads";
 import { normalizePhoto } from "../reviews/image";
-const limit = 5 * 1024 * 1024;
+const limit = 3 * 1024 * 1024;
 // Run the PDF parser in a bounded worker. No user PDF scripts or external links execute.
 const workerSource = String.raw`
 const {parentPort}=require('node:worker_threads');
@@ -20,7 +20,7 @@ parentPort.on('message',async(bytes)=>{try{
  for(const[,value]of objects)inspect(value);
  const clean=await PDFDocument.create();for(const page of await clean.copyPages(input,input.getPageIndices())){page.node.delete(PDFName.of('Annots'));page.node.delete(PDFName.of('AA'));clean.addPage(page);}
  clean.setTitle('Rental evidence');clean.setAuthor('');clean.setSubject('');clean.setKeywords([]);
- const output=await clean.save();if(output.byteLength>5242880)throw new Error('Output limit');parentPort.postMessage({bytes:output});
+ const output=await clean.save();if(output.byteLength>3145728)throw new Error('Output limit');parentPort.postMessage({bytes:output});
  }catch{parentPort.postMessage({error:true});}});
 `;
 export async function normalizeDocument(

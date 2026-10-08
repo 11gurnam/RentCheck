@@ -1,6 +1,6 @@
 # RentCheck operations — Phase 12
 
-The latest branch is `phase-12-real-data-operations`. Public deployment remains deferred. The existing local project retains its Google provider, accounts and fictional catalogue. Never reset its database or copy secret files into Git. These helper commands deliberately refuse hosted backends; hosted operations require provider-specific setup and a separately verified staging restore.
+The latest branch is `phase-13-hosted-deployment`. Hosted deployment is being prepared; no hosted service has yet been published. The existing local project retains its Google provider, accounts and fictional catalogue. Never reset its database or copy secret files into Git. These helper commands deliberately refuse hosted backends; hosted operations require provider-specific setup and a separately verified staging restore.
 
 ## Intake and manual evidence review
 
@@ -27,7 +27,7 @@ npm run ops:cleanup
 
 The command queues expired evidence and retired/deleted photos, removes only registered object paths and acknowledges successful removals. Failed storage requests leave durable jobs for retry. Runs are bounded; repeat if the queue remains. Account closure also attempts immediate cleanup, and this command retries outstanding account-deletion jobs. Expiry preserves the recorded decision and audit while clearing its downloadable document path. Moderation-hidden review photos are not destroyed merely because their review is hidden; explicit photo removal, review deletion, expiry where applicable or account closure governs cleanup.
 
-Run cleanup at least daily once operating with real evidence. No scheduler is installed by this phase. Review pending-job count and oldest-job time after each run. Inspect private server logs if jobs fail. Backups are separate from live object cleanup and need their own access and retention controls.
+Run cleanup at least daily once operating with real evidence. Phase 13 prepares a production-only Netlify daily cleanup function. It is not active until the hosted deployment and its schedule have been verified; local cleanup still runs on demand. Review pending-job count and oldest-job time after each run. Inspect private server logs if jobs fail. Backups are separate from live object cleanup and need their own access and retention controls.
 
 ## Readiness and monitoring hooks
 

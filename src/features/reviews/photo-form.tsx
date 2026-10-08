@@ -15,7 +15,7 @@ export function PhotoForm({
     <section className="dashboard-card">
       <h2>Review photos</h2>
       <p>
-        Optional. Up to three {real ? "property" : "fictional"} photos, 5 MiB each. Image metadata is removed. Only upload images you have permission to share; avoid faces and private documents. Photos are public.
+        Optional. Up to three {real ? "property" : "fictional"} photos, 3 MiB each. Image metadata is removed. Only upload images you have permission to share; avoid faces and private documents. Photos are public.
       </p>
       <form action={a} className="auth-form">
         <input name="review" type="hidden" value={review} />

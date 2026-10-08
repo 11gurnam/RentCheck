@@ -53,7 +53,7 @@ it("rejects malformed and excessive documents", async () => {
   await expect(normalizeDocument(await pdfFile(large))).rejects.toThrow();
   await expect(
     normalizeDocument(
-      new File([new Uint8Array(5242881)], "oversize.pdf", {
+      new File([new Uint8Array(3145729)], "oversize.pdf", {
         type: "application/pdf",
       }),
     ),

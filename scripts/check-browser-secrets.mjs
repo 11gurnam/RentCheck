@@ -1,8 +1,7 @@
 import { readFileSync, readdirSync, existsSync } from "node:fs";
 import { parseEnv } from "node:util";
 import { join } from "node:path";
-const env = parseEnv(readFileSync(".env.local", "utf8"));
-const secrets = [env.SUPABASE_SERVICE_ROLE_KEY].filter(Boolean);
+const secrets = [process.env.SUPABASE_SERVICE_ROLE_KEY, ...[".env.local", ".env.hosted.local"].filter(existsSync).map(file => parseEnv(readFileSync(file, "utf8")).SUPABASE_SERVICE_ROLE_KEY)].filter(Boolean);
 if (existsSync(".env.google.local"))
   secrets.push(
     parseEnv(readFileSync(".env.google.local", "utf8"))

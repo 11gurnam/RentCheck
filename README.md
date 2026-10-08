@@ -2,14 +2,14 @@
 
 India-wide accommodation research prototype: Google/email accounts and public aliases, multi-city discovery, private shortlists, fictional property contributions, canonical tenancies, separate property/management reviews and photos, private demonstration verification, women's recommendation counts, property/manager claims, representative replies, reports, trusted moderation, dated management history and conflict-safe property merges.
 
-The original eight phases and enhancement Phases 09–12 are implemented. Photos include tenant/landlord provenance; accounts support recovery, private PDFs, notifications and deletion. Opt-in private messaging, reporting/blocking, three-property comparison and explicitly recorded maps are available. Real-data intake is controlled in the database with per-record demo labels, manual evidence checklists, expiry/cleanup and local encrypted backup/restore checks. Existing local records remain demonstration examples. Deployment is deferred. There are no bookings, payments or independent ownership/tenancy certification.
+The original eight phases and enhancement Phases 09–12 are implemented. Photos include tenant/landlord provenance; accounts support recovery, private PDFs, notifications and deletion. Opt-in private messaging, reporting/blocking, three-property comparison and explicitly recorded maps are available. Real-data intake is controlled in the database with per-record demo labels, manual evidence checklists, expiry/cleanup and local encrypted backup/restore checks. Existing local records remain demonstration examples. Free hosted deployment is now being prepared in Phase 13; provider sign-in and hosted acceptance are pending. There are no bookings, payments or independent ownership/tenancy certification.
 
 ## Start on a fresh local checkout
 
-Use Node24 LTS, npm11+, Git and Docker Desktop with the Linux engine running. The latest implementation is on branch phase-12-real-data-operations; main retains the earlier merged foundation until a separately authorized merge.
+Use Node24 LTS, npm11+, Git and Docker Desktop with the Linux engine running. The latest implementation is on branch phase-13-hosted-deployment; main retains the earlier merged foundation until a separately authorized merge.
 
 ```sh
-git switch phase-12-real-data-operations
+git switch phase-13-hosted-deployment
 npm ci
 npm run backend:start
 npm run backend:env
@@ -46,7 +46,7 @@ If Chrome is already installed on Windows, set $env:PLAYWRIGHT_CHANNEL='chrome' 
 - [Current tenant and landlord demo walkthrough](docs/enhancements/demo-walkthrough.md)
 - [Phase 10 account/privacy checking guide](docs/enhancements/phase-10-account-privacy.md)
 - [Phase 11 messaging/comparison/maps checking guide](docs/enhancements/phase-11-messaging-discovery.md)
-- [Phase 12 real-data/operations checking guide](docs/enhancements/phase-12-real-data-operations.md)
+- [Phase 12 real-data/operations checking guide](docs/enhancements/phase-13-hosted-deployment.md)
 - [Operator commands and retention/backup policies](docs/operations.md)
 - [Final end-to-end checklist](docs/phases/phase-08/review-checklist.md)
 - [Phase results and evidence](docs/phases.md)
@@ -56,3 +56,5 @@ If Chrome is already installed on Windows, set $env:PLAYWRIGHT_CHANNEL='chrome' 
 - [Google provider setup](docs/phases/phase-01/provider-setup.md)
 
 Phases were tested and pushed sequentially under the user's continuation instruction. No main merge or public deployment was performed. The final branch contains all earlier phases.
+
+Hosted preparation and beginner checks: [Phase 13](docs/enhancements/phase-13-hosted-deployment.md) and [deployment guide](docs/deployment.md). New photo/document uploads are limited to 3 MiB to fit free-host request limits.
