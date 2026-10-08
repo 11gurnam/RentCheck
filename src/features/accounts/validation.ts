@@ -45,6 +45,7 @@ export function safeDestination(value: unknown) {
       "/account/password",
       "/account/privacy",
       "/account/notifications",
+      "/messages",
       "/claims",
       "/reviews/new",
       "/admin",

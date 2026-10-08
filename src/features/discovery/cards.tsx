@@ -35,6 +35,7 @@ export function PropertyCard({ property: p }: { property: Property }) {
           {p.recommended ? "Recommended" : "Threshold not reached"}
         </p>
         {p.is_demo && <span className="demo-tag">Synthetic example</span>}
+        <p><a href="/compare">Compare properties</a> · <a href="/map">Recorded locations</a></p>
       </div>
     </article>
   );

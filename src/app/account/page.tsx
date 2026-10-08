@@ -15,6 +15,7 @@ export default async function AccountPage() {
         <SignOutForm />
       </div>
       <nav className="pagination" aria-label="Account settings">
+        <a href="/messages">Private conversations</a>
         <a href="/account/notifications">Notifications</a>
         <a href="/account/password">Change password</a>
         <a href="/account/privacy">Privacy and deletion</a>

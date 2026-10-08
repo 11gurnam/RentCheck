@@ -24,6 +24,8 @@ export default async function AdminPage() {
             <a href="/admin/claims">Profile claims</a>
             {" · "}
             <a href="/admin/reports">Review reports</a>
+            {" · "}<a href="/admin/messages">Message reports</a>
+            {" · "}<a href="/admin/locations">Property locations</a>
             {" · "}
             <a href="/admin/duplicates">Possible duplicates</a>
             {" · "}

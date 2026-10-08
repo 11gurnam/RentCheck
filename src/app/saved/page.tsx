@@ -28,6 +28,7 @@ export default async function SavedPage() {
           your shortlist.
         </p>
       </div>
+      <p><a href="/compare">Compare up to three properties</a> · <a href="/map">Recorded locations</a></p>
       {rows.length ? (
         <div className="property-grid">
           {rows.map(

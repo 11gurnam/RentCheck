@@ -14,6 +14,7 @@ import { womensCounts } from "@/features/verification/data";
 import { ReviewFeed } from "@/features/reviews/feed";
 import { reviewPage } from "@/features/reviews/pagination";
 import { PropertyGallery } from "@/features/photos/gallery";
+import { StartConversation } from "@/features/messaging/forms";
 export default async function PropertyPage({
   params,
   searchParams,
@@ -39,6 +40,8 @@ export default async function PropertyPage({
     (row: { property_id: string }) => row.property_id === id,
   );
   const women = await womensCounts(id);
+  const contacts = user ? await (await createDatabaseClient()).rpc("get_contactable_representatives", { p_property: id }) : null;
+  if (contacts?.error) throw new Error("Representative contact unavailable");
   const associations = await getAssociations(id);
   const history = await Promise.all(
     associations.map(async (a) => ({
@@ -109,6 +112,7 @@ export default async function PropertyPage({
         </section>
       </div>
       <PropertyGallery property={id} />
+      <section className="dashboard-card"><h2>Private representative contact</h2><p><a href="/messages">Your conversations and contact preference</a></p>{contacts?.data?.length ? contacts.data.map((c: { profile_id: string; alias: string }) => <StartConversation key={c.profile_id} property={id} profile={c.profile_id} alias={c.alias} />) : <p>No approved representative is currently accepting contact for this property.</p>}</section>
       <ReviewFeed
         property={id}
         page={reviewPage((await searchParams).reviews)}
