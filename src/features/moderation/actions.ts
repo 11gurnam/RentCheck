@@ -6,6 +6,7 @@ import { requireUser, isAdministrator } from "@/lib/auth/session";
 import { createDatabaseClient } from "@/lib/database/server";
 import type { ReviewState } from "@/features/reviews/validation";
 import { reportSchema, mergeSchema, associationSchema } from "./validation";
+import { operationMode } from "@/features/operations/data";
 function refresh() {
   revalidatePath("/admin", "layout");
   revalidatePath("/properties", "layout");
@@ -148,6 +149,9 @@ export async function createManager(
   form: FormData,
 ): Promise<ReviewState> {
   if (!(await admin())) return { message: "Administrator access required." };
+  const recordMode = form.get("recordMode");
+  if (recordMode !== "demo" && recordMode !== "real") return { message: "Reload the manager form to confirm the record type." };
+  if (recordMode === "real" && !(await operationMode()).accepts_real_data) return { message: "Real-data intake is currently disabled." };
   const v = z
     .object({
       name: z.string().trim().min(3).max(120),
@@ -166,10 +170,12 @@ export async function createManager(
   ).rpc("create_manager_profile", {
     p_name: v.data.name,
     p_description: v.data.description,
+    p_demo: recordMode === "demo",
+    p_consent: true,
     p_acknowledged: form.get("acknowledged") === "on",
     p_reason: v.data.reason,
   });
   if (error) return { message: error.message };
   refresh();
-  return { message: "Fictional manager profile created and audited." };
+  return { message: recordMode === "demo" ? "Fictional manager profile created and audited." : "Manager profile created and audited." };
 }

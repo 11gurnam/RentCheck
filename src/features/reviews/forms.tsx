@@ -7,13 +7,14 @@ export function ReviewForm({
   property,
   review,
 }: {
-  property: { id: string; name: string };
+  property: { id: string; name: string; is_demo?: boolean };
   review?: OwnReview;
 }) {
   const [state, action, pending] = useActionState(submitReview, {});
   const [current, setCurrent] = useState(review?.current ?? true);
   const [start, setStart] = useState(review?.start ?? "");
   const [landlordAvailable, setLandlordAvailable] = useState(false);
+  const real = review ? review.is_demo === false : property.is_demo === false;
   return (
     <form
       action={action}
@@ -23,8 +24,7 @@ export function ReviewForm({
       <input type="hidden" name="property" value={property.id} />
       {review && <input type="hidden" name="review" value={review.id} />}
       <p>
-        Writing about <strong>{property.name}</strong>. Use fictional examples
-        only. Your public alias appears with this review.
+        Writing about <strong>{property.name}</strong>. {real ? "Describe your own experience without publishing private information." : "Use fictional examples only."} Your public alias appears with this review.
       </p>
       <label>
         Tenancy start
@@ -141,8 +141,7 @@ export function ReviewForm({
         </select>
       </label>
       <label>
-        <input name="synthetic" type="checkbox" required /> This is a fictional
-        tenancy and review.
+        <input name="synthetic" type="checkbox" required /> {real ? "This is my own tenancy experience and I consent to publication under my alias." : "This is a fictional tenancy and review."}
       </label>
       {state.message && <p role="alert">{state.message}</p>}
       <button className="primary-button" disabled={pending}>

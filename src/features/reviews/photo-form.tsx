@@ -4,17 +4,18 @@ import { addPhoto, removePhoto } from "./photo-actions";
 export function PhotoForm({
   review,
   photos,
+  real = false,
 }: {
   review: string;
   photos: { id: string }[];
+  real?: boolean;
 }) {
   const [s, a, p] = useActionState(addPhoto, {});
   return (
     <section className="dashboard-card">
       <h2>Review photos</h2>
       <p>
-        Optional. Up to three fictional photos, 5 MiB each. Image metadata is
-        removed.
+        Optional. Up to three {real ? "property" : "fictional"} photos, 5 MiB each. Image metadata is removed. Only upload images you have permission to share; avoid faces and private documents. Photos are public.
       </p>
       <form action={a} className="auth-form">
         <input name="review" type="hidden" value={review} />

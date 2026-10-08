@@ -1,6 +1,9 @@
 import "server-only";
 import { createDatabaseClient } from "@/lib/database/server";
 export type Claim = {
+  is_demo?: boolean;
+  evidence_expired?: boolean;
+  expires_at?: string;
   id: string;
   property_id: string | null;
   landlord_id: string | null;

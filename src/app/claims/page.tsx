@@ -8,7 +8,7 @@ export default async function ClaimsPage() {
   const rows = await myClaims();
   return (
     <AccountShell>
-      <h1>Your demonstration claims</h1>
+      <h1>Your profile claims</h1>
       <p>
         <a href="/search">Find a profile to claim</a>
       </p>
@@ -22,11 +22,12 @@ export default async function ClaimsPage() {
             <section key={c.id} className="dashboard-card">
               <h2>{c.name}</h2>
               <p>
+                {c.is_demo === false ? "Manual evidence review" : "Demonstration claim"} ·{" "}
                 {c.status} · {c.reason}
               </p>
-              <a href={"/api/documents/" + c.document_id}>
+              {c.evidence_expired ? <p>Evidence expired; download unavailable.</p> : <a href={"/api/documents/" + c.document_id}>
                 Download your private claim evidence
-              </a>
+              </a>}
               <p>
                 <a
                   href={

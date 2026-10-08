@@ -48,6 +48,8 @@ export async function requestVerification(
     p_review: id.data,
     p_document: document,
     p_extension: documentFile.extension,
+    p_demo: review.is_demo !== false,
+    p_consent: true,
   });
   if (result.error) {
     await media.storage.from("rental-documents").remove([path]);
@@ -57,7 +59,7 @@ export async function requestVerification(
   revalidatePath("/admin/verification");
   return {
     message:
-      "Private demonstration verification requested. Only you and trusted administrators can access the document.",
+      review.is_demo !== false ? "Private demonstration verification requested. Only you and trusted administrators can access the document." : "Private evidence submitted for manual tenancy review. Only you and trusted administrators can access the document.",
   };
 }
 export async function decideVerification(
@@ -85,6 +87,7 @@ export async function decideVerification(
     p_request: v.request,
     p_decision: v.decision,
     p_reason: v.reason,
+    p_checks: { identity: form.get("identity") === "on", property: form.get("property") === "on", period_or_authority: form.get("period_or_authority") === "on" },
   });
   if (error) return { message: error.message };
   revalidatePath("/admin/verification");

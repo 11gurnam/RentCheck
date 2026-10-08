@@ -2,6 +2,9 @@ import "server-only";
 import { createDatabaseClient } from "@/lib/database/server";
 import { womenRecommended } from "./rules";
 export type Verification = {
+  is_demo?: boolean;
+  evidence_expired?: boolean;
+  expires_at?: string;
   id: string;
   review_id: string;
   document_id: string;

@@ -7,27 +7,31 @@ import {
   replyToReview,
 } from "./actions";
 import type { Claim } from "./data";
+import { EvidenceChecklist } from "@/features/operations/checklist";
 export function ClaimForm({
   target,
   kind,
   name,
+  real = false,
 }: {
   target: string;
   kind: "property" | "landlord";
   name: string;
+  real?: boolean;
 }) {
   const [s, a, p] = useActionState(requestClaim, {});
   return (
     <form action={a} onReset={(e) => e.preventDefault()} className="auth-form">
       <input name="target" type="hidden" value={target} />
       <input name="kind" type="hidden" value={kind} />
+      <p>Read the <a href="/privacy">privacy and evidence retention policy</a> before uploading.</p>
       <p>
-        Request demonstration representative access for {name}. Private evidence
+        Request {real ? "manual representative review" : "demonstration representative access"} for {name}. Private evidence
         is visible only to you and trusted administrators. Approval grants
         permitted detail/reply controls.
       </p>
       <label>
-        Fictional claim evidence image or PDF
+        {real ? "Redacted representative evidence image or PDF" : "Fictional claim evidence image or PDF"}
         <input
           type="file"
           name="document"
@@ -36,10 +40,9 @@ export function ClaimForm({
         />
       </label>
       <label>
-        <input name="synthetic" type="checkbox" required /> This claim and
-        evidence use only invented demonstration information.
+        <input name="synthetic" type="checkbox" required /> {real ? "I have authority to submit this redacted evidence and consent to private review and the evidence retention policy." : "This claim and evidence use only invented demonstration information."}
       </label>
-      <button disabled={p}>Submit demonstration claim</button>
+      <button disabled={p}>{real ? "Submit representative evidence" : "Submit demonstration claim"}</button>
       {s.message && <p role="status">{s.message}</p>}
     </form>
   );
@@ -51,7 +54,8 @@ export function ClaimDecision({ claim }: { claim: Claim }) {
       <h2>
         {claim.name} · {claim.alias}
       </h2>
-      <p>Demonstration claim · {claim.status}</p>
+      <p>{claim.is_demo === false ? "Real evidence · manual review" : "Demonstration claim"} · {claim.status}</p>
+      <p>Evidence expires: {claim.expires_at ?? "Not recorded"}{claim.evidence_expired ? " · Download unavailable" : ""}</p>
       <p>{claim.reason}</p>
       <p>
         <a href={"/api/documents/" + claim.document_id}>
@@ -70,7 +74,7 @@ export function ClaimDecision({ claim }: { claim: Claim }) {
             <select name="decision">
               {claim.status === "pending" ? (
                 <>
-                  <option value="approved">Approve demonstration claim</option>
+                  <option value="approved">{claim.is_demo === false ? "Approve representative evidence" : "Approve demonstration claim"}</option>
                   <option value="rejected">Reject claim</option>
                 </>
               ) : (
@@ -82,6 +86,7 @@ export function ClaimDecision({ claim }: { claim: Claim }) {
             Claim decision reason
             <textarea name="reason" required minLength={10} maxLength={2000} />
           </label>
+          {claim.is_demo === false && <EvidenceChecklist />}
           <button disabled={p}>Save claim decision</button>
         </form>
       )}

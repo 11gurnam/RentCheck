@@ -5,6 +5,8 @@ import { requireUser } from "@/lib/auth/session";
 import { createDatabaseClient } from "@/lib/database/server";
 import { reviewSchema, type ReviewState } from "./validation";
 import { z } from "zod";
+import { getProperty } from "@/features/discovery/data";
+import { ownReviews } from "./data";
 export async function submitReview(
   _: ReviewState,
   form: FormData,
@@ -14,12 +16,17 @@ export async function submitReview(
   if (!parsed.success)
     return { message: parsed.error.issues.map((i) => i.message).join(" ") };
   const v = parsed.data;
+  const existingId = String(form.get("review") ?? "");
+  const existing = existingId ? (await ownReviews()).find(r => r.id === existingId) : null;
+  const property = await getProperty(v.property);
+  if (!property || (existingId && !existing)) return { message: "Review or property unavailable." };
   const input = {
     ...v,
     current: v.current === "true",
     woman: v.woman === "on",
     recommend: v.recommend === "" ? null : v.recommend === "true",
-    synthetic: true,
+    synthetic: existing ? existing.is_demo !== false : property.is_demo,
+    consent: true,
   };
   const id = String(form.get("review") ?? "");
   if (id && !z.uuid().safeParse(id).success)

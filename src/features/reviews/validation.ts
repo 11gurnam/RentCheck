@@ -37,6 +37,7 @@ export const reviewSchema = z
       });
   });
 export type OwnReview = {
+  is_demo?: boolean;
   id: string;
   property_id: string;
   property_name: string;

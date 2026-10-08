@@ -270,12 +270,13 @@ export function AssociationForm({
     </form>
   );
 }
-export function ManagerForm() {
+export function ManagerForm({ real = false }: { real?: boolean }) {
   const [s, a, p] = useActionState(createManager, {});
   return (
     <form action={a} className="auth-form" onReset={(e) => e.preventDefault()}>
+      <input type="hidden" name="recordMode" value={real ? "real" : "demo"} />
       <label>
-        Fictional manager name
+        {real ? "Manager name" : "Fictional manager name"}
         <input name="name" required minLength={3} maxLength={120} />
       </label>
       <label>
@@ -285,13 +286,13 @@ export function ManagerForm() {
       <Reason label="Manager creation reason" />
       <label>
         <input type="checkbox" name="synthetic" required />
-        This manager information is entirely invented.
+        {real ? "I checked the source and have permission to publish these manager details." : "This manager information is entirely invented."}
       </label>
       <label>
         <input type="checkbox" name="acknowledged" />I reviewed the existing
         manager profiles and acknowledge any similar names.
       </label>
-      <button disabled={p}>Create fictional manager</button>
+      <button disabled={p}>{real ? "Create manager profile" : "Create fictional manager"}</button>
       {s.message && <p role="status">{s.message}</p>}
     </form>
   );

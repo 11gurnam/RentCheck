@@ -25,7 +25,7 @@ export function SaveForm({
     </form>
   );
 }
-export function ContributionForm() {
+export function ContributionForm({ real = false }: { real?: boolean }) {
   const [state, action, pending] = useActionState(contribute, {
     status: "idle",
   } as ContributionState);
@@ -34,7 +34,7 @@ export function ContributionForm() {
   });
   const fields = [
     ["name", "Property name"],
-    ["address", "Full demo address"],
+    ["address", real ? "Full address" : "Full demo address"],
     ["state", "State / union territory"],
     ["city", "City"],
     ["locality", "Locality"],
@@ -44,6 +44,7 @@ export function ContributionForm() {
   const [checks, setChecks] = useState({synthetic:false,owner:false});
   return (
     <form action={action} className="contribution-form" onReset={event=>event.preventDefault()}>
+      <input type="hidden" name="recordMode" value={real ? "real" : "demo"} />
       {fields.map(([name, label]) => (
         <div className="form-field" key={name}>
           <label htmlFor={name}>{label}</label>
@@ -85,13 +86,12 @@ export function ContributionForm() {
         />
       </div>
       <label className="checkbox-row wide">
-        <input type="checkbox" name="declaredOwner" checked={checks.owner} onChange={e=>setChecks({...checks,owner:e.target.checked})}/>I own this fictional
-        example (this prevents reviewing my own place; it grants no management
+        <input type="checkbox" name="declaredOwner" checked={checks.owner} onChange={e=>setChecks({...checks,owner:e.target.checked})}/>{real ? "I own this property" : "I own this fictional example"} (this prevents reviewing my own place; it grants no management
         permissions).
       </label>
       <label className="checkbox-row wide">
         <input type="checkbox" name="synthetic" required checked={checks.synthetic} onChange={e=>setChecks({...checks,synthetic:e.target.checked})}/>
-        All details are fictional demonstration data.
+        {real ? "These details are accurate to my knowledge and I consent to their public display." : "All details are fictional demonstration data."}
       </label>
       {state.message && (
         <p role="alert" className="form-feedback error wide">

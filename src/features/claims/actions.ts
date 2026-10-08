@@ -25,7 +25,7 @@ export async function requestClaim(
   const db = await createDatabaseClient();
   const profile = await db
     .from(kind.data === "property" ? "properties" : "landlords")
-    .select("id")
+    .select("id,is_demo")
     .eq("id", target.data)
     .maybeSingle();
   if (profile.error || !profile.data)
@@ -55,6 +55,8 @@ export async function requestClaim(
     p_landlord: kind.data === "landlord" ? target.data : null,
     p_document: document,
     p_extension: documentFile.extension,
+    p_demo: profile.data.is_demo,
+    p_consent: true,
   });
   if (claim.error) {
     await media.storage.from("rental-documents").remove([path]);
@@ -64,7 +66,7 @@ export async function requestClaim(
   revalidatePath("/admin/claims");
   return {
     message:
-      "Private demonstration claim submitted. Approval is required before you can change details or reply.",
+      profile.data.is_demo ? "Private demonstration claim submitted. Approval is required before you can change details or reply." : "Private evidence submitted for manual representative review. Approval is required before changing details or replying.",
   };
 }
 export async function decideClaim(
@@ -91,6 +93,7 @@ export async function decideClaim(
     p_claim: v.data.claim,
     p_decision: v.data.decision,
     p_reason: v.data.reason,
+    p_checks: { identity: form.get("identity") === "on", property: form.get("property") === "on", period_or_authority: form.get("period_or_authority") === "on" },
   });
   if (error) return { message: error.message };
   revalidatePath("/admin/claims");

@@ -31,9 +31,10 @@ export default async function EditReview({
           review={r}
         />
       </section>
-      <PhotoForm review={id} photos={data} />
+      <PhotoForm review={id} photos={data} real={r.is_demo === false} />
       <VerificationForm
         review={id}
+        real={r.is_demo === false}
         requests={(await myVerifications()).filter((v) => v.review_id === id)}
       />
     </AccountShell>

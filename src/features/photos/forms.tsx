@@ -21,6 +21,7 @@ export function PropertyPhotoForm({
         Up to ten photos per property, 5 MiB each. Only an approved matching
         claim earns a verified label. Pending-claim photos are hidden if the
         claim is rejected or revoked.
+        Photos are public. Only upload images you have permission to share; avoid faces and private documents.
       </p>
       <form action={a} className="auth-form">
         <input type="hidden" name="property" value={property} />

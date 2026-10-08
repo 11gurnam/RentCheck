@@ -106,7 +106,7 @@ export default async function PropertyPage({
               ? "Recommended by eligible women tenants."
               : "Recommendation threshold not reached."}{" "}
             {women?.positive_count ?? 0}/{women?.eligible_count ?? 0} eligible
-            positive responses. Demonstration verification only. Tenant
+            positive responses. {p.is_demo ? "Demonstration verification only." : "Verification records manual evidence review; it does not independently certify identity."} Tenant
             recommendations are never a safety guarantee.
           </p>
         </section>

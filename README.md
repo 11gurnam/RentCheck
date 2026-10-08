@@ -2,14 +2,14 @@
 
 India-wide accommodation research prototype: Google/email accounts and public aliases, multi-city discovery, private shortlists, fictional property contributions, canonical tenancies, separate property/management reviews and photos, private demonstration verification, women's recommendation counts, property/manager claims, representative replies, reports, trusted moderation, dated management history and conflict-safe property merges.
 
-The original eight phases and enhancement Phases 09–10 are implemented for local demonstration. Photos include tenant/landlord provenance, and accounts support recovery, private PDF evidence, notifications and deletion. Records/evidence and approvals remain demonstration examples. Phases 11–12 and deployment are deferred. There are no bookings, payments or real ownership/tenancy certification.
+The original eight phases and enhancement Phases 09–12 are implemented. Photos include tenant/landlord provenance; accounts support recovery, private PDFs, notifications and deletion. Opt-in private messaging, reporting/blocking, three-property comparison and explicitly recorded maps are available. Real-data intake is controlled in the database with per-record demo labels, manual evidence checklists, expiry/cleanup and local encrypted backup/restore checks. Existing local records remain demonstration examples. Deployment is deferred. There are no bookings, payments or independent ownership/tenancy certification.
 
 ## Start on a fresh local checkout
 
-Use Node24 LTS, npm11+, Git and Docker Desktop with the Linux engine running. The latest completed demo is on branch phase-10-account-privacy; main retains the earlier merged foundation until a separately authorized merge.
+Use Node24 LTS, npm11+, Git and Docker Desktop with the Linux engine running. The latest implementation is on branch phase-12-real-data-operations; main retains the earlier merged foundation until a separately authorized merge.
 
 ```sh
-git switch phase-10-account-privacy
+git switch phase-12-real-data-operations
 npm ci
 npm run backend:start
 npm run backend:env
@@ -31,6 +31,8 @@ npm run test:integration
 npx playwright install chromium
 npm run test:e2e
 npm run test:recovery
+npm run test:operations
+npm run ops:backup-check
 node scripts/check-browser-secrets.mjs
 ```
 
@@ -43,6 +45,9 @@ If Chrome is already installed on Windows, set $env:PLAYWRIGHT_CHANNEL='chrome' 
 - [Beginner review guide](docs/review-guide.md)
 - [Current tenant and landlord demo walkthrough](docs/enhancements/demo-walkthrough.md)
 - [Phase 10 account/privacy checking guide](docs/enhancements/phase-10-account-privacy.md)
+- [Phase 11 messaging/comparison/maps checking guide](docs/enhancements/phase-11-messaging-discovery.md)
+- [Phase 12 real-data/operations checking guide](docs/enhancements/phase-12-real-data-operations.md)
+- [Operator commands and retention/backup policies](docs/operations.md)
 - [Final end-to-end checklist](docs/phases/phase-08/review-checklist.md)
 - [Phase results and evidence](docs/phases.md)
 - [Specification](docs/specification.md)

@@ -6,7 +6,7 @@ This is a prepared guide, not a deployment record. Use a separate staging Supaba
 
 The account owner chooses hosting/domain, creates a hosted staging Supabase project, and stores credentials in private host/provider settings. Local Docker accounts, test passwords and callback URLs are not hosted configuration.
 
-Check out phase-08-release (or its reviewed, approved merge), then npm ci. Authenticate the Supabase CLI, link the confirmed staging project and inspect migrations before applying them. See [Supabase migration workflow](https://supabase.com/docs/guides/deployment/database-migrations).
+Check out phase-12-real-data-operations (or its reviewed, approved merge), then npm ci. Authenticate the Supabase CLI, link the confirmed staging project and inspect migrations before applying them. See [Supabase migration workflow](https://supabase.com/docs/guides/deployment/database-migrations).
 
 ```sh
 npx supabase login
@@ -37,7 +37,7 @@ Set these host values BEFORE building:
 
 Public variables enter the browser build, so rebuild when changing them. Keep privileged keys out of NEXT_PUBLIC_ variables and Git. Google secret belongs in Supabase provider settings.
 
-Set Supabase Auth Site URL and exact hosted /auth/callback and /auth/confirm redirect destinations. Use the confirmation-template pattern in supabase/templates/confirmation.html and real hosted email delivery for nonlocal confirmation.
+Set Supabase Auth Site URL and exact hosted /auth/callback and /auth/confirm redirect destinations. Use the confirmation and recovery template patterns in supabase/templates/confirmation.html and supabase/templates/recovery.html and real hosted email delivery for nonlocal confirmation.
 
 Configure a Google web OAuth client with the HTTPS website origin and the hosted Supabase callback shown in its Google provider settings, commonly https://PROJECT.supabase.co/auth/v1/callback. Add intended testers to the consent audience while testing; enter ID/secret privately into Supabase. [Supabase Google setup](https://supabase.com/docs/guides/auth/social-login/auth-google) explains client/provider configuration. Repeat real Google login, alias persistence and logout on the hosted origin; local success does not prove hosted callbacks.
 
@@ -65,4 +65,4 @@ Allow the app's 6MiB Server Action envelope and 5MiB image input at the proxy/pr
 
 Repeat the final checklist at the hosted URL with NEW fictional accounts: Google/email confirmation/logout/alias, nonadmin denial, combined search/saves, review creation/edit/delete/photos, private-document denial, verification threshold/revoke, claims/replies/revocation, reports keep/remove, historic associations, explicit conflict merge and audit. Check another account/incognito and physical phone. Scan browser assets after the staging build.
 
-The staging operator owns backups and evidence/audit retention. This prototype retains private documents/archived records and immutable audit; no purge/retention-management feature was implemented. Publishing a demonstration is separate from approving real data collection, real verification or a public launch.
+The staging operator owns backups and evidence/audit retention. Phase 12 adds evidence expiry, durable registered-media cleanup and encrypted local restore checks; see [operations](operations.md). Configure hosted scheduling, private object backups and post-backup deletion replay before real-user operation. Local helpers refuse hosted targets. Publishing a demonstration is separate from approving real data collection, real verification or a public launch.

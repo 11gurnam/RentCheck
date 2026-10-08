@@ -90,16 +90,16 @@ export async function ReviewFeed({
             <a href={href(1)}>Return to the first experiences page</a>.
           </p>
         ) : (
-          <p>Be the first to share a fictional experience.</p>
+          <p>Be the first to share an experience.</p>
         ))}
       {rows.map((r) => (
         <article key={r.id} className="dashboard-card">
           <h3>{r.alias}</h3>
           <p className="demo-tag">
             {verified.find((v) => v.id === r.id)?.verified
-              ? "Demonstration verified tenant"
+              ? (r.is_demo ? "Demonstration verified tenant" : "Verified tenant · evidence manually reviewed")
               : "Unverified tenant"}{" "}
-            · synthetic example {r.was_edited ? "· Updated" : ""}
+            {r.is_demo ? "· synthetic example" : "· User experience"} {r.was_edited ? "· Updated" : ""}
           </p>
           <p>
             Property {r.property_rating} / 5 · Management{" "}

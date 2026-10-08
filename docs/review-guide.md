@@ -33,4 +33,4 @@ Each phase includes a separate `review-checklist.md` linked from its README and 
 - [Phase7: reports/history/duplicate resolutions](phases/phase-07/review-checklist.md)
 - [Phase8: final end-to-end walkthrough](phases/phase-08/review-checklist.md)
 
-Use the final checklist for one complete review. The private local-demo-accounts.md and fictional-rental-document.png supplied in this chat support the role checks. Your actual Google account stays ordinary; use the separate fictional administrator account. No credentials are stored in this repository. The complete source branch is phase-08-release; it has not been deployed or merged to main by this task.
+Use the final checklist for one complete review. The private local-demo-accounts.md and fictional-rental-document.png supplied in this chat support the role checks. Your actual Google account stays ordinary; use the separate fictional administrator account. No credentials are stored in this repository. The complete source branch is phase-12-real-data-operations; it has not been deployed or merged to main by this task.

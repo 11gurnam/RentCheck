@@ -2,7 +2,7 @@ import "server-only";
 import type { createMediaClient } from "@/lib/database/privileged";
 export async function purgeMedia(
   service: ReturnType<typeof createMediaClient>,
-  user: string,
+  user: string | null,
   maxBatches = 2,
 ) {
   // Queue is durable; downloads have already become unavailable in the auth-deletion transaction.
@@ -28,5 +28,6 @@ export async function purgeMedia(
       if (finished.error) return false;
     }
   }
-  return false;
+  const remaining = await service.rpc("get_media_purge_jobs", { p_user: user });
+  return !remaining.error && remaining.data?.length === 0;
 }

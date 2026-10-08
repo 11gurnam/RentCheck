@@ -19,6 +19,7 @@ export default async function AccountPage() {
         <a href="/account/notifications">Notifications</a>
         <a href="/account/password">Change password</a>
         <a href="/account/privacy">Privacy and deletion</a>
+        <a href="/privacy">Evidence retention policy</a>
       </nav>
       {profile ? (
         <div className="dashboard-grid">
@@ -42,7 +43,7 @@ export default async function AccountPage() {
             </dl>
             <p className="field-hint">
               Email and account identity are visible only to you. Representative
-              controls require an approved demonstration claim.
+              controls require an approved matching claim.
             </p>
             {profile.is_administrator && (
               <a className="text-link" href="/admin">

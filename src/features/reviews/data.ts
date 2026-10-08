@@ -9,6 +9,7 @@ export async function ownReviews(): Promise<OwnReview[]> {
   return data;
 }
 export type FeedReview = {
+  is_demo: boolean;
   id: string;
   property_id: string;
   landlord_id: string | null;

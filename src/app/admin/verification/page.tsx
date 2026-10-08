@@ -14,9 +14,9 @@ export default async function VerificationAdmin() {
   const rows = await adminVerifications();
   return (
     <AccountShell>
-      <h1>Demonstration verification requests</h1>
+      <h1>Tenancy verification requests</h1>
       <p>
-        Inspect only synthetic documents. Every approval, rejection and
+        Inspect the evidence and its demonstration/real label. Real approvals require the manual checklist. Every approval, rejection and
         revocation needs a reason and is audited.
       </p>
       {!rows.length && <p>No requests yet.</p>}

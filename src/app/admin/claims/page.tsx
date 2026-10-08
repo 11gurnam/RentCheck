@@ -13,9 +13,9 @@ export default async function ClaimsAdmin() {
   const rows = await adminClaims();
   return (
     <AccountShell>
-      <h1>Demonstration profile claims</h1>
+      <h1>Profile claims and evidence review</h1>
       <p>
-        Inspect private fictional evidence. Resolve existing claimant
+        Inspect private evidence and its demonstration/real label. Resolve existing claimant
         tenant-review or representative conflicts explicitly before approval.
         Every decision is audited.
       </p>

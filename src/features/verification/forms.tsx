@@ -2,12 +2,15 @@
 import { useActionState } from "react";
 import { requestVerification, decideVerification } from "./actions";
 import type { Verification } from "./data";
+import { EvidenceChecklist } from "@/features/operations/checklist";
 export function VerificationForm({
   review,
   requests,
+  real = false,
 }: {
   review: string;
   requests: Verification[];
+  real?: boolean;
 }) {
   const [s, a, p] = useActionState(requestVerification, {});
   const active = requests.some((r) =>
@@ -15,19 +18,19 @@ export function VerificationForm({
   );
   return (
     <section className="dashboard-card">
-      <h2>Demonstration tenant verification</h2>
+      <h2>{real ? "Manual tenancy evidence review" : "Demonstration tenant verification"}</h2>
+      <p>Read the <a href="/privacy">privacy and evidence retention policy</a> before uploading.</p>
       <p>
-        Use fictional rental-document images or PDFs only. This prototype
-        simulates verification; it never verifies a real tenancy.
+        {real ? "Upload a redacted rental document supporting your tenancy dates and property. Remove bank details, identity numbers and unrelated people's information. Only you and authorized reviewers can access it. Manual review is not independent identity certification." : "Use fictional rental-document images or PDFs only. This prototype simulates verification; it never verifies a real tenancy."}
       </p>
       {requests.map((r) => (
         <div key={r.id}>
           <p>
             {r.status} {r.reason ? "· " + r.reason : ""}
           </p>
-          <a href={"/api/documents/" + r.document_id}>
+          {r.evidence_expired ? <p>Evidence expired; download unavailable.</p> : <a href={"/api/documents/" + r.document_id}>
             Download your private document
-          </a>
+          </a>}
         </div>
       ))}
       {!active && (
@@ -38,7 +41,7 @@ export function VerificationForm({
         >
           <input name="review" type="hidden" value={review} />
           <label>
-            Fictional rental document image or PDF
+            {real ? "Redacted rental document image or PDF" : "Fictional rental document image or PDF"}
             <input
               type="file"
               name="document"
@@ -47,10 +50,9 @@ export function VerificationForm({
             />
           </label>
           <label>
-            <input type="checkbox" name="synthetic" required /> This document
-            contains only invented demonstration information.
+            <input type="checkbox" name="synthetic" required /> {real ? "I have permission to submit this redacted document and consent to private review and the evidence retention policy." : "This document contains only invented demonstration information."}
           </label>
-          <button disabled={p}>Request demonstration verification</button>
+          <button disabled={p}>{real ? "Request manual evidence review" : "Request demonstration verification"}</button>
         </form>
       )}
       {s.message && <p role="status">{s.message}</p>}
@@ -64,11 +66,12 @@ export function VerificationDecision({ request }: { request: Verification }) {
       <h2>
         {request.property} · {request.alias}
       </h2>
-      <p>Demonstration request · {request.status}</p>
+      <p>{request.is_demo === false ? "Real evidence · manual review" : "Demonstration request"} · {request.status}</p>
+      <p>Evidence expires: {request.expires_at ?? "Not recorded"}{request.evidence_expired ? " · Download unavailable" : ""}</p>
       <p>{request.reason}</p>
       <p>
         <a href={"/api/documents/" + request.document_id}>
-          Download private demonstration document
+          {request.is_demo === false ? "Download private evidence" : "Download private demonstration document"}
         </a>
       </p>
       {["pending", "approved"].includes(request.status) && (
@@ -83,11 +86,11 @@ export function VerificationDecision({ request }: { request: Verification }) {
             <select name="decision">
               {request.status === "pending" ? (
                 <>
-                  <option value="approved">Approve demonstration</option>
+                  <option value="approved">{request.is_demo === false ? "Approve manual evidence review" : "Approve demonstration"}</option>
                   <option value="rejected">Reject</option>
                 </>
               ) : (
-                <option value="revoked">Revoke demonstration approval</option>
+                <option value="revoked">{request.is_demo === false ? "Revoke approval" : "Revoke demonstration approval"}</option>
               )}
             </select>
           </label>
@@ -95,6 +98,7 @@ export function VerificationDecision({ request }: { request: Verification }) {
             Decision reason
             <textarea name="reason" minLength={10} maxLength={2000} required />
           </label>
+          {request.is_demo === false && <EvidenceChecklist />}
           <button disabled={p}>Save verification decision</button>
         </form>
       )}

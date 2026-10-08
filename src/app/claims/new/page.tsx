@@ -20,12 +20,13 @@ export default async function NewClaim({
   return (
     <AccountShell>
       <section className="dashboard-card">
-        <h1>Claim a demonstration profile</h1>
+        <h1>{profile?.is_demo === false ? "Claim a representative profile" : "Claim a demonstration profile"}</h1>
         {v.success && profile ? (
           <ClaimForm
             target={v.data.target}
             kind={v.data.kind}
             name={profile.name}
+            real={profile.is_demo === false}
           />
         ) : (
           <p>

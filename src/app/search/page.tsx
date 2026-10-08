@@ -55,8 +55,7 @@ export default async function SearchPage({
         <p className="eyebrow">A MORE INFORMED MOVE · INDIA</p>
         <h1>Find a place. Know its story.</h1>
         <p>
-          Explore synthetic accommodation examples across India. These are
-          research profiles, not available rental listings.
+          Explore accommodation research across India. Fictional examples carry demonstration labels. Profiles are research records, not available rental listings.
         </p>
       </div>
       <form action="/search" method="get" className="filter-panel">

@@ -2,6 +2,7 @@ import { AccountShell } from "@/components/ui/account-shell";
 import { requireUser, isAdministrator } from "@/lib/auth/session";
 import { createDatabaseClient } from "@/lib/database/server";
 import { z } from "zod";
+import { operationMode } from "@/features/operations/data";
 import {
   AssociationForm,
   ManagerForm,
@@ -22,6 +23,7 @@ export default async function AssociationsPage({
     );
   const db = await createDatabaseClient(),
     params = await searchParams;
+  const real = (await operationMode()).accepts_real_data;
   const [p, l] = await Promise.all([
     db.from("properties").select("id,name").order("name"),
     db.from("landlords").select("id,name").order("name"),
@@ -77,12 +79,12 @@ export default async function AssociationsPage({
         </section>
       )}
       <section className="dashboard-card">
-        <h2>Add a fictional manager</h2>
+        <h2>{real ? "Add a manager profile" : "Add a fictional manager"}</h2>
         <p>
           Inspect the existing manager names above first. Exact duplicate names
           are refused; similar names require acknowledgement.
         </p>
-        <ManagerForm />
+        <ManagerForm real={real} />
       </section>
     </AccountShell>
   );

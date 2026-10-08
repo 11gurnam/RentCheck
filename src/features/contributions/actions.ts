@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { requireUser } from "@/lib/auth/session";
 import { createDatabaseClient } from "@/lib/database/server";
+import { operationMode } from "@/features/operations/data";
 import {
   contributionSchema,
   type ContributionState,
@@ -22,6 +23,9 @@ export async function contribute(
         .join(" "),
     };
   const input = parsed.data;
+  const recordMode = form.get("recordMode");
+  if (recordMode !== "demo" && recordMode !== "real") return { status: "error", message: "Reload the contribution form to confirm the record type." };
+  if (recordMode === "real" && !(await operationMode()).accepts_real_data) return { status: "error", message: "Real-data intake is currently disabled." };
   let id: string;
   try {
     const db = await createDatabaseClient();
@@ -50,7 +54,8 @@ export async function contribute(
     const result = await db.rpc("create_property", {
       p_input: {
         ...input,
-        synthetic: true,
+        synthetic: recordMode === "demo",
+        consent: true,
         declaredOwner: input.declaredOwner === "on",
       },
       p_acknowledged: input.acknowledged === "on",

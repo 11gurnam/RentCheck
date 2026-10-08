@@ -106,7 +106,7 @@ export function Introduction() {
               Get to know RentCheck <span aria-hidden="true">↗</span>
             </a>
             <p className="availability">
-              An early prototype. Explore synthetic accommodation across India.
+              An early prototype. Explore accommodation research across India.
               {" "}<a href="/search">Explore accommodation →</a>
             </p>
           </div>
@@ -203,9 +203,7 @@ export function Introduction() {
             <div className="demo-notice">
               <strong>About this prototype</strong>
               <p>
-                Future sample properties, reviews and documents will be
-                synthetic. Verification and claim approvals will be clearly
-                labelled demonstrations.
+                  Fictional properties, reviews and approvals carry demonstration labels. Real contributions, when intake is enabled, are labelled separately. Verification records manual evidence review, not independent identity certification.
               </p>
             </div>
           </div>
