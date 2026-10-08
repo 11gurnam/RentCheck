@@ -10,7 +10,7 @@ export function PhotoForm({
 }) {
   const [s, a, p] = useActionState(addPhoto, {});
   return (
-    <section className="dashboard-card">
+    <section className="dashboard-card" id="review-photos">
       <h2>Review photos</h2>
       <p>
         Optional. Up to three fictional photos, 5 MiB each. Image metadata is

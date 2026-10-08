@@ -13,6 +13,7 @@ import { SaveForm } from "@/features/contributions/forms";
 import { womensCounts } from "@/features/verification/data";
 import { ReviewFeed } from "@/features/reviews/feed";
 import { reviewPage } from "@/features/reviews/pagination";
+import { ownReviews } from "@/features/reviews/data";
 export default async function PropertyPage({
   params,
   searchParams,
@@ -25,6 +26,7 @@ export default async function PropertyPage({
   const p = await getProperty(id);
   if (!p) notFound();
   const user = await getVerifiedUser();
+  const ownReview = user ? (await ownReviews()).find((r) => r.property_id === id && r.status === "visible") : null;
   const allowed = user
     ? await (
         await createDatabaseClient()
@@ -107,6 +109,11 @@ export default async function PropertyPage({
           </p>
         </section>
       </div>
+      <section className="dashboard-card property-photo-panel" id="photos">
+        <h2>Add photos of this place</h2>
+        <p>Share up to three fictional property images with your tenant review. PNG, JPEG or WebP, up to 5 MiB each.</p>
+        {ownReview ? <a className="button" href={`/reviews/${ownReview.id}/edit#review-photos`}>Add images to your review</a> : allowed?.data === false ? <p>You cannot add tenant review photos to your own property.</p> : <a className="button" href={`/reviews/new?property=${id}`}>Write a review to add photos</a>}
+      </section>
       <ReviewFeed
         property={id}
         page={reviewPage((await searchParams).reviews)}

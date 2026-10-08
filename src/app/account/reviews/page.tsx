@@ -1,3 +1,4 @@
+import { CollectionHeading } from "@/components/ui/collection-heading";
 import { AccountShell } from "@/components/ui/account-shell";
 import { requireUser } from "@/lib/auth/session";
 import { ownReviews } from "@/features/reviews/data";
@@ -7,7 +8,7 @@ export default async function MyReviews() {
   const rows = await ownReviews();
   return (
     <AccountShell>
-      <h1>Your reviews</h1>
+      <CollectionHeading kind="reviews" eyebrow="YOUR EXPERIENCES" title="Your reviews" description="Your experiences help others make a more informed move." />
       <p>
         <a href="/search">Find a place to review</a>
       </p>

@@ -1,3 +1,4 @@
+import { CollectionHeading } from "@/components/ui/collection-heading";
 import { AccountShell } from "@/components/ui/account-shell";
 import { requireUser } from "@/lib/auth/session";
 import { myClaims } from "@/features/claims/data";
@@ -8,7 +9,7 @@ export default async function ClaimsPage() {
   const rows = await myClaims();
   return (
     <AccountShell>
-      <h1>Your demonstration claims</h1>
+      <CollectionHeading kind="claims" eyebrow="YOUR REPRESENTATIVE SPACE" title="Your demonstration claims" description="Keep track of the profiles you represent and your claim decisions." />
       <p>
         <a href="/search">Find a profile to claim</a>
       </p>

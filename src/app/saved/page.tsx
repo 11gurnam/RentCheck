@@ -1,3 +1,4 @@
+import { CollectionHeading } from "@/components/ui/collection-heading";
 import { AccountShell } from "@/components/ui/account-shell";
 import { requireUser } from "@/lib/auth/session";
 import { createDatabaseClient } from "@/lib/database/server";
@@ -20,14 +21,7 @@ export default async function SavedPage() {
   );
   return (
     <AccountShell>
-      <div className="discovery-heading">
-        <p className="eyebrow">YOUR PRIVATE SHORTLIST</p>
-        <h1>Places to come back to.</h1>
-        <p>
-          Your saved places stay with your account. Only you can see or change
-          your shortlist.
-        </p>
-      </div>
+      <CollectionHeading kind="saved" eyebrow="YOUR PRIVATE SHORTLIST" title="Places to come back to." description="Your saved places stay with your account. Only you can see or change your shortlist." />
       {rows.length ? (
         <div className="property-grid">
           {rows.map(
