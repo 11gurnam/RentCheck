@@ -76,7 +76,7 @@ function NeighbourhoodIllustration() {
   );
 }
 
-export function Introduction() {
+export function Introduction({ samples = true }: { samples?: boolean }) {
   return (
     <div id="top">
       <a className="skip-link" href="#main">
@@ -203,7 +203,7 @@ export function Introduction() {
             <div className="demo-notice">
               <strong>About RentCheck</strong>
               <p>
-                  Fictional properties, reviews and approvals carry demonstration labels. Real contributions, when intake is enabled, are labelled separately. Verification records manual evidence review, not independent identity certification.
+                  {samples && "Fictional properties, reviews and approvals carry demonstration labels. Real contributions, when intake is enabled, are labelled separately. "}Verification records manual evidence review, not independent identity certification.
               </p>
             </div>
           </div>

@@ -24,4 +24,4 @@ The first isolated Netlify build compiled the application but failed during adap
 3. After publishing, open `/privacy` at the hosted URL and check the public operator/contact. Do not use local success as evidence of hosted configuration.
 4. Follow the [deployment checklist](../deployment.md) for hosted account, upload, access-control and recovery checks. A successful migration installation alone does not prove the hosted application works.
 
-The hosted database contains the application's fictional seed catalogue. These records must retain their demonstration labels. Existing local accounts and Google settings have not been replaced with hosted credentials.
+The hosted database's fictional seed catalogue is now hidden by the operator control in [Phase 15](phase-15-genuine-public-catalogue.md). Existing local accounts and Google settings have not been replaced with hosted credentials.

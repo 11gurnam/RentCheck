@@ -4,7 +4,9 @@ import { ContributionForm } from "@/features/contributions/forms";
 import { operationMode } from "@/features/operations/data";
 export default async function AddPropertyPage() {
   await requireUser("/properties/new");
-  const real = (await operationMode()).accepts_real_data;
+  const mode = await operationMode();
+  const real = mode.accepts_real_data;
+  if (!real && mode.allows_demo_data === false) return <AccountShell><h1>Property contributions are not open yet.</h1><p>We’re preparing the service for genuine property details. Please check back soon.</p><a href="/search">Explore accommodation</a></AccountShell>;
   return (
     <AccountShell>
       <a href="/search">← Explore accommodation</a>
