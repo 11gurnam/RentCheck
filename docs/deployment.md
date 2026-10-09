@@ -80,3 +80,11 @@ After publishing, verify **Functions → media-cleanup** shows its schedule and 
 Google setup uses the hosted Supabase provider callback in Google Cloud, and the final HTTPS website origin for `SITE_URL` plus exact Supabase redirect destinations. Retain local callbacks while developing locally. Test Google sign-in, alias persistence, logout, denied administrator access and cancellation on the hosted site. Google testing audiences restrict eligible users; public launch requires appropriate audience/publishing settings. Configure custom SMTP and verify confirmation/password recovery using a non-team email before enabling public email/password registration.
 
 See [Netlify Next.js support](https://docs.netlify.com/build/frameworks/framework-setup-guides/nextjs/overview/), [function limits](https://docs.netlify.com/build/functions/configuration/) and [scheduled functions](https://docs.netlify.com/build/functions/scheduled-functions/). Free plans have quotas. No paid upgrade is authorized.
+
+## Manual deployment acceptance — Phase 16
+
+The published origin is `https://rentcheck-india.netlify.app`; see [the release record](enhancements/phase-16-hosted-release.md) for acceptance and pending owner steps. The repository belongs to `11gurnam`, while Netlify's GitHub picker belongs to `rudy8399`, so this release uses manual CLI deployment rather than an automatic repository build.
+
+Build on Linux with the current Netlify adapter. After a successful `netlify build`, publish with `netlify deploy --prod --no-build --dir .netlify/static`. Retain generated function/edge metadata. Do not manually upload `.next` directly: it includes server build files. Verify a known `/server/app/.../route.js` URL returns 404 afterward. The cloud build configuration's `.next` setting is consumed by the adapter; the prepared manual public-assets output is `.netlify/static`.
+
+The hosted project disables public samples through `configure_sample_visibility(false, audit_reason)`, callable only by the service role. This hides samples and blocks new demo contributions without converting records to real data or enabling real intake. Preserve local fixture settings.

@@ -23,7 +23,7 @@ export function AccountFrame({ children, header }: {
       <footer className="site-footer shell">
         <Brand />
         <p>Made for a more informed move.</p>
-        <span>India · Early prototype</span>
+        <span>Accommodation research across India</span>
       </footer>
     </>
   );
