@@ -7,3 +7,6 @@ work/
 .env*
 !.env.example
 *.tsbuildinfo
+
+# Local Netlify folder
+.netlify

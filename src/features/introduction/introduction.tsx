@@ -106,7 +106,7 @@ export function Introduction() {
               Get to know RentCheck <span aria-hidden="true">↗</span>
             </a>
             <p className="availability">
-              An early prototype. Explore accommodation research across India.
+              Explore accommodation research across India.
               {" "}<a href="/search">Explore accommodation →</a>
             </p>
           </div>
@@ -201,7 +201,7 @@ export function Introduction() {
               never a platform safety guarantee.
             </p>
             <div className="demo-notice">
-              <strong>About this prototype</strong>
+              <strong>About RentCheck</strong>
               <p>
                   Fictional properties, reviews and approvals carry demonstration labels. Real contributions, when intake is enabled, are labelled separately. Verification records manual evidence review, not independent identity certification.
               </p>
@@ -212,7 +212,7 @@ export function Introduction() {
       <footer className="site-footer shell">
         <Brand href="#top" />
         <p>Made for a more informed move.</p>
-        <span>India · Early prototype</span>
+        <span>Accommodation research across India</span>
       </footer>
     </div>
   );
