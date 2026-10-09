@@ -14,6 +14,7 @@ import { womensCounts } from "@/features/verification/data";
 import { ReviewFeed } from "@/features/reviews/feed";
 import { reviewPage } from "@/features/reviews/pagination";
 import { ownReviews } from "@/features/reviews/data";
+import { CameraIcon } from "@/components/ui/camera-icon";
 export default async function PropertyPage({
   params,
   searchParams,
@@ -52,7 +53,7 @@ export default async function PropertyPage({
       <a href="/search" className="text-link">
         ← Explore accommodation
       </a>
-      <div className="profile-hero">
+      <div className="profile-hero property-profile-hero">
         <p className="eyebrow">
           {p.property_type} · {p.city}, {p.state}
         </p>
@@ -67,13 +68,11 @@ export default async function PropertyPage({
           </span>
         )}
       </div>
-      <SaveForm property={id} saved={isSaved} />
-      <p>
-        <a href={`/claims/new?kind=property&target=${id}`}>
+      <div className="property-actions" aria-label="Property actions">
+        <SaveForm property={id} saved={isSaved} />
+        <a className="property-secondary-action" href={`/claims/new?kind=property&target=${id}`}>
           Claim this profile
         </a>
-      </p>
-      <p>
         {allowed?.data === false ? (
           <span>You cannot review your own property.</span>
         ) : (
@@ -81,8 +80,8 @@ export default async function PropertyPage({
             Write a review
           </a>
         )}
-      </p>
-      <div className="dashboard-grid">
+      </div>
+      <div className="dashboard-grid property-detail-panels">
         <section className="dashboard-card">
           <h2>About this place</h2>
           <p>{p.description}</p>
@@ -110,9 +109,8 @@ export default async function PropertyPage({
         </section>
       </div>
       <section className="dashboard-card property-photo-panel" id="photos">
-        <h2>Add photos of this place</h2>
-        <p>Share up to three fictional property images with your tenant review. PNG, JPEG or WebP, up to 5 MiB each.</p>
-        {ownReview ? <a className="button" href={`/reviews/${ownReview.id}/edit#review-photos`}>Add images to your review</a> : allowed?.data === false ? <p>You cannot add tenant review photos to your own property.</p> : <a className="button" href={`/reviews/new?property=${id}`}>Write a review to add photos</a>}
+        <div><h2>Photos</h2><p className="field-hint">Share a glimpse of your stay.</p></div>
+        {allowed?.data === false ? <p>You cannot add tenant photos to your own property.</p> : <a className="button camera-action" href={ownReview ? `/reviews/${ownReview.id}/edit#review-photos` : `/reviews/new?property=${id}`}><CameraIcon /><span>Add photos{!ownReview && <small>Start with a review</small>}</span></a>}
       </section>
       <ReviewFeed
         property={id}

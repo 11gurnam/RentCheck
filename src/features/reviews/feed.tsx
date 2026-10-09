@@ -6,6 +6,7 @@ import { getVerifiedUser } from "@/lib/auth/session";
 import { myClaims } from "@/features/claims/data";
 import { ReplyForm } from "@/features/claims/forms";
 import { ReportForm } from "@/features/moderation/forms";
+import { ReviewScoreBadges, ratingTone } from "./score-badges";
 export async function ReviewFeed({
   property,
   landlord,
@@ -51,6 +52,8 @@ export async function ReviewFeed({
   if (score.error) throw new Error("Ratings unavailable");
   const rating = score.data?.[landlord ? "landlord_rating" : "property_rating"];
   const count = score.data?.review_count ?? 0;
+  const summary = property ? await db.from("property_criterion_scores").select("*").eq("property_id", property).order("criterion_key") : null;
+  if (summary?.error) throw new Error("Criterion scores unavailable");
   const verified = await Promise.all(
     rows.map(async (r) => {
       const { data, error } = await db.rpc("review_is_verified", {
@@ -74,7 +77,7 @@ export async function ReviewFeed({
       <h2>{landlord ? "Management experiences" : "Tenant experiences"}</h2>
       <p>
         {rating != null
-          ? rating + " / 5 · " + count + " ratings"
+          ? Number(rating).toFixed(1) + " / 5 · " + count + " ratings"
           : landlord
             ? "No management ratings yet."
             : "No tenant ratings yet."}
@@ -82,6 +85,11 @@ export async function ReviewFeed({
       <p>
         {total} experiences · Page {page}
       </p>
+      {!!summary?.data?.length && <section className="criterion-summary" aria-label="Average tenant ratings">
+        <div className="criterion-summary-heading"><h3>Tenant rating summary</h3><span>{Number(rating).toFixed(1)} / 5 overall</span></div>
+        <div className="criterion-summary-grid">{summary.data.map(c => <div key={c.criterion_key}><span>{c.label}</span><strong>{Number(c.rating).toFixed(1)} / 5</strong><div className={`rating-meter rating-${ratingTone(Number(c.rating))}`} role="meter" aria-valuemin={0} aria-valuemax={5} aria-valuenow={Number(c.rating)} aria-label={`${c.label} average rating`}><span style={{ width: `${Number(c.rating) / 5 * 100}%` }} /></div><small>{c.review_count} {c.review_count === 1 ? "review" : "reviews"}</small></div>)}</div>
+        <p className="field-hint">Each review’s overall score is the mean of its criteria. The property score is the mean of visible reviews. Older reviews retain their original score.</p>
+      </section>}
       {!rows.length &&
         (total ? (
           <p>
@@ -101,11 +109,13 @@ export async function ReviewFeed({
             · synthetic example {r.was_edited ? "· Updated" : ""}
           </p>
           <p>
-            Property {r.property_rating} / 5 · Management{" "}
-            {r.landlord_rating ?? "Unanswered"}
+            Management{" "}
+            {r.landlord_rating ?? "N/A"}
             {r.landlord_rating ? " / 5" : ""}
           </p>
+          <ReviewScoreBadges overall={r.property_rating} criteria={r.criteria} />
           <p>{r.body}</p>
+          {!!r.criteria?.length && <details className="review-criterion-details"><summary>Criterion ratings · {Number(r.property_rating).toFixed(1)} / 5 overall</summary><div className="review-criteria-scores">{r.criteria.map(c => <span key={c.key}>{c.label}{c.custom ? " (tenant added)" : ""} <strong>{c.rating} / 5</strong></span>)}</div></details>}
           {user ? (
             <ReportForm review={r.id} />
           ) : (

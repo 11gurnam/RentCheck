@@ -1,4 +1,16 @@
 import { z } from "zod";
+import type { CriterionRating } from "./criteria";
+export const criteriaSchema = z.array(z.object({
+  key: z.string().min(1).max(80),
+  label: z.string().trim().min(2).max(60),
+  rating: z.number().min(0.5).max(5).multipleOf(0.5),
+  custom: z.boolean().optional(),
+})).min(5).max(13).superRefine((items, context) => {
+  if (new Set(items.map(c => c.key)).size !== items.length || new Set(items.map(c => c.label.toLowerCase())).size !== items.length)
+    context.addIssue({ code: "custom", message: "Use distinct names for each rating criterion." });
+  if (items.filter(c => c.custom).length > 5)
+    context.addIssue({ code: "custom", message: "Add up to five custom criteria." });
+});
 export const todayIndia = () =>
   new Intl.DateTimeFormat("en-CA", {
     timeZone: "Asia/Kolkata",
@@ -13,7 +25,7 @@ export const reviewSchema = z
     end: z.union([z.literal(""), z.iso.date()]),
     current: z.enum(["true", "false"]),
     paid: z.coerce.number().int().min(0).max(10000000),
-    propertyRating: z.coerce.number().int().min(1).max(5),
+    propertyRating: z.coerce.number().min(0.5).max(5),
     managerRating: z.union([
       z.literal(""),
       z.coerce.number().int().min(1).max(5),
@@ -37,6 +49,8 @@ export const reviewSchema = z
       });
   });
 export type OwnReview = {
+  property_type: string;
+  criteria: CriterionRating[];
   id: string;
   property_id: string;
   property_name: string;

@@ -5,7 +5,7 @@ export const filtersSchema = z
     state: z.string().trim().max(80).default(""),
     city: z.string().trim().max(80).default(""),
     locality: z.string().trim().max(100).default(""),
-    type: z.enum(["", "Flat", "House", "PG", "Hostel"]).default(""),
+    type: z.enum(["", "Flat", "House", "PG", "Hostel", "Homestay"]).default(""),
     min: z.coerce.number().int().min(0).max(10000000).default(0),
     max: z.coerce.number().int().min(0).max(10000000).default(10000000),
     women: z.enum(["", "recommended"]).default(""),

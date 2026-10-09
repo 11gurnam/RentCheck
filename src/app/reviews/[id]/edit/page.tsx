@@ -24,10 +24,10 @@ export default async function EditReview({
   if (error) throw new Error("Photos unavailable");
   return (
     <AccountShell>
-      <section className="dashboard-card">
+      <section className="dashboard-card review-form-card">
         <h1>Edit your review</h1>
         <ReviewForm
-          property={{ id: r.property_id, name: r.property_name }}
+          property={{ id: r.property_id, name: r.property_name, property_type: r.property_type }}
           review={r}
         />
       </section>

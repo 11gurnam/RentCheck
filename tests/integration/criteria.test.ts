@@ -1,0 +1,48 @@
+import { expect, it } from "vitest";
+import { createClient } from "@supabase/supabase-js";
+import { criteriaFor } from "../../src/features/reviews/criteria";
+import { localBackendConfiguration } from "../helpers/local-backend";
+import { cleanupReviewUser } from "../helpers/review-cleanup";
+const c = localBackendConfiguration();
+if (!c) throw new Error("Local backend required");
+it("stores criteria atomically, computes averages and excludes deleted reviews", async () => {
+ const admin = createClient(c.url,c.serviceKey,{auth:{persistSession:false}});
+ const email = `criteria-${crypto.randomUUID()}@example.test`;
+ const password = "Synthetic criteria test password";
+ const user = await admin.auth.admin.createUser({email,password,email_confirm:true});
+ expect(user.error).toBeNull();
+ const client = createClient(c.url,c.publicKey,{auth:{persistSession:false}});
+ const other = createClient(c.url,c.publicKey,{auth:{persistSession:false}});
+ try {
+  expect((await client.auth.signInWithPassword({email,password})).error).toBeNull();
+  const property = "20000000-0000-4000-8000-000000000001";
+  const customLabel = `Parking ${crypto.randomUUID()}`;
+  const customKey = `custom:${customLabel.toLowerCase()}`;
+  const criteria = [...criteriaFor("Flat").map(x=>({...x,rating:4})),{key:"custom_parking",label:customLabel,rating:2.5,custom:true}];
+  const input = {property,start:"2024-01-01",end:"2024-12-01",current:false,paid:15000,propertyRating:5,managerRating:2,body:"Fictional criterion integration review.",woman:false,recommend:null,synthetic:true,criteria};
+  const invalid = await client.rpc("create_review",{p_input:{...input,criteria:criteria.slice(1)}});
+  expect(invalid.error).not.toBeNull();
+  const result = await client.rpc("create_review",{p_input:input});
+  expect(result.error).toBeNull();
+  const id = result.data.id;
+  const own = await client.rpc("get_my_reviews");
+  expect(own.data[0].criteria).toEqual(criteria);
+  expect(Number(own.data[0].propertyRating)).toBe(3.81);
+  expect(own.data[0].property_type).toBe("Flat");
+  const feed = await other.rpc("get_review_page",{p_property:property});
+  expect(Number(feed.data.rows.find((r:{id:string})=>r.id===id).property_rating)).toBe(3.81);
+  const scores = await other.from("property_criterion_scores").select("*").eq("property_id",property);
+  expect(scores.error).toBeNull();
+  expect(Number(scores.data!.find(s=>s.criterion_key===customKey)!.rating)).toBe(2.5);
+  const discovery = await other.rpc("search_properties_verified",{p_query:"Neem",p_state:"",p_city:"",p_locality:"",p_type:"",p_min:0,p_max:10000000,p_page:1,p_rating:0,p_women:false});
+  const stored = await other.from("property_scores").select("*").eq("property_id",property).single();
+  expect(Number(discovery.data.find((p:{id:string})=>p.id===property).property_rating)).toBe(Number(stored.data!.property_rating));
+  expect((await other.rpc("edit_review",{p_review:id,p_input:input})).error).not.toBeNull();
+  expect((await client.rpc("edit_review",{p_review:id,p_input:{...input,criteria:criteria.map(x=>({...x,rating:5}))}})).error).toBeNull();
+  expect(Number((await client.rpc("get_my_reviews")).data[0].propertyRating)).toBe(5);
+  expect((await client.rpc("delete_review",{p_review:id})).error).toBeNull();
+  const after = await other.from("property_criterion_scores").select("*").eq("property_id",property).eq("criterion_key",customKey);
+  expect(after.data).toEqual([]);
+  expect((await other.rpc("get_review_page",{p_property:property})).data.rows.some((r:{id:string})=>r.id===id)).toBe(false);
+ } finally { cleanupReviewUser(user.data.user!.id); await admin.auth.admin.deleteUser(user.data.user!.id); }
+});

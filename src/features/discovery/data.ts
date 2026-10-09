@@ -2,6 +2,7 @@ import "server-only";
 import { createDatabaseClient } from "@/lib/database/server";
 import type { Filters } from "./filters";
 export type Property = {
+  criterion_scores: CriterionScore[];
   id: string;
   name: string;
   address: string;
@@ -22,6 +23,7 @@ export type Property = {
   eligible_count: number;
   recommended: boolean;
 };
+export type CriterionScore = { criterion_key: string; label: string; rating: number; review_count: number };
 export type Association = {
   id: string;
   property_id: string;
@@ -50,7 +52,11 @@ export async function searchProperties(filters: Filters) {
     p_women: filters.women === "recommended",
   });
   if (error) throw new Error("Discovery unavailable");
-  return data as Property[];
+  const properties = data as Property[];
+  if (!properties.length) return properties;
+  const scores = await db.from("property_criterion_scores").select("*").in("property_id", properties.map(p => p.id));
+  if (scores.error) throw new Error("Criterion scores unavailable");
+  return properties.map(p => ({ ...p, criterion_scores: (scores.data ?? []).filter(s => s.property_id === p.id) as CriterionScore[] }));
 }
 export async function getLocations() {
   const db = await createDatabaseClient();

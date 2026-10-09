@@ -2,11 +2,18 @@
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { requireUser } from "@/lib/auth/session";
+import { getVerifiedUser } from "@/lib/auth/session";
 import { createMediaClient } from "@/lib/database/privileged";
 import { createDatabaseClient } from "@/lib/database/server";
 import { ownReviews } from "./data";
 import { normalizePhoto } from "./image";
 import type { ReviewState } from "./validation";
+export async function photoUploadContext(property: string) {
+  if (!z.uuid().safeParse(property).success) throw new Error("Invalid property.");
+  if (!await getVerifiedUser()) return { signedIn: false, reviews: [] };
+  const reviews = (await ownReviews()).filter(r => r.property_id === property && r.status === "visible" && !r.archived);
+  return { signedIn: true, reviews: reviews.map(r => ({ id: r.id, start: r.start, end: r.end })) };
+}
 export async function addPhoto(
   _: ReviewState,
   form: FormData,

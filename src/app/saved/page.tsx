@@ -27,10 +27,7 @@ export default async function SavedPage() {
           {rows.map(
             (p) =>
               p && (
-                <div key={p.id}>
-                  <PropertyCard property={p} />
-                  <SaveForm property={p.id} saved={true} />
-                </div>
+                <PropertyCard key={p.id} property={p} actions={<SaveForm property={p.id} saved={true} />} />
               ),
           )}
         </div>

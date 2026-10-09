@@ -1,6 +1,8 @@
 import type { Property } from "./data";
+import type { ReactNode } from "react";
+import { CardPhotoUpload } from "@/features/reviews/card-photo-upload";
 import { money } from "./filters";
-export function PropertyCard({ property: p }: { property: Property }) {
+export function PropertyCard({ property: p, actions }: { property: Property; actions?: ReactNode }) {
   return (
     <article className="property-card">
       <div className="property-art" aria-hidden="true">
@@ -24,18 +26,19 @@ export function PropertyCard({ property: p }: { property: Property }) {
         <p className="field-hint">
           {p.property_rating == null
             ? "No tenant ratings yet"
-            : p.property_rating +
+            : Number(p.property_rating).toFixed(1) +
               " / 5 · " +
               p.review_count +
               " property ratings"}
         </p>
+        {!!p.criterion_scores?.length && <div className="card-criterion-scores" aria-label="Average tenant criteria ratings">{p.criterion_scores.filter(c => ["water", "electricity", "cleanliness"].includes(c.criterion_key)).map(c => <span key={c.criterion_key}>{c.label} <strong>{Number(c.rating).toFixed(1)}/5</strong></span>)}</div>}
         <p className="field-hint">
           {p.positive_count ?? 0}/{p.eligible_count ?? 0} eligible women’s
           positive responses ·{" "}
           {p.recommended ? "Recommended" : "Threshold not reached"}
         </p>
         {p.is_demo && <span className="demo-tag">Synthetic example</span>}
-        <a className="property-photo-link" href={`/properties/${p.id}#photos`}><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M8 5 10 2h4l2 3h5v15H3V5Z" stroke="currentColor" strokeWidth="1.7" strokeLinejoin="round" /><circle cx="12" cy="12" r="4" stroke="currentColor" strokeWidth="1.7" /></svg>Add photos</a>
+        <div className="property-card-actions"><CardPhotoUpload property={p.id} name={p.name} />{actions}</div>
       </div>
     </article>
   );

@@ -1,12 +1,13 @@
 "use client";
-import { useActionState, useState } from "react";
+import { useActionState, useState, useRef, useId } from "react";
 import { submitReview, removeReview, closeTenancy } from "./actions";
 import type { OwnReview } from "./validation";
+import { CriteriaForm } from "./criteria-form";
 export function ReviewForm({
   property,
   review,
 }: {
-  property: { id: string; name: string };
+  property: { id: string; name: string; property_type: string };
   review?: OwnReview;
 }) {
   const [state, action, pending] = useActionState(submitReview, {});
@@ -15,24 +16,13 @@ export function ReviewForm({
     <form
       action={action}
       onReset={(e) => e.preventDefault()}
-      className="auth-form"
+      className="auth-form tenancy-review-form"
     >
       <input type="hidden" name="property" value={property.id} />
       {review && <input type="hidden" name="review" value={review.id} />}
-      <p>
-        Writing about <strong>{property.name}</strong>. Use fictional examples
-        only. Your public alias appears with this review.
-      </p>
-      <label>
-        Tenancy start
-        <input
-          name="start"
-          type="date"
-          required
-          defaultValue={review?.start}
-          readOnly={!!review}
-        />
-      </label>
+      <p className="review-property-context"><strong>{property.name}</strong><span>{property.property_type} · Your public alias appears with this review.</span></p>
+      <fieldset className="review-stay-fields"><legend>Your stay</legend>
+      <div className="review-short-fields">
       <label>
         Tenancy status
         <select
@@ -45,6 +35,16 @@ export function ReviewForm({
         </select>
       </label>
       <label>
+        Monthly rent paid (INR)
+        <input name="paid" type="number" min="0" max="10000000" required defaultValue={review?.paid} />
+      </label>
+      </div>
+      <div className="review-date-fields">
+      <label>
+        Tenancy start
+        <input name="start" type="date" required defaultValue={review?.start} readOnly={!!review} />
+      </label>
+      <label>
         Tenancy end
         <input
           name="end"
@@ -54,35 +54,15 @@ export function ReviewForm({
           defaultValue={review?.end ?? ""}
         />
       </label>
+      </div>
+      {current && <p className="field-hint">Your stay is ongoing. No end date needed.</p>}
       {current && <input name="end" type="hidden" value="" />}
-      <label>
-        Monthly rent paid (INR)
-        <input
-          name="paid"
-          type="number"
-          min="0"
-          max="10000000"
-          required
-          defaultValue={review?.paid}
-        />
-      </label>
-      <label>
-        Property rating
-        <select
-          name="propertyRating"
-          defaultValue={review?.propertyRating ?? 5}
-        >
-          {[5, 4, 3, 2, 1].map((n) => (
-            <option key={n} value={n}>
-              {n} / 5
-            </option>
-          ))}
-        </select>
-      </label>
-      <label>
+      </fieldset>
+      <CriteriaForm type={property.property_type} initial={review?.criteria} />
+      <div className="review-short-fields"><label>
         Landlord / management rating
         <select name="managerRating" defaultValue={review?.managerRating ?? ""}>
-          <option value="">Unanswered / manager unknown</option>
+          <option value="">N/A</option>
           {[5, 4, 3, 2, 1].map((n) => (
             <option key={n} value={n}>
               {n} / 5
@@ -90,10 +70,9 @@ export function ReviewForm({
           ))}
         </select>
       </label>
-      <p className="field-hint">
-        Management is attributed to the manager recorded on your tenancy start
-        date. Leave its rating unanswered if none is recorded.
-      </p>
+      <label>Would you recommend this place? (optional)<select name="recommend" defaultValue={review?.recommend == null ? "" : String(review.recommend)}><option value="">N/A</option><option value="true">Yes</option><option value="false">No</option></select></label>
+      </div>
+      <p className="field-hint">Management rating is optional; select N/A if the manager is unknown.</p>
       <label>
         Your experience
         <textarea
@@ -102,25 +81,13 @@ export function ReviewForm({
           maxLength={5000}
           required
           defaultValue={review?.body}
-          rows={5}
+          rows={4}
+          placeholder="What worked well? What could be better?"
         />
       </label>
       <label>
         <input name="woman" type="checkbox" defaultChecked={review?.woman} /> I
         explicitly self-identify as a woman (optional, private answer).
-      </label>
-      <label>
-        Would you recommend this place? (optional)
-        <select
-          name="recommend"
-          defaultValue={
-            review?.recommend == null ? "" : String(review.recommend)
-          }
-        >
-          <option value="">Unanswered</option>
-          <option value="true">Yes</option>
-          <option value="false">No</option>
-        </select>
       </label>
       <label>
         <input name="synthetic" type="checkbox" required /> This is a fictional
@@ -135,15 +102,24 @@ export function ReviewForm({
 }
 export function DeleteReview({ id }: { id: string }) {
   const [s, a, p] = useActionState(removeReview, {});
+  const dialog = useRef<HTMLDialogElement>(null);
+  const title = useId();
   return (
-    <form action={a}>
-      <input type="hidden" name="review" value={id} />
-      <label>
-        <input type="checkbox" required /> Confirm deleting this review
-      </label>
-      <button disabled={p}>Delete review</button>
-      {s.message && <p role="status">{s.message}</p>}
-    </form>
+    <>
+      <button type="button" className="review-action review-delete" onClick={() => dialog.current?.showModal()}>Delete review</button>
+      <dialog ref={dialog} className="review-delete-dialog" aria-labelledby={title} onCancel={e => { if (p) e.preventDefault(); }}>
+        <h2 id={title}>Delete this review?</h2>
+        <p>Your review and its ratings will be removed from public view. This review cannot be republished.</p>
+        <form action={a}>
+          <input type="hidden" name="review" value={id} />
+          {s.message && <p role="status">{s.message}</p>}
+          <div className="review-actions">
+            <button type="button" className="review-action" autoFocus disabled={p} onClick={() => dialog.current?.close()}>Cancel</button>
+            <button className="review-action review-delete" disabled={p}>{p ? "Deleting…" : "Confirm delete"}</button>
+          </div>
+        </form>
+      </dialog>
+    </>
   );
 }
 export function CloseTenancy({ review }: { review: OwnReview }) {

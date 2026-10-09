@@ -67,7 +67,7 @@ export function ContributionForm() {
           value={values.type}
           onChange={(e) => setValues({ ...values, type: e.target.value })}
         >
-          {["Flat", "House", "PG", "Hostel"].map((v) => (
+          {["Flat", "House", "PG", "Hostel", "Homestay"].map((v) => (
             <option key={v}>{v}</option>
           ))}
         </select>
