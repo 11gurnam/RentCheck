@@ -1,4 +1,5 @@
 "use client";
+import { ActionFeedback, ActionIcon, StatusBadge } from "@/components/ui/action-feedback";
 import { useActionState } from "react";
 import {
   requestClaim,
@@ -39,8 +40,8 @@ export function ClaimForm({
         <input name="synthetic" type="checkbox" required /> This claim and
         evidence use only invented demonstration information.
       </label>
-      <button disabled={p}>Submit demonstration claim</button>
-      {s.message && <p role="status">{s.message}</p>}
+      <button disabled={p}><ActionIcon name="shield" />Submit demonstration claim</button>
+      <ActionFeedback message={s.message} status={s.status} />
     </form>
   );
 }
@@ -51,7 +52,7 @@ export function ClaimDecision({ claim }: { claim: Claim }) {
       <h2>
         {claim.name} · {claim.alias}
       </h2>
-      <p>Demonstration claim · {claim.status}</p>
+      <p>Demonstration claim · <StatusBadge status={claim.status} /></p>
       <p>{claim.reason}</p>
       <p>
         <a href={"/api/documents/" + claim.document_id}>
@@ -82,10 +83,10 @@ export function ClaimDecision({ claim }: { claim: Claim }) {
             Claim decision reason
             <textarea name="reason" required minLength={10} maxLength={2000} />
           </label>
-          <button disabled={p}>Save claim decision</button>
+          <button disabled={p}><ActionIcon name="save" />Save claim decision</button>
         </form>
       )}
-      {s.message && <p role="status">{s.message}</p>}
+      <ActionFeedback message={s.message} status={s.status} />
     </section>
   );
 }
@@ -157,8 +158,8 @@ export function DetailsForm({
         Change reason
         <textarea name="reason" required minLength={10} maxLength={2000} />
       </label>
-      <button disabled={p}>Save claimed details</button>
-      {s.message && <p role="status">{s.message}</p>}
+      <button disabled={p}><ActionIcon name="save" />Save claimed details</button>
+      <ActionFeedback message={s.message} status={s.status} />
     </form>
   );
 }
@@ -187,8 +188,8 @@ export function ReplyForm({
         Your public representative reply
         <textarea name="body" minLength={10} maxLength={3000} required />
       </label>
-      <button disabled={p}>Save representative reply</button>
-      {s.message && <p role="status">{s.message}</p>}
+      <button disabled={p}><ActionIcon name="save" />Save representative reply</button>
+      <ActionFeedback message={s.message} status={s.status} />
     </form>
   );
 }

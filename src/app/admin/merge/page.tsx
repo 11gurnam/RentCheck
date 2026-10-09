@@ -1,4 +1,5 @@
 import { AccountShell } from "@/components/ui/account-shell";
+import { ActionFeedback } from "@/components/ui/action-feedback";
 import { requireUser, isAdministrator } from "@/lib/auth/session";
 import { createDatabaseClient } from "@/lib/database/server";
 import { z } from "zod";
@@ -44,10 +45,7 @@ export default async function MergePage({
     <AccountShell>
       <h1>Inspect a property merge</h1>
       {params.notice === "merged" && (
-        <p role="status">
-          Profiles merged transactionally. Source archived; decisions and
-          previous records retained.
-        </p>
+        <ActionFeedback status="success" message="Profiles merged transactionally. Source archived; decisions and previous records retained." />
       )}
       <form method="get" className="auth-form">
         <label>

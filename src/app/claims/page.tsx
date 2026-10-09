@@ -4,6 +4,7 @@ import { requireUser } from "@/lib/auth/session";
 import { myClaims } from "@/features/claims/data";
 import { DetailsForm } from "@/features/claims/forms";
 import { getProperty, getLandlord } from "@/features/discovery/data";
+import { StatusBadge } from "@/components/ui/action-feedback";
 export default async function ClaimsPage() {
   await requireUser("/claims");
   const rows = await myClaims();
@@ -23,7 +24,7 @@ export default async function ClaimsPage() {
             <section key={c.id} className="dashboard-card">
               <h2>{c.name}</h2>
               <p>
-                {c.status} · {c.reason}
+                <StatusBadge status={c.status} /> · {c.reason}
               </p>
               <a href={"/api/documents/" + c.document_id}>
                 Download your private claim evidence

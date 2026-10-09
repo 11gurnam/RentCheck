@@ -52,7 +52,7 @@ export async function requestVerification(
   revalidatePath("/reviews/" + id.data + "/edit");
   revalidatePath("/admin/verification");
   return {
-    message:
+    status: "success", message:
       "Private demonstration verification requested. Only you and trusted administrators can access the document.",
   };
 }
@@ -88,6 +88,6 @@ export async function decideVerification(
   revalidatePath("/reviews", "layout");
   revalidatePath("/search");
   return {
-    message: "Demonstration decision saved with an immutable audit record.",
+    status: "success", message: "Demonstration decision saved with an immutable audit record.",
   };
 }

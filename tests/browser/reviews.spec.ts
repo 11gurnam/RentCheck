@@ -124,7 +124,7 @@ test("author creates, edits, uploads and deletes a review without exposing priva
       buffer: Buffer.from("<html>not a photo</html>"),
     });
     await page.getByRole("button", { name: "Add photo" }).click();
-    await expect(page.locator("#review-photos").getByRole("status")).toContainText("Photo rejected");
+    await expect(page.locator("#review-photos").getByRole("alert")).toContainText("Photo rejected");
     const png = await sharp({
       create: { width: 600, height: 400, channels: 3, background: "#2a705b" },
     })
@@ -190,6 +190,19 @@ test("author creates, edits, uploads and deletes a review without exposing priva
     await page.getByRole("dialog").getByRole("button", { name: "Confirm delete" }).click();
     await expect(page.locator(".review-status")).toHaveText("deleted");
     await expect(page.locator(".review-dates")).toContainText("01 Jan 2024");
+    await expect(page.getByRole("dialog")).not.toBeVisible();
+    await expect(page.getByLabel("Move-out date", { exact: true })).not.toBeVisible();
+    await page.getByRole("button", { name: "Update move-out date", exact: true }).click();
+    const moveOut = page.getByRole("dialog", { name: "Update move-out date", exact: true });
+    await expect(moveOut).toBeVisible();
+    await moveOut.getByRole("button", { name: "Cancel", exact: true }).click();
+    await expect(moveOut).not.toBeVisible();
+    await page.getByRole("button", { name: "Update move-out date", exact: true }).click();
+    await moveOut.getByLabel("Move-out date", { exact: true }).fill("2024-12-02");
+    await moveOut.getByRole("button", { name: "Save move-out date", exact: true }).click();
+    await expect(moveOut.getByRole("status")).toContainText("Tenancy end saved");
+    await moveOut.getByRole("button", { name: "Done", exact: true }).click();
+    await expect(page.locator(".review-dates")).toContainText("02 Dec 2024");
     expect((await page.request.get(url!)).status()).toBe(404);
   } finally {
     if (paths.length) await admin.storage.from("review-photos").remove(paths);

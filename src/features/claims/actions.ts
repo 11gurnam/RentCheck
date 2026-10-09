@@ -59,7 +59,7 @@ export async function requestClaim(
   revalidatePath("/claims");
   revalidatePath("/admin/claims");
   return {
-    message:
+    status: "success", message:
       "Private demonstration claim submitted. Approval is required before you can change details or reply.",
   };
 }
@@ -93,7 +93,7 @@ export async function decideClaim(
   revalidatePath("/claims");
   revalidatePath("/properties", "layout");
   revalidatePath("/landlords", "layout");
-  return { message: "Demonstration claim decision saved and audited." };
+  return { status: "success", message: "Demonstration claim decision saved and audited." };
 }
 export async function updateDetails(
   _: ReviewState,
@@ -115,7 +115,7 @@ export async function updateDetails(
   revalidatePath("/properties", "layout");
   revalidatePath("/landlords", "layout");
   revalidatePath("/search");
-  return { message: "Permitted details updated and audited." };
+  return { status: "success", message: "Permitted details updated and audited." };
 }
 export async function replyToReview(
   _: ReviewState,
@@ -140,7 +140,7 @@ export async function replyToReview(
   revalidatePath("/properties", "layout");
   revalidatePath("/landlords", "layout");
   return {
-    message:
+    status: "success", message:
       "Your representative reply was saved. The tenant review is unchanged.",
   };
 }

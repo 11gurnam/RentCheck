@@ -15,6 +15,7 @@ import { ReviewFeed } from "@/features/reviews/feed";
 import { reviewPage } from "@/features/reviews/pagination";
 import { ownReviews } from "@/features/reviews/data";
 import { CameraIcon } from "@/components/ui/camera-icon";
+import { ActionIcon } from "@/components/ui/action-feedback";
 export default async function PropertyPage({
   params,
   searchParams,
@@ -71,13 +72,13 @@ export default async function PropertyPage({
       <div className="property-actions" aria-label="Property actions">
         <SaveForm property={id} saved={isSaved} />
         <a className="property-secondary-action" href={`/claims/new?kind=property&target=${id}`}>
-          Claim this profile
+          <ActionIcon name="shield" />Claim this profile
         </a>
         {allowed?.data === false ? (
           <span>You cannot review your own property.</span>
         ) : (
           <a className="primary-link" href={`/reviews/new?property=${id}`}>
-            Write a review
+            <ActionIcon name="edit" />Write a review
           </a>
         )}
       </div>

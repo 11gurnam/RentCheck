@@ -1,4 +1,5 @@
 "use client";
+import { ActionFeedback, ActionIcon } from "@/components/ui/action-feedback";
 import { useActionState, useState } from "react";
 import { contribute, saveProperty } from "./actions";
 import type { ContributionState } from "./validation";
@@ -14,14 +15,15 @@ export function SaveForm({
     <form action={action} className="save-form">
       <input type="hidden" name="property" value={property} />
       <input type="hidden" name="saved" value={String(!saved)} />
-      <button className="button" disabled={pending}>
+      <button className={saved ? "button action-danger" : "button"} disabled={pending}>
+        <ActionIcon name={saved ? "trash" : "save"} />
         {pending
           ? "Saving…"
           : saved
             ? "Remove from shortlist"
             : "Save to shortlist"}
       </button>
-      {state.message && <p role="status">{state.message}</p>}
+      <ActionFeedback message={state.message} status={state.status} />
     </form>
   );
 }

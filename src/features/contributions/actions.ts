@@ -68,7 +68,7 @@ export async function contribute(
   redirect(`/properties/${id}`);
 }
 export async function saveProperty(
-  _previous: { message?: string },
+  _previous: ContributionState,
   form: FormData,
 ) {
   const id = String(form.get("property"));
@@ -88,6 +88,7 @@ export async function saveProperty(
   revalidatePath(`/properties/${id}`);
   revalidatePath("/saved");
   return {
+    status: "success" as const,
     message:
       form.get("saved") === "true"
         ? "Added to your shortlist."

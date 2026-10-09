@@ -36,7 +36,7 @@ export type Duplicate = {
   exact: boolean;
 };
 export type ContributionState = {
+  status?: "success" | "error" | "warning" | "idle";
   message?: string;
-  status: "idle" | "error";
   candidates?: Duplicate[];
 };

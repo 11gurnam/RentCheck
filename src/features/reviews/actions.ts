@@ -72,7 +72,7 @@ export async function removeReview(
   revalidatePath("/account/reviews");
   revalidatePath("/properties", "layout");
   return {
-    message: "Review deleted. It no longer contributes to public ratings.",
+    status: "success", message: "Review deleted. It no longer contributes to public ratings.",
   };
 }
 export async function closeTenancy(
@@ -100,5 +100,5 @@ export async function closeTenancy(
   });
   if (error) return { message: error.message };
   revalidatePath("/account/reviews");
-  return { message: "Tenancy end saved." };
+  return { status: "success", message: "Tenancy end saved." };
 }

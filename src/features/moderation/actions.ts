@@ -36,7 +36,7 @@ export async function reportReview(
   if (error) return { message: error.message };
   refresh();
   return {
-    message:
+    status: "success", message:
       "Report submitted. The review remains visible while an administrator investigates.",
   };
 }
@@ -62,7 +62,7 @@ export async function decideReport(
   });
   if (error) return { message: error.message };
   refresh();
-  return { message: "Report decision saved and audited." };
+  return { status: "success", message: "Report decision saved and audited." };
 }
 export async function markDistinct(
   _: ReviewState,
@@ -85,7 +85,7 @@ export async function markDistinct(
   });
   if (error) return { message: error.message };
   refresh();
-  return { message: "Profiles kept distinct; decision audited." };
+  return { status: "success", message: "Profiles kept distinct; decision audited." };
 }
 export async function mergeProperties(
   _: ReviewState,
@@ -141,6 +141,7 @@ export async function maintainAssociation(
   return {
     message:
       "Management history saved. Existing tenant manager snapshots remain unchanged.",
+    status: "success",
   };
 }
 export async function createManager(
@@ -171,5 +172,5 @@ export async function createManager(
   });
   if (error) return { message: error.message };
   refresh();
-  return { message: "Fictional manager profile created and audited." };
+  return { status: "success", message: "Fictional manager profile created and audited." };
 }

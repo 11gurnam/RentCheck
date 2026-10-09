@@ -56,7 +56,7 @@ export async function addPhoto(
   revalidatePath("/reviews/" + id.data + "/edit");
   revalidatePath("/properties/" + review.property_id);
   return {
-    message: "Photo added. Location and other image metadata were stripped.",
+    status: "success", message: "Photo added. Location and other image metadata were stripped.",
   };
 }
 export async function removePhoto(
@@ -72,5 +72,5 @@ export async function removePhoto(
   if (error) return { message: "Only the author can remove this photo." };
   revalidatePath("/reviews", "layout");
   revalidatePath("/properties", "layout");
-  return { message: "Photo removed from public access." };
+  return { status: "success", message: "Photo removed from public access." };
 }

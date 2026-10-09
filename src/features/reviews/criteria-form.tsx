@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { criteriaFor, overallRating, type CriterionRating } from "./criteria";
 import { StarRating } from "./star-rating";
+import { ActionIcon } from "@/components/ui/action-feedback";
 export function CriteriaForm({ type, initial = [] }: { type: string; initial?: CriterionRating[] }) {
   const standards = criteriaFor(type);
   const [ratings, setRatings] = useState<Record<string, string>>(() => Object.fromEntries(initial.map(c => [c.key, String(c.rating)])));
@@ -16,7 +17,7 @@ export function CriteriaForm({ type, initial = [] }: { type: string; initial?: C
     <div className="criteria-fields">{all.map(c => <div key={c.key} className="criterion-field">
       {"custom" in c ? <label>Your criterion<input aria-label="Custom criterion name" value={c.label} required minLength={2} maxLength={60} onChange={e => setCustom(custom.map(x => x.key === c.key ? { ...x, label: e.target.value } : x))} placeholder="e.g. Parking" /></label> : <span className="criterion-label">{c.label}</span>}
       <StarRating label={c.label || "Custom criterion"} value={Number(ratings[c.key] || 0)} onChange={rating => setRatings({ ...ratings, [c.key]: String(rating) })} />
-      {"custom" in c && <button type="button" className="review-action" aria-label={`Remove ${c.label || "custom criterion"}`} onClick={() => setCustom(custom.filter(x => x.key !== c.key))}>Remove</button>}
+      {"custom" in c && <button type="button" className="review-action action-danger" aria-label={`Remove ${c.label || "custom criterion"}`} onClick={() => setCustom(custom.filter(x => x.key !== c.key))}><ActionIcon name="trash" />Remove</button>}
     </div>)}</div>
     <div className="criteria-footer"><button type="button" className="review-action" disabled={custom.length >= 5} onClick={() => setCustom([...custom, { key: `custom_${crypto.randomUUID()}`, label: "" }])}>+ Add your own criterion</button><output>Overall rating <strong>{average == null ? "—" : `${average.toFixed(1)} / 5`}</strong></output></div>
   </fieldset>;
