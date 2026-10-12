@@ -1,6 +1,6 @@
-# RentCheck operations — Phase 12
+# RentCheck operations
 
-RentCheck is published at https://rentcheck-india.netlify.app. The hosted catalogue hides fictional fixtures, and real-data intake remains closed until hosted authentication, email delivery and operational acceptance are complete. See [the hosted release record](enhancements/phase-16-hosted-release.md) for the verified checks and remaining work. The existing local project retains its Google provider, accounts and fictional catalogue. Never reset its database or copy secret files into Git. These helper commands deliberately refuse hosted backends; hosted operations require provider-specific setup and a separately verified staging restore.
+RentCheck is published at https://rentcheck-india.netlify.app. The hosted catalogue hides fictional fixtures, and real-data intake remains closed until hosted authentication, email delivery and operational acceptance are complete. See [the current verification record](enhancements/phase-19-hosted-account-and-backup-verification.md) for verified checks and remaining work. The existing local project retains its Google provider, accounts and fictional catalogue. Never reset its database or copy secret files into Git. Local helpers deliberately refuse hosted backends. The separate hosted backup drill below reads the confirmed hosted project and restores only to isolated local scratch resources.
 
 ## Intake and manual evidence review
 
@@ -54,6 +54,20 @@ Encrypted files are under ignored `work/backups/`; the key is in ignored `work/b
 An actual recovery must first restore to an isolated staging environment with user access disabled, replay post-backup account deletions and expired evidence cleanup from a separately retained private deletion ledger, verify authorization/storage and provider configuration, and only then switch traffic. Restoring an old backup can resurrect deleted records if those later actions are not replayed. The drill deliberately does not perform a live cutover.
 
 Database backups alone omit stored file bytes; keeping database metadata and media together matters. See [Supabase backup documentation](https://supabase.com/docs/guides/platform/backups) and [PostgreSQL pg_restore](https://www.postgresql.org/docs/current/app-pgrestore.html).
+
+## Hosted encrypted export and local restore acceptance
+
+With hosted rental intake closed, no media writes underway, the CLI linked to `qbvuwjyamktzwimisvet` and the existing local Docker backend running:
+
+```powershell
+npm run ops:hosted-backup-check
+```
+
+This separate helper reads `.env.hosted.local` and the linked hosted database. It exports `public`, `private`, `auth`, `storage` and `supabase_migrations` schema/data plus cluster roles using the installed official CLI. It encrypts each export immediately with AES-256-GCM and removes plaintext exports, including partial exports after failures. It separately inventories and encrypts bytes from both private media buckets and their manifest. The key is in ignored `work/hosted-backup-key.bin`; timestamped encrypted snapshots and a safe report are under ignored `work/hosted-backup/`. Protect and retain these as described above; do not move the key and snapshots together to an untrusted destination.
+
+Restore uses a uniquely named scratch database in the existing local Supabase container. It recreates required extensions, loads hosted schema/data, compares every exported COPY table's count and checks private-schema, service-only function, RLS and intake boundaries. Media, when present, is restored into a new private local scratch bucket and checked by hash. Scratch resources are removed afterward. The hosted database and original local database are never restored over. Cluster roles are exported, but not applied to the shared local cluster; existing provider roles support the scratch restore. This does not restore provider account settings, SMTP/OAuth secrets, extension versions or a live hosted cluster.
+
+The 12 October acceptance restored 66 tables; both hosted media buckets were empty. A successful empty-media drill does not prove non-empty hosted media recovery. This helper is an operator-run maintenance drill: automatic scheduling, off-site retention, separate key custody and post-backup deletion replay still require acceptance before operating with real documents.
 
 ## Repeatable acceptance
 

@@ -22,6 +22,7 @@
     "test:operations": "playwright test --config playwright.operations.config.ts",
     "ops:cleanup": "node scripts/operations.mjs cleanup",
     "ops:backup-check": "node scripts/backup-check.mjs --confirm-local-backup",
+    "ops:hosted-backup-check": "node scripts/hosted-backup-check.mjs --confirm-hosted-backup",
     "ops:health": "node scripts/health-check.mjs",
     "deploy:preflight": "node scripts/deployment-preflight.mjs"
   },
