@@ -37,7 +37,7 @@ Set these host values BEFORE building:
 
 Public variables enter the browser build, so rebuild when changing them. Keep privileged keys out of NEXT_PUBLIC_ variables and Git. Google secret belongs in Supabase provider settings.
 
-Set Supabase Auth Site URL and exact hosted /auth/callback and /auth/confirm redirect destinations. Use the confirmation and recovery template patterns in supabase/templates/confirmation.html and supabase/templates/recovery.html and real hosted email delivery for nonlocal confirmation.
+Set Supabase Auth Site URL and exact hosted /auth/callback and /auth/confirm redirect destinations. Use the hosted confirmation and recovery templates in `supabase/hosted-templates/confirmation.html` and `supabase/hosted-templates/recovery.html`. The templates in `supabase/templates/` belong to local tests. Configure real hosted email delivery for nonlocal confirmation.
 
 Configure a Google web OAuth client with the HTTPS website origin and the hosted Supabase callback shown in its Google provider settings, commonly https://PROJECT.supabase.co/auth/v1/callback. Add intended testers to the consent audience while testing; enter ID/secret privately into Supabase. [Supabase Google setup](https://supabase.com/docs/guides/auth/social-login/auth-google) explains client/provider configuration. Repeat real Google login, alias persistence and logout on the hosted origin; local success does not prove hosted callbacks.
 

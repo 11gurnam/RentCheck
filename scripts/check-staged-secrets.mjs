@@ -6,13 +6,16 @@ const sensitiveNames = [
   "SUPABASE_AUTH_EXTERNAL_GOOGLE_CLIENT_ID",
   "SUPABASE_TEST_SERVICE_ROLE_KEY",
   "SUPABASE_SERVICE_ROLE_KEY",
+  "SMTP_PASSWORD",
 ];
-const secrets = [".env.google.local", ".env.test.local", ".env.local", ".env.hosted.local"]
+const secrets = [".env.google.local", ".env.test.local", ".env.local", ".env.hosted.local", ".env.smtp.local"]
   .filter(existsSync)
   .flatMap((file) => {
     const env = parseEnv(readFileSync(file, "utf8"));
     return sensitiveNames.map((name) => env[name]).filter(Boolean);
   });
+// Google displays app passwords with spaces; reject either saved representation.
+secrets.push(...secrets.filter((secret) => secret.includes(" ")).map((secret) => secret.replaceAll(" ", "")));
 if (existsSync("work/demo-accounts.json"))
   secrets.push(
     ...JSON.parse(readFileSync("work/demo-accounts.json", "utf8")).map(
