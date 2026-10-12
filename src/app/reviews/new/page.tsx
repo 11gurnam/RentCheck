@@ -38,7 +38,7 @@ export default async function NewReviewPage({
   }
   return (
     <AccountShell>
-      <section className="dashboard-card">
+      <section className="dashboard-card review-form-card">
         <h1>Share your tenancy experience</h1>
         {p ? (
           <ReviewForm property={p} />

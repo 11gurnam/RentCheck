@@ -1,3 +1,4 @@
+import { CollectionHeading } from "@/components/ui/collection-heading";
 import { AccountShell } from "@/components/ui/account-shell";
 import { requireUser } from "@/lib/auth/session";
 import { createDatabaseClient } from "@/lib/database/server";
@@ -20,24 +21,14 @@ export default async function SavedPage() {
   );
   return (
     <AccountShell>
-      <div className="discovery-heading">
-        <p className="eyebrow">YOUR PRIVATE SHORTLIST</p>
-        <h1>Places to come back to.</h1>
-        <p>
-          Your saved places stay with your account. Only you can see or change
-          your shortlist.
-        </p>
-      </div>
-      <p><a href="/compare">Compare up to three properties</a> · <a href="/map">Recorded locations</a></p>
+      <CollectionHeading kind="saved" eyebrow="YOUR PRIVATE SHORTLIST" title="Places to come back to." description="Your saved places stay with your account. Only you can see or change your shortlist." />
+      <p><a href="/compare">Compare saved places</a> · <a href="/map">Recorded locations</a></p>
       {rows.length ? (
         <div className="property-grid">
           {rows.map(
             (p) =>
               p && (
-                <div key={p.id}>
-                  <PropertyCard property={p} />
-                  <SaveForm property={p.id} saved={true} />
-                </div>
+                <PropertyCard key={p.id} property={p} actions={<SaveForm property={p.id} saved={true} />} />
               ),
           )}
         </div>

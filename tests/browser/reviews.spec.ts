@@ -46,9 +46,11 @@ test("author creates, edits, uploads and deletes a review without exposing priva
     await page.getByLabel("Tenancy status").selectOption("false");
     await page.getByLabel("Tenancy end").fill("2024-12-01");
     await page.getByLabel("Monthly rent paid (INR)").fill("15000");
-    await page
-      .getByRole("combobox", { name: "Property rating", exact: true })
-      .selectOption("4");
+    for (const field of await page.locator('.criteria-form [role="radiogroup"]').all()) await field.getByRole("radio", { name: "4 out of 5", exact: true }).check();
+    await page.getByRole("button", { name: "Add your own criterion" }).click();
+    await page.getByLabel("Custom criterion name").fill("Parking");
+    await page.getByRole("radiogroup", { name: "Parking rating", exact: true }).getByRole("radio", { name: "2.5 out of 5", exact: true }).check();
+    await expect(page.locator(".criteria-footer output")).toContainText("3.8 / 5");
     await page
       .getByRole("combobox", {
         name: "Landlord / management rating",
@@ -82,7 +84,28 @@ test("author creates, edits, uploads and deletes a review without exposing priva
     });
     await page.getByRole("button", { name: "Publish review" }).click();
     await expect(page).toHaveURL(/\/account\/reviews$/);
-    await page.getByRole("link", { name: "Edit review and photos" }).click();
+    await expect(page.getByRole("dialog")).not.toBeVisible();
+    await page.getByLabel("Search reviews").fill("no matching fictional property");
+    await expect(page.getByText("No matching reviews", { exact: true })).toBeVisible();
+    await page.getByRole("button", { name: "Clear filters" }).click();
+    await expect(page.locator(".own-review-card")).toHaveCount(1);
+    await page.getByRole("button", { name: "Stay to", exact: true }).click();
+    const calendar = page.getByRole("dialog", { name: "Choose stay to date" });
+    await calendar.getByLabel("Year", { exact: true }).selectOption("2000");
+    await calendar.getByLabel("Month", { exact: true }).selectOption("1");
+    await page.screenshot({ path: info.outputPath("review-calendar.png") });
+    await calendar.getByRole("button", { name: "1 Jan 2000", exact: true }).click();
+    await expect(page.locator(".own-review-card")).toHaveCount(0);
+    await page.getByRole("button", { name: "Clear filters" }).click();
+    await expect(page.locator(".review-dates")).toContainText(/\d{2} [A-Za-z]{3} \d{4}/);
+    await page.getByRole("button", { name: "Delete review", exact: true }).click();
+    await expect(page.getByRole("dialog")).toBeVisible();
+    await page.getByRole("button", { name: "Cancel", exact: true }).click();
+    await expect(page.getByRole("dialog")).not.toBeVisible();
+    await expect(page.locator(".own-review-card")).toHaveCount(1);
+    await page.screenshot({ path: info.outputPath("your-reviews.png"), fullPage: true });
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+    await page.getByRole("link", { name: "Photos", exact: true }).click();
     await expect(page.getByLabel("Tenancy start")).toHaveAttribute(
       "readonly",
       "",
@@ -97,26 +120,39 @@ test("author creates, edits, uploads and deletes a review without exposing priva
       .getByRole("button", { name: "Save review", exact: true })
       .click();
     await expect(page).toHaveURL(/\/account\/reviews$/);
-    await page.getByRole("link", { name: "Edit review and photos" }).click();
+    await page.getByRole("link", { name: "Edit review" }).click();
     await page.getByLabel("Photo", { exact: true }).setInputFiles({
       name: "fake.jpg",
       mimeType: "image/jpeg",
       buffer: Buffer.from("<html>not a photo</html>"),
     });
     await page.getByRole("button", { name: "Add photo" }).click();
-    await expect(page.getByRole("status")).toContainText("Photo rejected");
+    await expect(page.locator("#review-photos").getByRole("alert")).toContainText("Photo rejected");
     const png = await sharp({
       create: { width: 600, height: 400, channels: 3, background: "#2a705b" },
     })
       .png()
       .toBuffer();
-    await page.getByLabel("Photo", { exact: true }).setInputFiles({
+    await page.goto("/properties/20000000-0000-4000-8000-000000000001");
+    await page.getByRole("button", { name: "Save to shortlist", exact: true }).click();
+    await expect(page.getByRole("button", { name: "Remove from shortlist", exact: true })).toBeVisible();
+    await page.goto("/saved");
+    await page.getByRole("button", { name: "Add photos", exact: true }).click();
+    const upload = page.getByRole("dialog", { name: "Add photos", exact: true });
+    await expect(upload).toBeVisible();
+    await expect(page).toHaveURL(/\/saved$/);
+    await upload.getByLabel("Photo", { exact: true }).setInputFiles({
       name: "synthetic.png",
       mimeType: "image/png",
       buffer: png,
     });
-    await page.getByRole("button", { name: "Add photo" }).click();
-    await expect(page.getByRole("status")).toContainText("Photo added");
+    await upload.getByRole("button", { name: "Upload photo", exact: true }).click();
+    await expect(upload.getByRole("status")).toContainText("Photo added");
+    await expect(page).toHaveURL(/\/saved$/);
+    await page.screenshot({ path: info.outputPath("card-photo-upload.png") });
+    await upload.getByRole("button", { name: "Done", exact: true }).click();
+    await page.goto("/account/reviews");
+    await page.getByRole("link", { name: "Photos", exact: true }).click();
     const url = await page
       .getByRole("link", { name: "View photo" })
       .getAttribute("href");
@@ -132,6 +168,10 @@ test("author creates, edits, uploads and deletes a review without exposing priva
     await expect(
       page.getByText("Updated fictional experience:", { exact: false }),
     ).toBeVisible();
+    await expect(page.getByRole("region", { name: "Average tenant ratings" })).toContainText("Water supply");
+    await expect(page.getByRole("region", { name: "Average tenant ratings" })).toContainText("Parking");
+    await page.locator(".review-criterion-details").filter({ hasText: "3.8 / 5" }).getByText("Criterion ratings", { exact: false }).click();
+    await expect(page.locator(".review-criteria-scores").filter({ hasText: "Parking" })).toBeVisible();
     await expect(page.locator('img[src="' + url + '"]')).toBeVisible();
     await expect(
       page
@@ -145,6 +185,23 @@ test("author creates, edits, uploads and deletes a review without exposing priva
     ).toContainText("Unverified tenant");
     await expect(page.getByRole("main")).not.toContainText(email);
     await expect(page.getByRole("main")).not.toContainText("self-identify");
+    const reviewCard = page.locator(".tenant-review-card").filter({ hasText: "Updated fictional experience:" });
+    await expect(reviewCard.getByRole("heading", { name: "Description", exact: true })).toBeVisible();
+    await reviewCard.getByRole("button", { name: "Report this review", exact: true }).click();
+    const reportDialog = page.getByRole("dialog", { name: "Report this review", exact: true });
+    await expect(reportDialog).toBeVisible();
+    await expect(reportDialog.getByLabel("Report reason")).toBeVisible();
+    await expect(reportDialog.getByRole("button", { name: "Submit report" })).toBeVisible();
+    await expect(reportDialog.getByRole("button", { name: "Close", exact: true })).toHaveCount(0);
+    const submitBounds = await reportDialog.getByRole("button", { name: "Submit report" }).boundingBox();
+    const bounds = await reportDialog.boundingBox();
+    expect(submitBounds!.width).toBeLessThan(bounds!.width * 0.75);
+    const viewport = page.viewportSize()!;
+    expect(Math.abs(bounds!.x + bounds!.width / 2 - viewport.width / 2)).toBeLessThan(3);
+    expect(Math.abs(bounds!.y + bounds!.height / 2 - viewport.height / 2)).toBeLessThan(3);
+    await page.screenshot({ path: info.outputPath("report-dialog.png") });
+    await page.keyboard.press("Escape");
+    await expect(reportDialog).not.toBeVisible();
     await page.screenshot({
       path: info.outputPath("review-profile.png"),
       fullPage: true,
@@ -159,9 +216,23 @@ test("author creates, edits, uploads and deletes a review without exposing priva
       fullPage: true,
     });
     await page.goto("/account/reviews");
-    await page.getByLabel("Confirm deleting").check();
     await page.getByRole("button", { name: "Delete review" }).click();
-    await expect(page.getByRole("main")).toContainText("deleted · 2024-01-01");
+    await page.getByRole("dialog").getByRole("button", { name: "Confirm delete" }).click();
+    await expect(page.locator(".review-status")).toHaveText("deleted");
+    await expect(page.locator(".review-dates")).toContainText("01 Jan 2024");
+    await expect(page.getByRole("dialog")).not.toBeVisible();
+    await expect(page.getByLabel("Move-out date", { exact: true })).not.toBeVisible();
+    await page.getByRole("button", { name: "Update move-out date", exact: true }).click();
+    const moveOut = page.getByRole("dialog", { name: "Update move-out date", exact: true });
+    await expect(moveOut).toBeVisible();
+    await moveOut.getByRole("button", { name: "Cancel", exact: true }).click();
+    await expect(moveOut).not.toBeVisible();
+    await page.getByRole("button", { name: "Update move-out date", exact: true }).click();
+    await moveOut.getByLabel("Move-out date", { exact: true }).fill("2024-12-02");
+    await moveOut.getByRole("button", { name: "Save move-out date", exact: true }).click();
+    await expect(moveOut.getByRole("status")).toContainText("Tenancy end saved");
+    await moveOut.getByRole("button", { name: "Done", exact: true }).click();
+    await expect(page.locator(".review-dates")).toContainText("02 Dec 2024");
     expect((await page.request.get(url!)).status()).toBe(404);
   } finally {
     if (paths.length) await admin.storage.from("review-photos").remove(paths);

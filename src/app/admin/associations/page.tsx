@@ -1,3 +1,4 @@
+import { displayDate } from "@/lib/display-date";
 import { AccountShell } from "@/components/ui/account-shell";
 import { requireUser, isAdministrator } from "@/lib/auth/session";
 import { createDatabaseClient } from "@/lib/database/server";
@@ -68,7 +69,7 @@ export default async function AssociationsPage({
           {history.map((h) => (
             <p key={h.id}>
               {(l.data as Profile[]).find((x) => x.id === h.landlord_id)?.name}{" "}
-              · {h.start_date} → {h.end_date ?? "Ongoing"}
+              · {displayDate(h.start_date)} → {h.end_date ? displayDate(h.end_date) : "Ongoing"}
             </p>
           ))}
           <AssociationForm

@@ -1,4 +1,7 @@
 "use client";
+import { ActionModal } from "@/components/ui/action-modal";
+import { displayDate } from "@/lib/display-date";
+import { ActionFeedback, ActionIcon, StatusBadge } from "@/components/ui/action-feedback";
 import { useActionState } from "react";
 import {
   reportReview,
@@ -66,8 +69,7 @@ function Reason({ label = "Decision reason" }: { label?: string }) {
 export function ReportForm({ review }: { review: string }) {
   const [s, a, p] = useActionState(reportReview, {});
   return (
-    <details>
-      <summary>Report this review</summary>
+    <ActionModal title="Report this review" trigger="Report this review" warning>
       <form
         action={a}
         className="auth-form"
@@ -75,10 +77,10 @@ export function ReportForm({ review }: { review: string }) {
       >
         <input name="review" value={review} type="hidden" />
         <Reason label="Report reason" />
-        <button disabled={p}>Submit report</button>
-        {s.message && <p role="status">{s.message}</p>}
+        <button disabled={p}><ActionIcon name="check" />Submit report</button>
+        <ActionFeedback message={s.message} status={s.status} />
       </form>
-    </details>
+    </ActionModal>
   );
 }
 export function ReportCard({ r }: { r: Report }) {
@@ -89,7 +91,7 @@ export function ReportCard({ r }: { r: Report }) {
       <p>{r.body}</p>
       <p>Report: {r.reason}</p>
       <p>
-        {r.status} · review {r.review_status}
+        <StatusBadge status={r.status} /> · review <StatusBadge status={r.review_status} />
       </p>
       <p>{r.decision_reason}</p>
       {r.status === "pending" && (
@@ -107,10 +109,10 @@ export function ReportCard({ r }: { r: Report }) {
             </select>
           </label>
           <Reason />
-          <button disabled={p}>Save report decision</button>
+          <button disabled={p}><ActionIcon name="save" />Save report decision</button>
         </form>
       )}
-      {s.message && <p role="status">{s.message}</p>}
+      <ActionFeedback message={s.message} status={s.status} />
     </section>
   );
 }
@@ -136,11 +138,11 @@ export function DuplicateCard({ d }: { d: Duplicate }) {
           >
             <input type="hidden" name="candidate" value={d.id} />
             <Reason />
-            <button disabled={p}>Keep profiles distinct</button>
+            <button disabled={p}><ActionIcon name="check" />Keep profiles distinct</button>
           </form>
         </>
       )}
-      {s.message && <p role="status">{s.message}</p>}
+      <ActionFeedback message={s.message} status={s.status} />
     </section>
   );
 }
@@ -195,7 +197,7 @@ export function MergeForm({
           <label key={r.id}>
             <input type="checkbox" name="archive" value={r.id} />
             {r.property === source ? "Source" : "Target"} · {r.alias} ·{" "}
-            {r.start} → {r.end ?? "Current"} · {r.status}
+            {displayDate(r.start)} → {r.end ? displayDate(r.end) : "Current"} · {r.status}
             <span>{r.body}</span>
           </label>
         ))}
@@ -217,8 +219,9 @@ export function MergeForm({
         <input type="checkbox" name="confirm" required />I reviewed both
         fictional profiles and these explicit resolutions.
       </label>
-      <button disabled={p}>Merge with these resolutions</button>
-      {s.message && <p role="status">{s.message}</p>}
+      <ActionFeedback status="warning" message="Merging archives the source profile and moves its records. Review the selected removals and revoked claims before continuing." />
+      <button className="action-danger" disabled={p}><ActionIcon name="warning" />Merge with these resolutions</button>
+      <ActionFeedback message={s.message} status={s.status} />
     </form>
   );
 }
@@ -259,14 +262,14 @@ export function AssociationForm({
           <option value="">Add a new period</option>
           {history.map((h) => (
             <option key={h.id} value={h.id}>
-              {h.start_date} → {h.end_date ?? "Ongoing"}
+              {displayDate(h.start_date)} → {h.end_date ? displayDate(h.end_date) : "Ongoing"}
             </option>
           ))}
         </select>
       </label>
       <Reason label="Association change reason" />
-      <button disabled={p}>Save management period</button>
-      {s.message && <p role="status">{s.message}</p>}
+      <button disabled={p}><ActionIcon name="save" />Save management period</button>
+      <ActionFeedback message={s.message} status={s.status} />
     </form>
   );
 }
@@ -292,8 +295,8 @@ export function ManagerForm({ real = false }: { real?: boolean }) {
         <input type="checkbox" name="acknowledged" />I reviewed the existing
         manager profiles and acknowledge any similar names.
       </label>
-      <button disabled={p}>{real ? "Create manager profile" : "Create fictional manager"}</button>
-      {s.message && <p role="status">{s.message}</p>}
+      <button disabled={p}><ActionIcon name="save" />{real ? "Create manager profile" : "Create fictional manager"}</button>
+      <ActionFeedback message={s.message} status={s.status} />
     </form>
   );
 }

@@ -1,0 +1,27 @@
+import { test, expect } from "@playwright/test";
+test("filters overlay results and retain selections when searching", async ({ page }, info) => {
+ await page.goto("/search");
+ const dialog = page.getByRole("dialog", { name: "Filter places" });
+ await expect(dialog).not.toBeVisible();
+ await page.getByRole("button", { name: "Filters", exact: true }).click();
+ await expect(dialog).toBeVisible();
+ const bounds = await dialog.boundingBox();
+ const viewport = page.viewportSize()!;
+ expect(Math.abs(bounds!.x + bounds!.width / 2 - viewport.width / 2)).toBeLessThan(3);
+ expect(Math.abs(bounds!.y + bounds!.height / 2 - viewport.height / 2)).toBeLessThan(3);
+ await dialog.getByLabel("Accommodation type").selectOption("House");
+ await page.screenshot({ path: info.outputPath("filter-popup.png") });
+ await dialog.getByRole("button", { name: "Apply filters" }).click();
+ await expect(page).toHaveURL(/type=House/);
+ await expect(dialog).not.toBeVisible();
+ await expect(page.locator(".accommodation-result-count strong")).toBeVisible();
+ await page.getByRole("button", { name: "Filters", exact: true }).click();
+ await expect(dialog.getByLabel("Accommodation type")).toHaveValue("House");
+ await page.keyboard.press("Escape");
+ await expect(dialog).not.toBeVisible();
+ await page.getByLabel("Property, address or manager").fill("Garden");
+ await page.getByRole("button", { name: "Search", exact: true }).click();
+ await expect(page).toHaveURL(/q=Garden/);
+ expect(new URL(page.url()).searchParams.get("type")).toBe("House");
+ expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+});

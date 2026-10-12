@@ -1,6 +1,7 @@
 import "server-only";
 import { createDatabaseClient } from "@/lib/database/server";
 import type { OwnReview } from "./validation";
+import type { CriterionRating } from "./criteria";
 export async function ownReviews(): Promise<OwnReview[]> {
   const { data, error } = await (
     await createDatabaseClient()
@@ -10,6 +11,7 @@ export async function ownReviews(): Promise<OwnReview[]> {
 }
 export type FeedReview = {
   is_demo: boolean;
+  criteria: CriterionRating[];
   id: string;
   property_id: string;
   landlord_id: string | null;

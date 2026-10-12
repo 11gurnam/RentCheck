@@ -1,3 +1,6 @@
+import { ProfileAvatar } from "@/components/ui/profile-avatar";
+import { ActionIcon } from "@/components/ui/action-feedback";
+import { displayDate } from "@/lib/display-date";
 import { reviewFeed } from "./data";
 import { money } from "@/features/discovery/filters";
 import { createDatabaseClient } from "@/lib/database/server";
@@ -7,6 +10,7 @@ import { myClaims } from "@/features/claims/data";
 import { ReplyForm } from "@/features/claims/forms";
 import { ReportForm } from "@/features/moderation/forms";
 import { PhotoCaption, type PhotoSource } from "@/features/photos/caption";
+import { ReviewScoreBadges, ratingTone } from "./score-badges";
 export async function ReviewFeed({
   property,
   landlord,
@@ -44,6 +48,9 @@ export async function ReviewFeed({
       };
     }),
   );
+  const profiles = rows.length ? await db.rpc("get_review_avatars", { p_reviews: rows.map(r => r.id) }) : null;
+  if (profiles?.error) throw new Error("Public profiles unavailable");
+  const avatars = (profiles?.data ?? {}) as Record<string, string | null>;
   const score = await db
     .from(landlord ? "landlord_scores" : "property_scores")
     .select("*")
@@ -52,6 +59,8 @@ export async function ReviewFeed({
   if (score.error) throw new Error("Ratings unavailable");
   const rating = score.data?.[landlord ? "landlord_rating" : "property_rating"];
   const count = score.data?.review_count ?? 0;
+  const summary = property ? await db.from("property_criterion_scores").select("*").eq("property_id", property).order("criterion_key") : null;
+  if (summary?.error) throw new Error("Criterion scores unavailable");
   const verified = await Promise.all(
     rows.map(async (r) => {
       const { data, error } = await db.rpc("review_is_verified", {
@@ -75,7 +84,7 @@ export async function ReviewFeed({
       <h2>{landlord ? "Management experiences" : "Tenant experiences"}</h2>
       <p>
         {rating != null
-          ? rating + " / 5 · " + count + " ratings"
+          ? Number(rating).toFixed(1) + " / 5 · " + count + " ratings"
           : landlord
             ? "No management ratings yet."
             : "No tenant ratings yet."}
@@ -83,6 +92,11 @@ export async function ReviewFeed({
       <p>
         {total} experiences · Page {page}
       </p>
+      {!!summary?.data?.length && <section className="criterion-summary" aria-label="Average tenant ratings">
+        <div className="criterion-summary-heading"><h3>Tenant rating summary</h3><span>{Number(rating).toFixed(1)} / 5 overall</span></div>
+        <div className="criterion-summary-grid">{summary.data.map(c => <div key={c.criterion_key}><span>{c.label}</span><strong>{Number(c.rating).toFixed(1)} / 5</strong><div className={`rating-meter rating-${ratingTone(Number(c.rating))}`} role="meter" aria-valuemin={0} aria-valuemax={5} aria-valuenow={Number(c.rating)} aria-label={`${c.label} average rating`}><span style={{ width: `${Number(c.rating) / 5 * 100}%` }} /></div><small>{c.review_count} {c.review_count === 1 ? "review" : "reviews"}</small></div>)}</div>
+        <p className="field-hint">Each review’s overall score is the mean of its criteria. The property score is the mean of visible reviews. Older reviews retain their original score.</p>
+      </section>}
       {!rows.length &&
         (total ? (
           <p>
@@ -93,8 +107,9 @@ export async function ReviewFeed({
           <p>Be the first to share an experience.</p>
         ))}
       {rows.map((r) => (
-        <article key={r.id} className="dashboard-card">
-          <h3>{r.alias}</h3>
+        <article key={r.id} className="dashboard-card tenant-review-card">
+          <header className="review-author"><ProfileAvatar name={r.alias} src={avatars[r.id]} /><h3>{r.alias}</h3></header>
+          <div className="review-stay-facts"><div><span className="review-date-caption">Tenancy</span><div className="review-date-range"><time dateTime={r.start_date}>{displayDate(r.start_date)}</time><span aria-label="to">→</span>{r.end_date ? <time dateTime={r.end_date}>{displayDate(r.end_date)}</time> : <strong>Current</strong>}</div></div><div className="review-rent"><span className="review-date-caption">Monthly rent paid</span><strong>{money(r.rent_paid)} <small>/ month</small></strong></div></div>
           <p className="demo-tag">
             {verified.find((v) => v.id === r.id)?.verified
               ? (r.is_demo ? "Demonstration verified tenant" : "Verified tenant · evidence manually reviewed")
@@ -102,42 +117,21 @@ export async function ReviewFeed({
             {r.is_demo ? "· synthetic example" : "· User experience"} {r.was_edited ? "· Updated" : ""}
           </p>
           <p>
-            Property {r.property_rating} / 5 · Management{" "}
-            {r.landlord_rating ?? "Unanswered"}
+            Management{" "}
+            {r.landlord_rating ?? "N/A"}
             {r.landlord_rating ? " / 5" : ""}
           </p>
-          <p>{r.body}</p>
-          {user ? (
-            <ReportForm review={r.id} />
-          ) : (
-            <p>
-              <a href="/sign-in">Sign in to report this review</a>
-            </p>
-          )}
+          <ReviewScoreBadges overall={r.property_rating} criteria={r.criteria} />
+<section className="review-description" aria-label="Review description"><h4>Description</h4><p>{r.body}</p></section>
+          {!!r.criteria?.length && <details className="review-criterion-details"><summary>Criterion ratings · {Number(r.property_rating).toFixed(1)} / 5 overall</summary><div className="review-criteria-scores">{r.criteria.map(c => <span key={c.key}>{c.label}{c.custom ? " (tenant added)" : ""} <strong>{c.rating} / 5</strong></span>)}</div></details>}
           {replies
             .find((x) => x.review === r.id)
             ?.rows.map((reply) => (
               <aside key={reply.id} className="dashboard-card">
-                <h4>
-                  {reply.representative} · {reply.alias}
-                </h4>
+                <header className="review-author"><ProfileAvatar name={reply.alias} src={avatars[reply.id]} /><div><h4>{reply.alias}</h4><small>{reply.representative}</small></div></header>
                 <p>{reply.body}</p>
               </aside>
             ))}
-          {claims.some(
-            (c) =>
-              c.property_id === r.property_id ||
-              (c.landlord_id !== null && c.landlord_id === r.landlord_id),
-          ) && (
-            <ReplyForm
-              review={r.id}
-              claims={claims.filter(
-                (c) =>
-                  c.property_id === r.property_id ||
-                  (c.landlord_id !== null && c.landlord_id === r.landlord_id),
-              )}
-            />
-          )}
           {photos
             .find((x) => x.review === r.id)
             ?.photos.map((ph) => (
@@ -155,16 +149,31 @@ export async function ReviewFeed({
                 <PhotoCaption photo={ph} />
               </figure>
             ))}
-          <p>
-            {r.start_date} → {r.end_date ?? "Current"} · {money(r.rent_paid)} /
-            month
-          </p>
-          {r.landlord_id && (
-            <a href={"/landlords/" + r.landlord_id}>Manager for this tenancy</a>
+          <footer className="review-actions review-feed-actions">
+            <a className="review-action" href={"/properties/" + r.property_id}><svg className="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" aria-hidden="true"><path d="m3 10 9-7 9 7v11H3Z"/><path d="M9 21v-8h6v8"/></svg>Property profile</a>
+            {r.landlord_id && <a className="review-action" href={"/landlords/" + r.landlord_id}><ActionIcon name="shield"/>Manager for this tenancy</a>}
+          {user ? (
+            <ReportForm review={r.id} />
+          ) : (
+            <p>
+              <a href="/sign-in">Sign in to report this review</a>
+            </p>
           )}
-          <p>
-            <a href={"/properties/" + r.property_id}>Property profile</a>
-          </p>
+          {claims.some(
+            (c) =>
+              c.property_id === r.property_id ||
+              (c.landlord_id !== null && c.landlord_id === r.landlord_id),
+          ) && (
+            <ReplyForm
+              review={r.id}
+              claims={claims.filter(
+                (c) =>
+                  c.property_id === r.property_id ||
+                  (c.landlord_id !== null && c.landlord_id === r.landlord_id),
+              )}
+            />
+          )}
+          </footer>
         </article>
       ))}
       <nav className="pagination" aria-label="Experience pages">

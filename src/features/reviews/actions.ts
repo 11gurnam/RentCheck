@@ -3,7 +3,8 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { requireUser } from "@/lib/auth/session";
 import { createDatabaseClient } from "@/lib/database/server";
-import { reviewSchema, type ReviewState } from "./validation";
+import { reviewSchema, criteriaSchema, type ReviewState } from "./validation";
+import { criteriaFor, overallRating } from "./criteria";
 import { z } from "zod";
 import { getProperty } from "@/features/discovery/data";
 import { ownReviews } from "./data";
@@ -20,8 +21,20 @@ export async function submitReview(
   const existing = existingId ? (await ownReviews()).find(r => r.id === existingId) : null;
   const property = await getProperty(v.property);
   if (!property || (existingId && !existing)) return { message: "Review or property unavailable." };
+  let rawCriteria: unknown;
+  try { rawCriteria = JSON.parse(String(form.get("criteria") ?? "")); }
+  catch { return { message: "Rate each of the property’s criteria before saving." }; }
+  const rated = criteriaSchema.safeParse(rawCriteria);
+  if (!rated.success) return { message: rated.error.issues.map(i => i.message).join(" ") };
+  const db = await createDatabaseClient();
+  const standards = criteriaFor(property.property_type);
+  if (standards.some(c => !rated.data.some(r => !r.custom && r.key === c.key && r.label === c.label)) ||
+      rated.data.some(r => r.custom ? !r.key.startsWith("custom_") : !standards.some(c => c.key === r.key && c.label === r.label)))
+    return { message: "Rate all criteria for this accommodation type." };
   const input = {
     ...v,
+    criteria: rated.data,
+    propertyRating: overallRating(rated.data),
     current: v.current === "true",
     woman: v.woman === "on",
     recommend: v.recommend === "" ? null : v.recommend === "true",
@@ -31,7 +44,6 @@ export async function submitReview(
   const id = String(form.get("review") ?? "");
   if (id && !z.uuid().safeParse(id).success)
     return { message: "Invalid review." };
-  const db = await createDatabaseClient();
   const result = id
     ? await db.rpc("edit_review", { p_review: id, p_input: input })
     : await db.rpc("create_review", { p_input: input });
@@ -48,6 +60,7 @@ export async function submitReview(
     };
   revalidatePath("/properties/" + v.property);
   revalidatePath("/account/reviews");
+  revalidatePath("/search");
   redirect("/account/reviews");
 }
 export async function removeReview(
@@ -64,7 +77,7 @@ export async function removeReview(
   revalidatePath("/account/reviews");
   revalidatePath("/properties", "layout");
   return {
-    message: "Review deleted. It no longer contributes to public ratings.",
+    status: "success", message: "Review deleted. It no longer contributes to public ratings.",
   };
 }
 export async function closeTenancy(
@@ -92,5 +105,5 @@ export async function closeTenancy(
   });
   if (error) return { message: error.message };
   revalidatePath("/account/reviews");
-  return { message: "Tenancy end saved." };
+  return { status: "success", message: "Tenancy end saved." };
 }

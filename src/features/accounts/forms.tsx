@@ -1,4 +1,5 @@
 "use client";
+import { ActionIcon } from "@/components/ui/action-feedback";
 
 import { useActionState, useRef, useState } from "react";
 import {
@@ -16,7 +17,7 @@ function Feedback({ state }: { state: FormState }) {
       className={`form-feedback ${state.status}`}
       role={state.status === "error" ? "alert" : "status"}
     >
-      {state.message}
+      <ActionIcon name={state.status === "success" ? "check" : "warning"} /> {state.message}
     </p>
   ) : null;
 }
@@ -230,7 +231,7 @@ export function AliasForm({ alias }: { alias: string }) {
       />
       <Feedback state={state} />
       <button className="primary-link" disabled={pending}>
-        {pending ? "Saving…" : "Save alias"}
+        <ActionIcon name="save" />{pending ? "Saving…" : "Save alias"}
       </button>
     </form>
   );
@@ -241,7 +242,7 @@ export function SignOutForm() {
   return (
     <form action={action}>
       <button className="secondary-button" disabled={pending}>
-        {pending ? "Signing out…" : "Sign out"}
+        <ActionIcon name="logout" />{pending ? "Signing out…" : "Sign out"}
       </button>
       <Feedback state={state} />
     </form>

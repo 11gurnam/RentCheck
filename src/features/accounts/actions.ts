@@ -8,6 +8,7 @@ import { getSiteOrigin } from "@/lib/environment";
 import { requireUser } from "@/lib/auth/session";
 import {
   aliasSchema,
+  changePasswordSchema,
   registerSchema,
   signInSchema,
   safeDestination,
@@ -28,6 +29,26 @@ const unavailable: FormState = {
   message:
     "We couldn’t connect to the account service. Please try again shortly.",
 };
+
+export async function changePassword(_: FormState, form: FormData): Promise<FormState> {
+  const user = await requireUser();
+  const input = changePasswordSchema.safeParse(Object.fromEntries(form));
+  if (!input.success) return invalidFields(input.error);
+  if (!user.email) return { status: "error", message: "An email sign-in is required to change your password." };
+  try {
+    const client = await createDatabaseClient();
+    // Verify the current password even when the backend's optional requirement is disabled.
+    const verified = await client.auth.signInWithPassword({ email: user.email, password: input.data.currentPassword });
+    if (verified.error || verified.data.user?.id !== user.id) return {
+      status: "error", message: "Your current password could not be verified.",
+      fieldErrors: { currentPassword: "Check your current password and try again." },
+    };
+    const { error } = await client.auth.updateUser({ password: input.data.password, current_password: input.data.currentPassword });
+    if (error) return { status: "error", message: "We couldn’t update your password. Please try again with a different password." };
+  } catch { return unavailable; }
+  revalidatePath("/account");
+  return { status: "success", message: "Your password has been changed." };
+}
 
 export async function signIn(
   _previous: FormState,

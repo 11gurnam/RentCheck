@@ -1,3 +1,4 @@
+import { displayDate } from "@/lib/display-date";
 import { notFound } from "next/navigation";
 import { z } from "zod";
 import { AccountShell } from "@/components/ui/account-shell";
@@ -15,6 +16,9 @@ import { ReviewFeed } from "@/features/reviews/feed";
 import { reviewPage } from "@/features/reviews/pagination";
 import { PropertyGallery } from "@/features/photos/gallery";
 import { StartConversation } from "@/features/messaging/forms";
+import { ownReviews } from "@/features/reviews/data";
+import { CameraIcon } from "@/components/ui/camera-icon";
+import { ActionIcon } from "@/components/ui/action-feedback";
 export default async function PropertyPage({
   params,
   searchParams,
@@ -27,6 +31,7 @@ export default async function PropertyPage({
   const p = await getProperty(id);
   if (!p) notFound();
   const user = await getVerifiedUser();
+  const ownReview = user ? (await ownReviews()).find((r) => r.property_id === id && r.status === "visible") : null;
   const allowed = user
     ? await (
         await createDatabaseClient()
@@ -54,7 +59,7 @@ export default async function PropertyPage({
       <a href="/search" className="text-link">
         ← Explore accommodation
       </a>
-      <div className="profile-hero">
+      <div className="profile-hero property-profile-hero">
         <p className="eyebrow">
           {p.property_type} · {p.city}, {p.state}
         </p>
@@ -69,22 +74,20 @@ export default async function PropertyPage({
           </span>
         )}
       </div>
-      <SaveForm property={id} saved={isSaved} />
-      <p>
-        <a href={`/claims/new?kind=property&target=${id}`}>
-          Claim this profile
+      <div className="property-actions" aria-label="Property actions">
+        <SaveForm property={id} saved={isSaved} />
+        <a className="property-secondary-action" href={`/claims/new?kind=property&target=${id}`}>
+          <ActionIcon name="shield" />Claim this profile
         </a>
-      </p>
-      <p>
         {allowed?.data === false ? (
           <span>You cannot review your own property.</span>
         ) : (
           <a className="primary-link" href={`/reviews/new?property=${id}`}>
-            Write a review
+            <ActionIcon name="edit" />Write a review
           </a>
         )}
-      </p>
-      <div className="dashboard-grid">
+      </div>
+      <div className="dashboard-grid property-detail-panels">
         <section className="dashboard-card">
           <h2>About this place</h2>
           <p>{p.description}</p>
@@ -113,6 +116,10 @@ export default async function PropertyPage({
       </div>
       <PropertyGallery property={id} />
       <section className="dashboard-card"><h2>Private representative contact</h2><p><a href="/messages">Your conversations and contact preference</a></p>{contacts?.data?.length ? contacts.data.map((c: { profile_id: string; alias: string }) => <StartConversation key={c.profile_id} property={id} profile={c.profile_id} alias={c.alias} />) : <p>No approved representative is currently accepting contact for this property.</p>}</section>
+      <section className="dashboard-card property-photo-panel" id="photos">
+        <div><h2>Photos</h2><p className="field-hint">Share a glimpse of your stay.</p></div>
+        {allowed?.data === false ? <p>You cannot add tenant photos to your own property.</p> : <a className="button camera-action" href={ownReview ? `/reviews/${ownReview.id}/edit#review-photos` : `/reviews/new?property=${id}`}><CameraIcon /><span>Add photos{!ownReview && <small>Start with a review</small>}</span></a>}
+      </section>
       <ReviewFeed
         property={id}
         page={reviewPage((await searchParams).reviews)}
@@ -129,7 +136,7 @@ export default async function PropertyPage({
               <li key={a.id}>
                 <a href={`/landlords/${a.landlord_id}`}>{a.landlord?.name}</a>
                 <span>
-                  {a.start_date} → {a.end_date ?? "Ongoing"}
+                  {displayDate(a.start_date)} → {a.end_date ? displayDate(a.end_date) : "Ongoing"}
                 </span>
               </li>
             ))}

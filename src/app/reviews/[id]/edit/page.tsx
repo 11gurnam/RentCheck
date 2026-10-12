@@ -24,10 +24,11 @@ export default async function EditReview({
   if (error) throw new Error("Photos unavailable");
   return (
     <AccountShell>
-      <section className="dashboard-card">
+      <div className="review-editor-layout">
+      <section className="dashboard-card review-form-card">
         <h1>Edit your review</h1>
         <ReviewForm
-          property={{ id: r.property_id, name: r.property_name }}
+          property={{ id: r.property_id, name: r.property_name, property_type: r.property_type, is_demo: r.is_demo }}
           review={r}
         />
       </section>
@@ -37,6 +38,7 @@ export default async function EditReview({
         real={r.is_demo === false}
         requests={(await myVerifications()).filter((v) => v.review_id === id)}
       />
+      </div>
     </AccountShell>
   );
 }

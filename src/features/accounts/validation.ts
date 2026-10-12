@@ -36,6 +36,16 @@ export const registerSchema = z
     message: "The passwords do not match.",
   });
 
+export const changePasswordSchema = z.object({
+  currentPassword: z.string().min(1, "Enter your current password.").max(128),
+  password: z.string().min(10, "Use at least 10 characters.").max(128, "Use 128 characters or fewer."),
+  confirmPassword: z.string().max(128),
+}).refine(input => input.password === input.confirmPassword, {
+  path: ["confirmPassword"], message: "The passwords do not match.",
+}).refine(input => input.password !== input.currentPassword, {
+  path: ["password"], message: "Choose a different password from your current one.",
+});
+
 // Only known internal destinations can be carried through authentication.
 export function safeDestination(value: unknown) {
   return typeof value === "string" &&
@@ -66,7 +76,7 @@ export type FormState = {
   status: "idle" | "error" | "success";
   message?: string;
   fieldErrors?: Partial<
-    Record<"email" | "password" | "confirmPassword" | "alias", string>
+    Record<"email" | "password" | "confirmPassword" | "alias" | "currentPassword", string>
   >;
 };
 export const initialFormState: FormState = { status: "idle" };
