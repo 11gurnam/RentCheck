@@ -166,7 +166,7 @@ export default async function SearchPage({
       <div className="results-heading">
         <h2 className="accommodation-result-count">
           {rows.length
-            ? <><strong>{total}</strong> accommodation {total === 1 ? "example" : "examples"}</>
+            ? <><strong>{total}</strong><span>{total === 1 ? "place found" : "places found"}</span></>
             : "No matching places"}
         </h2>
         <span className="budget-notice"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m12 3 10 18H2Z" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" /><path d="M12 9v5m0 3v1" stroke="currentColor" strokeWidth="2" strokeLinecap="round" /></svg>{f.min > 0 || f.max < 10000000 ? "Monthly rent ranges overlap your budget" : "Monthly rent ranges · check the full range before choosing"}</span>
