@@ -12,7 +12,7 @@ Eleven live HTTP checks passed: homepage/search/privacy/health load; signed-out 
 
 Supabase's site URL and two exact callback destinations are configured for this origin. The Google provider is enabled and email confirmation remains required. Email-template changes were rejected on the free plan without custom SMTP, so they are deferred rather than bypassing confirmation. Google Cloud callback approval and support mailbox credentials are owner steps still pending.
 
-The source also removes prototype wording from the shared account footer; that last wording correction needs the next complete build/deploy. No real-document intake, email delivery, Google end-to-end login, cleanup execution or hosted backup/restore acceptance is claimed complete. A hosted schema dump has been obtained privately; it is not a complete data/media backup.
+The source also removes prototype wording from the shared account footer; that correction was subsequently published and checked in [Phase 17](phase-17-hosted-release-verification.md). No real-document intake, email delivery, Google end-to-end login, cleanup execution or hosted backup/restore acceptance is claimed complete. A hosted schema dump has been obtained privately; it is not a complete data/media backup.
 
 ## How to check
 
