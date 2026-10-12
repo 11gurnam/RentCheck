@@ -3,6 +3,7 @@ import { AliasForm, SignOutForm } from "@/features/accounts/forms";
 import { getOwnProfile, requireUser } from "@/lib/auth/session";
 import { createDatabaseClient } from "@/lib/database/server";
 import { displayDate } from "@/lib/display-date";
+import { ProfilePhotoForm } from "@/features/accounts/photo-form";
 import { PasswordForm } from "@/features/accounts/password-form";
 import { ActionIcon } from "@/components/ui/action-feedback";
 
@@ -13,10 +14,12 @@ export default async function AccountPage() {
   const results = profile ? await Promise.allSettled([
     db.rpc("get_my_reviews"),
     db.rpc("get_saved_properties"),
+    db.from("public_profiles").select("avatar_url").eq("id",profile.profile_id).maybeSingle(),
 
   ]) : [];
   const reviews = results[0]?.status === "fulfilled" && !results[0].value.error ? results[0].value.data as { status: string }[] : null;
   const saved = results[1]?.status === "fulfilled" && !results[1].value.error ? results[1].value.data as { property_id: string }[] : null;
+  const avatar = results[2]?.status === "fulfilled" && !results[2].value.error ? results[2].value.data?.avatar_url : null;
   return (
     <AccountShell>
       <div className="dashboard-heading account-page-heading">
@@ -33,6 +36,7 @@ export default async function AccountPage() {
             <div className="account-panel-title"><span className="account-panel-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="4" /><path d="M4 21v-2a8 8 0 0 1 16 0v2" /></svg></span><div><p className="eyebrow">PUBLIC PROFILE</p><h2>Public profile</h2></div></div>
             <div className="account-user-summary"><div><strong>{profile.public_alias}</strong><span>RentCheck member since {displayDate(user.created_at)}</span></div></div>
             <p className="field-hint">This public name appears beside your reviews and replies.</p>
+            <ProfilePhotoForm name={profile.public_alias} src={avatar ?? null} />
             <AliasForm alias={profile.public_alias} />
           </section>
           <section className="dashboard-card">
@@ -63,7 +67,7 @@ export default async function AccountPage() {
             <div className="account-activity-grid">
               <a href="/account/reviews" className="account-activity-item"><ActionIcon name="edit" /><div><strong>{reviews ? reviews.filter(r => r.status === "visible").length : "—"}</strong><span>Published reviews</span><small>{reviews ? "View and manage your experiences" : "Open your reviews to view activity"}</small></div></a>
               <a href="/saved" className="account-activity-item"><ActionIcon name="save" /><div><strong>{saved ? saved.length : "—"}</strong><span>Saved places</span><small>Return to your private shortlist</small></div></a>
-              <a href="/search" className="account-activity-item"><ActionIcon name="search" /><div><strong aria-hidden="true">→</strong><span>Find a place</span><small>Explore places and tenant ratings</small></div></a>
+              <a href="/search" className="account-activity-item"><ActionIcon name="search" /><div><strong className="account-explore-value">Explore</strong><span>Find a place</span><small>Explore places and tenant ratings</small></div></a>
             </div>
           </section>
         </div>

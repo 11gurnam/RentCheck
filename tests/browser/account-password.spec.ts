@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test";
+import sharp from "sharp";
 import { createClient } from "@supabase/supabase-js";
 import { localBackendConfiguration } from "../helpers/local-backend";
 
@@ -11,6 +12,7 @@ test("account password change verifies current password and enables the new pass
   const nextPassword = "Synthetic updated password 84";
   const { data, error } = await admin.auth.admin.createUser({ email, password, email_confirm: true });
   expect(error).toBeNull();
+  let photoPath: string | null = null;
   try {
     await page.goto("/sign-in");
     await page.getByLabel("Email address").fill(email);
@@ -19,6 +21,30 @@ test("account password change verifies current password and enables the new pass
     await expect(page).toHaveURL(/\/account$/);
     await expect(page.getByText("Administrator access", { exact: true })).toHaveCount(0);
     await expect(page.locator(".account-user-summary .profile-avatar")).toHaveCount(0);
+    const alias = await page.locator(".account-user-summary strong").innerText();
+    await expect(page.locator('.header-profile-link')).toContainText(alias);
+    await page.getByRole("button", { name: "Upload photo", exact: true }).click();
+    const photoDialog = page.getByRole("dialog", { name: "Profile photo", exact: true });
+    await photoDialog.getByLabel("Profile photo", { exact: true }).setInputFiles({ name: "invalid.png", mimeType: "image/png", buffer: Buffer.from("invalid image") });
+    await photoDialog.getByRole("button", { name: "Save photo", exact: true }).click();
+    await expect(photoDialog.getByRole("alert")).toContainText("valid JPEG");
+    const buffer = await sharp({create:{width:32,height:32,channels:3,background:"#285641"}}).png().toBuffer();
+    await photoDialog.getByLabel("Profile photo", { exact: true }).setInputFiles({ name: "avatar.png", mimeType: "image/png", buffer });
+    await photoDialog.getByRole("button", { name: "Save photo", exact: true }).click();
+    await expect(photoDialog.getByRole("status")).toHaveText("Profile photo updated.");
+    await page.keyboard.press("Escape");
+    const image = page.locator('.header-profile-link img');
+    await expect(image).toBeVisible();
+    const source = await image.getAttribute("src");
+    const response = await page.request.get(source!);
+    expect(response.status()).toBe(200);
+    expect(response.headers()["content-type"]).toBe("image/jpeg");
+    const metadata = await sharp(await response.body()).metadata();
+    expect(metadata.width).toBe(256);
+    expect(metadata.height).toBe(256);
+    const profileId = source!.split("/").at(-1)!.split("?")[0];
+    const stored = await admin.from("public_profiles").select("avatar_object").eq("id",profileId).single();
+    photoPath = stored.data?.avatar_object ?? null;
     await page.screenshot({ path: info.outputPath("account.png"), fullPage: true });
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
     await page.getByRole("button", { name: "Change password", exact: true }).click();
@@ -39,6 +65,7 @@ test("account password change verifies current password and enables the new pass
     await page.getByRole("button", { name: "Sign in", exact: true }).click();
     await expect(page).toHaveURL(/\/account$/);
   } finally {
+    if(photoPath) await admin.storage.from("profile-photos").remove([photoPath]);
     if (data.user) await admin.auth.admin.deleteUser(data.user.id);
   }
 });
