@@ -8,7 +8,7 @@ const sensitiveNames = [
   "SUPABASE_SERVICE_ROLE_KEY",
   "SMTP_PASSWORD",
 ];
-const secrets = [".env.google.local", ".env.test.local", ".env.local", ".env.hosted.local", ".env.smtp.local"]
+const secrets = [".env.google.local", ".env.google.hosted.local", ".env.test.local", ".env.local", ".env.hosted.local", ".env.smtp.local"]
   .filter(existsSync)
   .flatMap((file) => {
     const env = parseEnv(readFileSync(file, "utf8"));
