@@ -172,6 +172,23 @@ test("author creates, edits, uploads and deletes a review without exposing priva
     await expect(page.locator('img[src="' + url + '"]')).toBeVisible();
     await expect(page.getByRole("main")).not.toContainText(email);
     await expect(page.getByRole("main")).not.toContainText("self-identify");
+    const reviewCard = page.locator(".tenant-review-card").filter({ hasText: "Updated fictional experience:" });
+    await expect(reviewCard.getByRole("heading", { name: "Description", exact: true })).toBeVisible();
+    await reviewCard.getByRole("button", { name: "Report this review", exact: true }).click();
+    const reportDialog = page.getByRole("dialog", { name: "Report this review", exact: true });
+    await expect(reportDialog).toBeVisible();
+    await expect(reportDialog.getByLabel("Report reason")).toBeVisible();
+    await expect(reportDialog.getByRole("button", { name: "Submit report" })).toBeVisible();
+    await expect(reportDialog.getByRole("button", { name: "Close", exact: true })).toHaveCount(0);
+    const submitBounds = await reportDialog.getByRole("button", { name: "Submit report" }).boundingBox();
+    const bounds = await reportDialog.boundingBox();
+    expect(submitBounds!.width).toBeLessThan(bounds!.width * 0.75);
+    const viewport = page.viewportSize()!;
+    expect(Math.abs(bounds!.x + bounds!.width / 2 - viewport.width / 2)).toBeLessThan(3);
+    expect(Math.abs(bounds!.y + bounds!.height / 2 - viewport.height / 2)).toBeLessThan(3);
+    await page.screenshot({ path: info.outputPath("report-dialog.png") });
+    await page.keyboard.press("Escape");
+    await expect(reportDialog).not.toBeVisible();
     await page.screenshot({
       path: info.outputPath("review-profile.png"),
       fullPage: true,

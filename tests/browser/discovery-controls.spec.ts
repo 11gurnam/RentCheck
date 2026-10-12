@@ -5,6 +5,10 @@ test("filters overlay results and retain selections when searching", async ({ pa
  await expect(dialog).not.toBeVisible();
  await page.getByRole("button", { name: "Filters", exact: true }).click();
  await expect(dialog).toBeVisible();
+ const bounds = await dialog.boundingBox();
+ const viewport = page.viewportSize()!;
+ expect(Math.abs(bounds!.x + bounds!.width / 2 - viewport.width / 2)).toBeLessThan(3);
+ expect(Math.abs(bounds!.y + bounds!.height / 2 - viewport.height / 2)).toBeLessThan(3);
  await dialog.getByLabel("Accommodation type").selectOption("House");
  await page.screenshot({ path: info.outputPath("filter-popup.png") });
  await dialog.getByRole("button", { name: "Apply filters" }).click();

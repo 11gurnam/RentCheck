@@ -24,6 +24,7 @@ export default async function EditReview({
   if (error) throw new Error("Photos unavailable");
   return (
     <AccountShell>
+      <div className="review-editor-layout">
       <section className="dashboard-card review-form-card">
         <h1>Edit your review</h1>
         <ReviewForm
@@ -36,6 +37,7 @@ export default async function EditReview({
         review={id}
         requests={(await myVerifications()).filter((v) => v.review_id === id)}
       />
+      </div>
     </AccountShell>
   );
 }

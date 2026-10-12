@@ -1,4 +1,5 @@
 "use client";
+import { ActionModal } from "@/components/ui/action-modal";
 import { ActionFeedback, ActionIcon, StatusBadge } from "@/components/ui/action-feedback";
 import { useActionState } from "react";
 import {
@@ -172,7 +173,7 @@ export function ReplyForm({
 }) {
   const [s, a, p] = useActionState(replyToReview, {});
   return (
-    <form action={a} className="auth-form" onReset={(e) => e.preventDefault()}>
+    <ActionModal title="Reply to this review" trigger="Reply to review"><form action={a} className="auth-form" onReset={(e) => e.preventDefault()}>
       <input name="review" type="hidden" value={review} />
       <label>
         Reply as approved representative
@@ -190,6 +191,6 @@ export function ReplyForm({
       </label>
       <button disabled={p}><ActionIcon name="save" />Save representative reply</button>
       <ActionFeedback message={s.message} status={s.status} />
-    </form>
+    </form></ActionModal>
   );
 }

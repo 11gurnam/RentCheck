@@ -1,4 +1,6 @@
 "use client";
+import { ActionModal } from "@/components/ui/action-modal";
+import { displayDate } from "@/lib/display-date";
 import { ActionFeedback, ActionIcon, StatusBadge } from "@/components/ui/action-feedback";
 import { useActionState } from "react";
 import {
@@ -67,8 +69,7 @@ function Reason({ label = "Decision reason" }: { label?: string }) {
 export function ReportForm({ review }: { review: string }) {
   const [s, a, p] = useActionState(reportReview, {});
   return (
-    <details>
-      <summary><ActionIcon name="warning" /> Report this review</summary>
+    <ActionModal title="Report this review" trigger="Report this review" warning>
       <form
         action={a}
         className="auth-form"
@@ -79,7 +80,7 @@ export function ReportForm({ review }: { review: string }) {
         <button disabled={p}><ActionIcon name="check" />Submit report</button>
         <ActionFeedback message={s.message} status={s.status} />
       </form>
-    </details>
+    </ActionModal>
   );
 }
 export function ReportCard({ r }: { r: Report }) {
@@ -196,7 +197,7 @@ export function MergeForm({
           <label key={r.id}>
             <input type="checkbox" name="archive" value={r.id} />
             {r.property === source ? "Source" : "Target"} · {r.alias} ·{" "}
-            {r.start} → {r.end ?? "Current"} · {r.status}
+            {displayDate(r.start)} → {r.end ? displayDate(r.end) : "Current"} · {r.status}
             <span>{r.body}</span>
           </label>
         ))}
@@ -261,7 +262,7 @@ export function AssociationForm({
           <option value="">Add a new period</option>
           {history.map((h) => (
             <option key={h.id} value={h.id}>
-              {h.start_date} → {h.end_date ?? "Ongoing"}
+              {displayDate(h.start_date)} → {h.end_date ? displayDate(h.end_date) : "Ongoing"}
             </option>
           ))}
         </select>

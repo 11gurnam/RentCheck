@@ -1,3 +1,4 @@
+import { displayDate } from "@/lib/display-date";
 import { AccountShell } from "@/components/ui/account-shell";
 import { ActionFeedback } from "@/components/ui/action-feedback";
 import { requireUser, isAdministrator } from "@/lib/auth/session";
@@ -88,8 +89,8 @@ export default async function MergePage({
           {preview.associations.map((a) => (
             <p key={a.id}>
               {a.property_id === params.source ? "Source" : "Target"} ·{" "}
-              {a.manager_name ?? "Manager"} · {a.start_date} →{" "}
-              {a.end_date ?? "Ongoing"}
+              {a.manager_name ?? "Manager"} · {displayDate(a.start_date)} →{" "}
+              {a.end_date ? displayDate(a.end_date) : "Ongoing"}
             </p>
           ))}
           <MergeForm

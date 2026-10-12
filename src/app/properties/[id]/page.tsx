@@ -1,3 +1,4 @@
+import { displayDate } from "@/lib/display-date";
 import { notFound } from "next/navigation";
 import { z } from "zod";
 import { AccountShell } from "@/components/ui/account-shell";
@@ -129,7 +130,7 @@ export default async function PropertyPage({
               <li key={a.id}>
                 <a href={`/landlords/${a.landlord_id}`}>{a.landlord?.name}</a>
                 <span>
-                  {a.start_date} → {a.end_date ?? "Ongoing"}
+                  {displayDate(a.start_date)} → {a.end_date ? displayDate(a.end_date) : "Ongoing"}
                 </span>
               </li>
             ))}
