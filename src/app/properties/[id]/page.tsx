@@ -46,7 +46,6 @@ export default async function PropertyPage({
   );
   const women = await womensCounts(id);
   const contacts = user ? await (await createDatabaseClient()).rpc("get_contactable_representatives", { p_property: id }) : null;
-  if (contacts?.error) throw new Error("Representative contact unavailable");
   const associations = await getAssociations(id);
   const history = await Promise.all(
     associations.map(async (a) => ({
@@ -115,7 +114,7 @@ export default async function PropertyPage({
         </section>
       </div>
       <PropertyGallery property={id} />
-      <section className="dashboard-card"><h2>Private representative contact</h2><p><a href="/messages">Your conversations and contact preference</a></p>{contacts?.data?.length ? contacts.data.map((c: { profile_id: string; alias: string }) => <StartConversation key={c.profile_id} property={id} profile={c.profile_id} alias={c.alias} />) : <p>No approved representative is currently accepting contact for this property.</p>}</section>
+      <section className="dashboard-card"><h2>Private representative contact</h2><p><a href="/messages">Your conversations and contact preference</a></p>{contacts?.error ? <p role="status">Representative contact is temporarily unavailable. You can still explore this property and its reviews.</p> : contacts?.data?.length ? contacts.data.map((c: { profile_id: string; alias: string }) => <StartConversation key={c.profile_id} property={id} profile={c.profile_id} alias={c.alias} />) : <p>No approved representative is currently accepting contact for this property.</p>}</section>
       <section className="dashboard-card property-photo-panel" id="photos">
         <div><h2>Photos</h2><p className="field-hint">Share a glimpse of your stay.</p></div>
         {allowed?.data === false ? <p>You cannot add tenant photos to your own property.</p> : <a className="button camera-action" href={ownReview ? `/reviews/${ownReview.id}/edit#review-photos` : `/reviews/new?property=${id}`}><CameraIcon /><span>Add photos{!ownReview && <small>Start with a review</small>}</span></a>}
