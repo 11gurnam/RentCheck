@@ -1,10 +1,8 @@
 "use client";
 import { AccountFrame as AccountShell } from "@/components/ui/account-frame";
-import { useRouter } from "next/navigation";
 import { useTransition } from "react";
-export default function ErrorPage({ reset }: { reset: () => void }) {
-  const router = useRouter();
-  const [pending, retry] = useTransition();
+export default function ErrorPage({ retry }: { retry: () => void }) {
+  const [pending, startRetry] = useTransition();
   return (
     <AccountShell>
       <section className="dashboard-card boundary-card">
@@ -16,12 +14,7 @@ export default function ErrorPage({ reset }: { reset: () => void }) {
         <button
           className="button"
           disabled={pending}
-          onClick={() =>
-            retry(() => {
-              router.refresh();
-              reset();
-            })
-          }
+          onClick={() => startRetry(() => retry())}
         >
           {pending ? "Trying again…" : "Try again"}
         </button>

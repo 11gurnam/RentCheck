@@ -1,4 +1,5 @@
 "use client";
+import { ActionFeedback, ActionIcon } from "@/components/ui/action-feedback";
 import { useActionState } from "react";
 import { addPhoto, removePhoto } from "./photo-actions";
 export function PhotoForm({
@@ -12,7 +13,7 @@ export function PhotoForm({
 }) {
   const [s, a, p] = useActionState(addPhoto, {});
   return (
-    <section className="dashboard-card">
+    <section className="dashboard-card" id="review-photos">
       <h2>Review photos</h2>
       <p>
         Optional. Up to three {real ? "property" : "fictional"} photos, 3 MiB each. Image metadata is removed. Only upload images you have permission to share; avoid faces and private documents. Photos are public.
@@ -28,8 +29,8 @@ export function PhotoForm({
             required
           />
         </label>
-        <button disabled={p}>Add photo</button>
-        {s.message && <p role="status">{s.message}</p>}
+        <button disabled={p}><ActionIcon name="plus" />Add photo</button>
+        <ActionFeedback message={s.message} status={s.status} />
       </form>
       {photos.map((ph) => (
         <RemovePhoto key={ph.id} id={ph.id} />
@@ -43,8 +44,8 @@ function RemovePhoto({ id }: { id: string }) {
     <form action={a}>
       <a href={"/api/photos/" + id}>View photo</a>
       <input type="hidden" name="photo" value={id} />
-      <button disabled={p}>Remove photo</button>
-      {s.message && <p role="status">{s.message}</p>}
+      <button className="action-danger" disabled={p}><ActionIcon name="trash" />Remove photo</button>
+      <ActionFeedback message={s.message} status={s.status} />
     </form>
   );
 }

@@ -1,14 +1,16 @@
+import { CollectionHeading } from "@/components/ui/collection-heading";
 import { AccountShell } from "@/components/ui/account-shell";
 import { requireUser } from "@/lib/auth/session";
 import { myClaims } from "@/features/claims/data";
 import { DetailsForm } from "@/features/claims/forms";
 import { getProperty, getLandlord } from "@/features/discovery/data";
+import { StatusBadge } from "@/components/ui/action-feedback";
 export default async function ClaimsPage() {
   await requireUser("/claims");
   const rows = await myClaims();
   return (
     <AccountShell>
-      <h1>Your profile claims</h1>
+      <CollectionHeading kind="claims" eyebrow="YOUR REPRESENTATIVE SPACE" title="Your profile claims" description="Keep track of the profiles you represent and your claim decisions." />
       <p>
         <a href="/search">Find a profile to claim</a>
       </p>
@@ -23,7 +25,7 @@ export default async function ClaimsPage() {
               <h2>{c.name}</h2>
               <p>
                 {c.is_demo === false ? "Manual evidence review" : "Demonstration claim"} ·{" "}
-                {c.status} · {c.reason}
+                <StatusBadge status={c.status} /> · {c.reason}
               </p>
               {c.evidence_expired ? <p>Evidence expired; download unavailable.</p> : <a href={"/api/documents/" + c.document_id}>
                 Download your private claim evidence

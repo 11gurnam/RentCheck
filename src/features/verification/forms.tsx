@@ -1,4 +1,5 @@
 "use client";
+import { ActionFeedback, ActionIcon, StatusBadge } from "@/components/ui/action-feedback";
 import { useActionState } from "react";
 import { requestVerification, decideVerification } from "./actions";
 import type { Verification } from "./data";
@@ -26,7 +27,7 @@ export function VerificationForm({
       {requests.map((r) => (
         <div key={r.id}>
           <p>
-            {r.status} {r.reason ? "· " + r.reason : ""}
+            <StatusBadge status={r.status} /> {r.reason ? "· " + r.reason : ""}
           </p>
           {r.evidence_expired ? <p>Evidence expired; download unavailable.</p> : <a href={"/api/documents/" + r.document_id}>
             Download your private document
@@ -52,10 +53,10 @@ export function VerificationForm({
           <label>
             <input type="checkbox" name="synthetic" required /> {real ? "I have permission to submit this redacted document and consent to private review and the evidence retention policy." : "This document contains only invented demonstration information."}
           </label>
-          <button disabled={p}>{real ? "Request manual evidence review" : "Request demonstration verification"}</button>
+          <button disabled={p}><ActionIcon name="save" />{real ? "Request manual evidence review" : "Request demonstration verification"}</button>
         </form>
       )}
-      {s.message && <p role="status">{s.message}</p>}
+      <ActionFeedback message={s.message} status={s.status} />
     </section>
   );
 }
@@ -66,7 +67,7 @@ export function VerificationDecision({ request }: { request: Verification }) {
       <h2>
         {request.property} · {request.alias}
       </h2>
-      <p>{request.is_demo === false ? "Real evidence · manual review" : "Demonstration request"} · {request.status}</p>
+      <p>{request.is_demo === false ? "Real evidence · manual review" : "Demonstration request"} · <StatusBadge status={request.status} /></p>
       <p>Evidence expires: {request.expires_at ?? "Not recorded"}{request.evidence_expired ? " · Download unavailable" : ""}</p>
       <p>{request.reason}</p>
       <p>
@@ -99,10 +100,10 @@ export function VerificationDecision({ request }: { request: Verification }) {
             <textarea name="reason" minLength={10} maxLength={2000} required />
           </label>
           {request.is_demo === false && <EvidenceChecklist />}
-          <button disabled={p}>Save verification decision</button>
+          <button disabled={p}><ActionIcon name="save" />Save verification decision</button>
         </form>
       )}
-      {s.message && <p role="status">{s.message}</p>}
+      <ActionFeedback message={s.message} status={s.status} />
     </section>
   );
 }

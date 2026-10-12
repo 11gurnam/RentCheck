@@ -1,4 +1,6 @@
 "use client";
+import { ActionModal } from "@/components/ui/action-modal";
+import { ActionFeedback, ActionIcon, StatusBadge } from "@/components/ui/action-feedback";
 import { useActionState } from "react";
 import {
   requestClaim,
@@ -42,8 +44,8 @@ export function ClaimForm({
       <label>
         <input name="synthetic" type="checkbox" required /> {real ? "I have authority to submit this redacted evidence and consent to private review and the evidence retention policy." : "This claim and evidence use only invented demonstration information."}
       </label>
-      <button disabled={p}>{real ? "Submit representative evidence" : "Submit demonstration claim"}</button>
-      {s.message && <p role="status">{s.message}</p>}
+      <button disabled={p}><ActionIcon name="save" />{real ? "Submit representative evidence" : "Submit demonstration claim"}</button>
+      <ActionFeedback message={s.message} status={s.status} />
     </form>
   );
 }
@@ -54,7 +56,7 @@ export function ClaimDecision({ claim }: { claim: Claim }) {
       <h2>
         {claim.name} · {claim.alias}
       </h2>
-      <p>{claim.is_demo === false ? "Real evidence · manual review" : "Demonstration claim"} · {claim.status}</p>
+      <p>{claim.is_demo === false ? "Real evidence · manual review" : "Demonstration claim"} · <StatusBadge status={claim.status} /></p>
       <p>Evidence expires: {claim.expires_at ?? "Not recorded"}{claim.evidence_expired ? " · Download unavailable" : ""}</p>
       <p>{claim.reason}</p>
       <p>
@@ -87,10 +89,10 @@ export function ClaimDecision({ claim }: { claim: Claim }) {
             <textarea name="reason" required minLength={10} maxLength={2000} />
           </label>
           {claim.is_demo === false && <EvidenceChecklist />}
-          <button disabled={p}>Save claim decision</button>
+          <button disabled={p}><ActionIcon name="save" />Save claim decision</button>
         </form>
       )}
-      {s.message && <p role="status">{s.message}</p>}
+      <ActionFeedback message={s.message} status={s.status} />
     </section>
   );
 }
@@ -162,8 +164,8 @@ export function DetailsForm({
         Change reason
         <textarea name="reason" required minLength={10} maxLength={2000} />
       </label>
-      <button disabled={p}>Save claimed details</button>
-      {s.message && <p role="status">{s.message}</p>}
+      <button disabled={p}><ActionIcon name="save" />Save claimed details</button>
+      <ActionFeedback message={s.message} status={s.status} />
     </form>
   );
 }
@@ -176,7 +178,7 @@ export function ReplyForm({
 }) {
   const [s, a, p] = useActionState(replyToReview, {});
   return (
-    <form action={a} className="auth-form" onReset={(e) => e.preventDefault()}>
+    <ActionModal title="Reply to this review" trigger="Reply to review"><form action={a} className="auth-form" onReset={(e) => e.preventDefault()}>
       <input name="review" type="hidden" value={review} />
       <label>
         Reply as approved representative
@@ -192,8 +194,8 @@ export function ReplyForm({
         Your public representative reply
         <textarea name="body" minLength={10} maxLength={3000} required />
       </label>
-      <button disabled={p}>Save representative reply</button>
-      {s.message && <p role="status">{s.message}</p>}
-    </form>
+      <button disabled={p}><ActionIcon name="save" />Save representative reply</button>
+      <ActionFeedback message={s.message} status={s.status} />
+    </form></ActionModal>
   );
 }

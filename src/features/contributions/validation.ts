@@ -16,7 +16,7 @@ export const contributionSchema = z
     state: short(80),
     city: short(80),
     locality: short(100),
-    type: z.enum(["Flat", "House", "PG", "Hostel"]),
+    type: z.enum(["Flat", "House", "PG", "Hostel", "Homestay"]),
     min: z.coerce.number().int().min(0).max(10000000),
     max: z.coerce.number().int().min(0).max(10000000),
     description: z.string().trim().max(3000),
@@ -36,7 +36,7 @@ export type Duplicate = {
   exact: boolean;
 };
 export type ContributionState = {
+  status?: "success" | "error" | "warning" | "idle";
   message?: string;
-  status: "idle" | "error";
   candidates?: Duplicate[];
 };
