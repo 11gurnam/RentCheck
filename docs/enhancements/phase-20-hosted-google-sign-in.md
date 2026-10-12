@@ -11,11 +11,11 @@ Branding links use the actual homepage and /privacy page, and both support/devel
 - Netlify production build passed and deploy 6accab3ce914ca380b026254 is live. The production Google feature flag is enabled.
 - 35 account validation/deployment tests passed; script ESLint and whitespace checks passed. All 33 browser assets passed the private-value scan.
 - Six hosted HTTP checks passed: health/privacy/sign-in 200, anonymous administrator access 401, fictional fixture property 404 and the private Google env path 404.
-- The live Google button reaches the new client’s consent screen using the support identity. Owner consent and authenticated alias/logout acceptance are still pending.
+- The owner approved support-account Google consent. Hosted login opened /account, retaining the existing RentCheck Team profile. A temporary RentCheck Support alias saved successfully, persisted after navigation and a complete logout/re-login, and administrator access remained Not granted. The original RentCheck Team alias was restored. Logout displayed the signed-out notice.
 - Real contribution intake remains closed pending the launch checks documented in Phase 19. Publishing the OAuth audience does not enable rental intake or grant administrator access.
 
 ## How to check
 
-1. Open https://rentcheck-india.netlify.app/sign-in and choose Continue with Google after the enabled deployment is published.
+1. Open https://rentcheck-india.netlify.app/sign-in and choose Continue with Google on the published deployment.
 2. Choose your Google account and review the basic sign-in permissions. Expect /account after approval.
 3. Save a public alias, refresh, sign out and sign in with Google again. Verify the alias remains and an ordinary account still shows Administrator access: Not granted.
