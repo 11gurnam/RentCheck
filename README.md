@@ -6,10 +6,10 @@ The hosted site is https://rentcheck-india.netlify.app. Google sign-in and SMTP 
 
 ## Start on a fresh local checkout
 
-Use Node24 LTS, npm11+, Git and Docker Desktop with the Linux engine running. The latest release branch is phase-22-tested-ui-deployment; main retains the earlier merged foundation until a separately authorized merge.
+Use Node24 LTS, npm11+, Git and Docker Desktop with the Linux engine running. The latest release branch is phase-23-gemini-activation; main retains the earlier merged foundation until a separately authorized merge.
 
 ```sh
-git switch phase-22-tested-ui-deployment
+git switch phase-23-gemini-activation
 npm ci
 npm run backend:start
 npm run backend:env
@@ -43,6 +43,7 @@ If Chrome is already installed on Windows, set $env:PLAYWRIGHT_CHANNEL='chrome' 
 ## Review and hosting
 
 - [Phase 22 release and beginner checks](docs/enhancements/phase-22-tested-ui-deployment.md)
+- [Phase 23 Gemini activation and checks](docs/enhancements/phase-23-gemini-activation.md)
 - [Beginner review guide](docs/review-guide.md)
 - [Current tenant and landlord demo walkthrough](docs/enhancements/demo-walkthrough.md)
 - [Phase 10 account/privacy checking guide](docs/enhancements/phase-10-account-privacy.md)
