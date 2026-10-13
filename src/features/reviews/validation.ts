@@ -68,4 +68,4 @@ export type OwnReview = {
   recommend: boolean | null;
   was_edited: boolean;
 };
-export type ReviewState = { message?: string; status?: "success" | "error" | "warning" };
+export type ReviewState = { message?: string; status?: "success" | "error" | "warning"; savedReviewId?: string };

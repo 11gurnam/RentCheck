@@ -8,6 +8,7 @@ import { criteriaFor, overallRating } from "./criteria";
 import { z } from "zod";
 import { getProperty } from "@/features/discovery/data";
 import { ownReviews } from "./data";
+import { checkReviewLanguage } from "./language-actions";
 export async function submitReview(
   _: ReviewState,
   form: FormData,
@@ -17,6 +18,8 @@ export async function submitReview(
   if (!parsed.success)
     return { message: parsed.error.issues.map((i) => i.message).join(" ") };
   const v = parsed.data;
+  if ((await checkReviewLanguage(v.body)).flagged)
+    return { message: "Please review the suggested wording or edit the comment to remove abusive language before submitting." };
   const existingId = String(form.get("review") ?? "");
   const existing = existingId ? (await ownReviews()).find(r => r.id === existingId) : null;
   const property = await getProperty(v.property);
@@ -61,6 +64,8 @@ export async function submitReview(
   revalidatePath("/properties/" + v.property);
   revalidatePath("/account/reviews");
   revalidatePath("/search");
+  if (form.get("withPhotos") === "true")
+    return { status: "success", savedReviewId: id || result.data?.id };
   redirect("/account/reviews");
 }
 export async function removeReview(

@@ -4,20 +4,24 @@ import { displayDate } from "@/lib/display-date";
 import { reviewFeed } from "./data";
 import { money } from "@/features/discovery/filters";
 import { createDatabaseClient } from "@/lib/database/server";
-import Image from "next/image";
+import { PhotoMedia } from "@/features/photos/media";
+import { ReviewDescription } from "./description";
 import { getVerifiedUser } from "@/lib/auth/session";
 import { myClaims } from "@/features/claims/data";
 import { ReplyForm } from "@/features/claims/forms";
 import { ReportForm } from "@/features/moderation/forms";
-import { PhotoCaption, type PhotoSource } from "@/features/photos/caption";
+import { type PhotoSource } from "@/features/photos/caption";
 import { ReviewScoreBadges, ratingTone } from "./score-badges";
+import { criteriaFor } from "./criteria";
 export async function ReviewFeed({
   property,
   landlord,
+  propertyType = "",
   page = 1,
 }: {
   property?: string;
   landlord?: string;
+  propertyType?: string;
   page?: number;
 }) {
   const { rows, total } = await reviewFeed(property, landlord, page);
@@ -61,6 +65,12 @@ export async function ReviewFeed({
   const count = score.data?.review_count ?? 0;
   const summary = property ? await db.from("property_criterion_scores").select("*").eq("property_id", property).order("criterion_key") : null;
   if (summary?.error) throw new Error("Criterion scores unavailable");
+  const averages = summary?.data ?? [];
+  const categories = criteriaFor(propertyType);
+  const categorySummary = [...categories.map(c => {
+    const average = averages.find(a => a.criterion_key === c.key);
+    return { criterion_key: c.key, label: c.label, rating: average?.rating ?? null, review_count: average?.review_count ?? 0 };
+  }), ...averages.filter(a => !categories.some(c => c.key === a.criterion_key))];
   const verified = await Promise.all(
     rows.map(async (r) => {
       const { data, error } = await db.rpc("review_is_verified", {
@@ -79,6 +89,9 @@ export async function ReviewFeed({
       return { review: r.id, photos: data as PhotoSource[] };
     }),
   );
+  const allGallery = property ? await db.rpc("get_property_gallery", { p_property: property }) : null;
+  if (allGallery?.error) throw new Error("Tenant photos unavailable");
+  const tenantPhotos = property ? ((allGallery?.data ?? []) as PhotoSource[]).filter(p => p.role === "tenant").map(p => { const review = photos.find(r => r.photos.some(photo => photo.id === p.id)); return { ...p, review_href: review ? `#review-${review.review}` : undefined }; }) : photos.flatMap(r => r.photos.map(p => ({ ...p, avatar_url: avatars[r.review], review_href: `#review-${r.review}` })));
   return (
     <section className="history-panel" id="experiences">
       <h2>{landlord ? "Management experiences" : "Tenant experiences"}</h2>
@@ -92,10 +105,13 @@ export async function ReviewFeed({
       <p>
         {total} experiences · Page {page}
       </p>
-      {!!summary?.data?.length && <section className="criterion-summary" aria-label="Average tenant ratings">
-        <div className="criterion-summary-heading"><h3>Tenant rating summary</h3><span>{Number(rating).toFixed(1)} / 5 overall</span></div>
-        <div className="criterion-summary-grid">{summary.data.map(c => <div key={c.criterion_key}><span>{c.label}</span><strong>{Number(c.rating).toFixed(1)} / 5</strong><div className={`rating-meter rating-${ratingTone(Number(c.rating))}`} role="meter" aria-valuemin={0} aria-valuemax={5} aria-valuenow={Number(c.rating)} aria-label={`${c.label} average rating`}><span style={{ width: `${Number(c.rating) / 5 * 100}%` }} /></div><small>{c.review_count} {c.review_count === 1 ? "review" : "reviews"}</small></div>)}</div>
-        <p className="field-hint">Each review’s overall score is the mean of its criteria. The property score is the mean of visible reviews. Older reviews retain their original score.</p>
+      {property && <section className="rating-summary-compact" aria-label="Average tenant ratings">
+        <div className="rating-summary-score"><strong>★ {rating == null ? "N/A" : Number(rating).toFixed(1)} <small>/ 5</small></strong><span>{count} {count === 1 ? "tenant rating" : "tenant ratings"}</span></div>
+        <details className="rating-category-breakdown"><summary>Ratings by category <span>View breakdown</span></summary>
+          <div className="rating-category-rows">{categorySummary.filter(c => c.rating != null).map(c => <div className="rating-category-row" key={c.criterion_key}><span>{c.label}</span><div className={`rating-meter rating-${ratingTone(Number(c.rating))}`} role="meter" aria-valuemin={0} aria-valuemax={5} aria-valuenow={Number(c.rating)} aria-label={`${c.label} average rating`}><span style={{ width: `${Number(c.rating) / 5 * 100}%` }} /></div><strong>{Number(c.rating).toFixed(1)} <small>/ 5</small></strong><small>{c.review_count} {c.review_count === 1 ? "rating" : "ratings"}</small></div>)}</div>
+          {categorySummary.some(c => c.rating == null) && <p className="rating-category-unrated"><strong>Not rated yet:</strong> {categorySummary.filter(c => c.rating == null).map(c => c.label).join(" · ")}</p>}
+          <p className="field-hint">Category scores average published tenant ratings. Overall averages the reviews’ scores; older reviews may only have an overall score.</p>
+        </details>
       </section>}
       {!rows.length &&
         (total ? (
@@ -106,24 +122,26 @@ export async function ReviewFeed({
         ) : (
           <p>Be the first to share an experience.</p>
         ))}
+      <PhotoMedia carousel photos={tenantPhotos} title="Photos shared by tenants" />
       {rows.map((r) => (
-        <article key={r.id} className="dashboard-card tenant-review-card">
-          <header className="review-author"><ProfileAvatar name={r.alias} src={avatars[r.id]} /><h3>{r.alias}</h3></header>
+        <article id={`review-${r.id}`} key={r.id} className="dashboard-card tenant-review-card">
+          <header className="review-author review-author-structured"><ProfileAvatar name={r.alias} src={avatars[r.id]} /><div><h3>{r.alias}</h3>{r.created_at && <time dateTime={r.created_at}>Reviewed {displayDate(r.created_at.slice(0,10))}</time>}</div><span className="review-header-rating">★ {Number(r.property_rating).toFixed(1)} / 5</span></header>
           <div className="review-stay-facts"><div><span className="review-date-caption">Tenancy</span><div className="review-date-range"><time dateTime={r.start_date}>{displayDate(r.start_date)}</time><span aria-label="to">→</span>{r.end_date ? <time dateTime={r.end_date}>{displayDate(r.end_date)}</time> : <strong>Current</strong>}</div></div><div className="review-rent"><span className="review-date-caption">Monthly rent paid</span><strong>{money(r.rent_paid)} <small>/ month</small></strong></div></div>
-          <p className="demo-tag">
+          <div className="review-meta-row"><p className="demo-tag">
             {verified.find((v) => v.id === r.id)?.verified
               ? (r.is_demo ? "Demonstration verified tenant" : "Verified tenant · evidence manually reviewed")
               : "Unverified tenant"}{" "}
             {r.is_demo ? "· synthetic example" : "· User experience"} {r.was_edited ? "· Updated" : ""}
           </p>
-          <p>
+          <p className="review-management-score">
             Management{" "}
             {r.landlord_rating ?? "N/A"}
             {r.landlord_rating ? " / 5" : ""}
           </p>
-          <ReviewScoreBadges overall={r.property_rating} criteria={r.criteria} />
-<section className="review-description" aria-label="Review description"><h4>Description</h4><p>{r.body}</p></section>
-          {!!r.criteria?.length && <details className="review-criterion-details"><summary>Criterion ratings · {Number(r.property_rating).toFixed(1)} / 5 overall</summary><div className="review-criteria-scores">{r.criteria.map(c => <span key={c.key}>{c.label}{c.custom ? " (tenant added)" : ""} <strong>{c.rating} / 5</strong></span>)}</div></details>}
+          <ReviewScoreBadges overall={r.property_rating} criteria={r.criteria} showOverall={false} /></div>
+<ReviewDescription body={r.body} />
+          <PhotoMedia compact photos={(photos.find(p => p.review === r.id)?.photos ?? []).map(p => ({ ...p, avatar_url: avatars[r.id] }))} title={`Photos attached to ${r.alias}’s review`} />
+          <details className="review-criterion-details"><summary>View detailed ratings</summary><div className="review-criteria-scores">{(r.criteria?.length ? r.criteria : categories.map(c => ({ ...c, rating: null, custom: false }))).map(c => <span key={c.key}>{c.label}{c.custom ? " (tenant added)" : ""} <strong>{c.rating == null ? "N/A" : `${Number(c.rating).toFixed(1)} / 5`}</strong></span>)}<span>Management <strong>{r.landlord_rating == null ? "N/A" : `${Number(r.landlord_rating).toFixed(1)} / 5`}</strong></span></div>{!r.criteria?.length && <p className="field-hint">This older review includes an overall score, but no individual category ratings.</p>}</details>
           {replies
             .find((x) => x.review === r.id)
             ?.rows.map((reply) => (
@@ -131,23 +149,6 @@ export async function ReviewFeed({
                 <header className="review-author"><ProfileAvatar name={reply.alias} src={avatars[reply.id]} /><div><h4>{reply.alias}</h4><small>{reply.representative}</small></div></header>
                 <p>{reply.body}</p>
               </aside>
-            ))}
-          {photos
-            .find((x) => x.review === r.id)
-            ?.photos.map((ph) => (
-              <figure key={ph.id} className="photo-card">
-                <a href={"/api/photos/" + ph.id}>
-                  <Image
-                    className="review-photo"
-                    src={"/api/photos/" + ph.id}
-                    width={400}
-                    height={300}
-                    unoptimized
-                    alt="Photo shared by a tenant"
-                  />
-                </a>
-                <PhotoCaption photo={ph} />
-              </figure>
             ))}
           <footer className="review-actions review-feed-actions">
             <a className="review-action" href={"/properties/" + r.property_id}><svg className="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" aria-hidden="true"><path d="m3 10 9-7 9 7v11H3Z"/><path d="M9 21v-8h6v8"/></svg>Property profile</a>

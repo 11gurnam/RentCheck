@@ -30,6 +30,7 @@ export default async function EditReview({
         <ReviewForm
           property={{ id: r.property_id, name: r.property_name, property_type: r.property_type, is_demo: r.is_demo }}
           review={r}
+          existingPhotoCount={data?.length ?? 0}
         />
       </section>
       <PhotoForm review={id} photos={data} real={r.is_demo === false} />
