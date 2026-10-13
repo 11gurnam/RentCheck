@@ -20,6 +20,7 @@ import { StartConversation } from "@/features/messaging/forms";
 import { ownReviews } from "@/features/reviews/data";
 import { CameraIcon } from "@/components/ui/camera-icon";
 import { ActionIcon } from "@/components/ui/action-feedback";
+import { AppealForm } from "@/features/admin-platform/forms";
 export default async function PropertyPage({
   params,
   searchParams,
@@ -89,6 +90,7 @@ export default async function PropertyPage({
         )}
         <a className="property-secondary-action" href="#representative-contact"><ActionIcon name="shield" />Contact representative</a>
         {allowed?.data !== false && <a className="property-secondary-action camera-action" href={ownReview ? `/reviews/${ownReview.id}/edit#review-photos` : `/reviews/new?property=${id}`}><CameraIcon />Add review photos</a>}
+        {user && <AppealForm kind="property" target={id} label="Report this property" />}
       </div>
       <div className="dashboard-grid property-detail-panels">
         <section className="dashboard-card">

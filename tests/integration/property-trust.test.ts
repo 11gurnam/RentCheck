@@ -44,6 +44,15 @@ it("property-specific evidence bundles, claim disputes and reply authorization",
   expect((await clients[0].rpc("get_claimant_replies",{p_review:review.data.id})).data).toHaveLength(0);
   expect((await clients[3].rpc("decide_claim",decision)).error).toBeNull();
   expect((await clients[0].rpc("get_claimant_replies",{p_review:review.data.id})).data).toHaveLength(1);
+  const moderationRecord=await clients[3].rpc("get_admin_platform_list",{p_kind:"reviews",p_filters:{id:review.data.id}});
+  const responseId=moderationRecord.data.rows[0].replies[0].id;
+  const removeResponse={p_reply:responseId,p_reason:"Synthetic response moderation policy violation."};
+  expect((await clients[0].rpc("admin_remove_landlord_reply",removeResponse)).error?.code).toBe("42501");
+  expect((await clients[3].rpc("admin_remove_landlord_reply",removeResponse)).error).toBeNull();
+  expect((await clients[0].rpc("get_claimant_replies",{p_review:review.data.id})).data).toHaveLength(0);
+  const untouchedReview=await clients[3].rpc("get_admin_platform_list",{p_kind:"reviews",p_filters:{id:review.data.id}});
+  expect(untouchedReview.data.rows[0].body).toBe(input.body);
+  expect(untouchedReview.data.rows[0].status).toBe("visible");
   expect((await clients[3].rpc("decide_claim",{...decision,p_decision:"revoked"})).error).toBeNull();
   expect((await clients[0].rpc("get_claimant_replies",{p_review:review.data.id})).data).toHaveLength(0);
   expect((await clients[0].rpc("update_tenancy",{p_review:review.data.id,p_current:false,p_end:"2024-12-01",p_paid:15000})).error).toBeNull();

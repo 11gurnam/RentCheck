@@ -1,5 +1,5 @@
 import { displayDate } from "@/lib/display-date";
-import { AccountShell } from "@/components/ui/account-shell";
+import { AdminContent as AccountShell } from "@/features/admin-platform/content";
 import { ActionFeedback } from "@/components/ui/action-feedback";
 import { requireUser, isAdministrator } from "@/lib/auth/session";
 import { createDatabaseClient } from "@/lib/database/server";

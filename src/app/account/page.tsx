@@ -1,7 +1,7 @@
 import { TenantVerificationStatus } from "@/features/verification/account-status";
 import { AccountShell } from "@/components/ui/account-shell";
 import { AliasForm, SignOutForm } from "@/features/accounts/forms";
-import { getOwnProfile, requireUser } from "@/lib/auth/session";
+import { getOwnProfile, requireUser, isAdministrator } from "@/lib/auth/session";
 import { createDatabaseClient } from "@/lib/database/server";
 import { displayDate } from "@/lib/display-date";
 import { ProfilePhotoForm } from "@/features/accounts/photo-form";
@@ -11,6 +11,7 @@ import { ActionIcon } from "@/components/ui/action-feedback";
 export default async function AccountPage() {
   const user = await requireUser();
   const profile = await getOwnProfile();
+  const admin = await isAdministrator();
   const db = await createDatabaseClient();
   const results = profile ? await Promise.allSettled([
     db.rpc("get_my_reviews"),
@@ -27,12 +28,12 @@ export default async function AccountPage() {
         <div>
           <p className="eyebrow">YOUR PRIVATE SPACE</p>
           <h1>Your account.</h1>
-          <p>Your RentCheck profile, tenant experiences, and saved places.</p>
+          <p>{admin ? "Your administrator profile, account settings, and platform controls." : "Your RentCheck profile, tenant experiences, and saved places."}</p>
         </div>
         <SignOutForm />
       </div>
       <nav className="pagination" aria-label="Account settings">
-        <a href="/messages">Private conversations</a>
+        {!admin && <a href="/messages">Private conversations</a>}
         <a href="/account/notifications">Notifications</a>
         <a href="/account/password">Change password</a>
         <a href="/account/privacy">Privacy and deletion</a>
@@ -43,7 +44,7 @@ export default async function AccountPage() {
           <section className="dashboard-card">
             <div className="account-panel-title"><span className="account-panel-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="4" /><path d="M4 21v-2a8 8 0 0 1 16 0v2" /></svg></span><div><p className="eyebrow">PUBLIC PROFILE</p><h2>Public profile</h2></div></div>
             <div className="account-user-summary"><div><strong>{profile.public_alias}</strong><span>RentCheck member since {displayDate(user.created_at)}</span></div></div>
-            <p className="field-hint">This public name appears beside your reviews and replies.</p>
+            <p className="field-hint">{admin ? "Your display name identifies you in administrative records." : "This public name appears beside your reviews and replies."}</p>
             <ProfilePhotoForm name={profile.public_alias} src={avatar ?? null} />
             <AliasForm alias={profile.public_alias} />
           </section>
@@ -57,26 +58,33 @@ export default async function AccountPage() {
               <dt>Member since</dt>
               <dd>{displayDate(user.created_at)}</dd>
               <dt>Your RentCheck activity</dt>
-              <dd>Share tenant experiences, rate essentials, and shortlist places.</dd>
+              <dd>{admin ? "Manage properties, users, verification, and moderation." : "Share tenant experiences, rate essentials, and shortlist places."}</dd>
             </dl>
             <p className="field-hint account-privacy-note">
-              Your email stays private. Your public alias appears on reviews; your shortlist is visible only to you.
+              {admin ? "Your email stays private. Administrative actions are recorded in the platform audit log." : "Your email stays private. Your public alias appears on reviews; your shortlist is visible only to you."}
             </p>
-            <div className="account-security-action"><PasswordForm /></div>
-            {profile.is_administrator && (
+            <div className="account-security-action"><PasswordForm />{!admin && <a className="review-action" href="/account/appeals">Reports and appeals</a>}
+            {admin && (
               <a className="text-link" href="/admin">
-                Administrator area →
+                Admin Dashboard
               </a>
             )}
+            </div>
           </section>
-          <TenantVerificationStatus />
+          {!admin && <TenantVerificationStatus />}
           <section className="dashboard-card account-activity-panel">
             <p className="eyebrow">YOUR RENTCHECK ACTIVITY</p>
-            <h2>Your next move</h2>
+            <h2>{admin ? "Your admin workspace" : "Your next move"}</h2>
             <div className="account-activity-grid">
+              {admin ? <>
+                <a href="/search" className="account-activity-item"><ActionIcon name="search" /><div><strong>Explore</strong><span>Browse properties</span><small>View places and tenant feedback</small></div></a>
+                <a href="/properties/new" className="account-activity-item"><ActionIcon name="edit" /><div><strong>Add a place</strong><span>Create a property profile</span><small>Add a place to RentCheck</small></div></a>
+                <a href="/admin" className="account-activity-item"><ActionIcon name="shield" /><div><strong>Admin Dashboard</strong><span>Manage RentCheck</span><small>Open the platform dashboard</small></div></a>
+              </> : <>
               <a href="/account/reviews" className="account-activity-item"><ActionIcon name="edit" /><div><strong>{reviews ? reviews.filter(r => r.status === "visible").length : "—"}</strong><span>Published reviews</span><small>{reviews ? "View and manage your experiences" : "Open your reviews to view activity"}</small></div></a>
               <a href="/saved" className="account-activity-item"><ActionIcon name="save" /><div><strong>{saved ? saved.length : "—"}</strong><span>Saved places</span><small>Return to your private shortlist</small></div></a>
               <a href="/search" className="account-activity-item"><ActionIcon name="search" /><div><strong className="account-explore-value">Explore</strong><span>Find a place</span><small>Explore places and tenant ratings</small></div></a>
+              </>}
             </div>
           </section>
         </div>
