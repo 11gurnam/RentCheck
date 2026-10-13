@@ -10,6 +10,7 @@ export async function ownReviews(): Promise<OwnReview[]> {
   return data;
 }
 export type FeedReview = {
+  created_at?: string;
   is_demo: boolean;
   criteria: CriterionRating[];
   id: string;

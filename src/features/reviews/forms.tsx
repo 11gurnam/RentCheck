@@ -1,29 +1,104 @@
 "use client";
 import { ActionFeedback, ActionIcon } from "@/components/ui/action-feedback";
-import { useActionState, useState, useRef, useId } from "react";
+import { useActionState, useState, useRef, useId, useTransition } from "react";
 import { submitReview, removeReview, closeTenancy } from "./actions";
 import type { OwnReview } from "./validation";
 import { LandlordPreview } from "./landlord-preview";
 import { CriteriaForm } from "./criteria-form";
+import { reviewLanguage } from "./language";
+import { checkReviewLanguage } from "./language-actions";
+import type { LanguageCheck } from "./language-ai";
+import type { ReviewState } from "./validation";
+import { addPhoto } from "./photo-actions";
+import { ReviewPhotoPicker } from "./photo-picker";
+import { useRouter } from "next/navigation";
 export function ReviewForm({
   property,
   review,
+  existingPhotoCount = 0,
 }: {
   property: { id: string; name: string; property_type: string; is_demo?: boolean };
   review?: OwnReview;
+  existingPhotoCount?: number;
 }) {
-  const [state, action, pending] = useActionState(submitReview, {});
+  const router = useRouter();
+  const [photos, setPhotos] = useState<File[]>([]);
+  const [photoCount, setPhotoCount] = useState(existingPhotoCount);
+  const [uploadProgress, setUploadProgress] = useState("");
+  const [state, action, pending] = useActionState<ReviewState, FormData>(async (previous, form) => {
+    if (previous.savedReviewId) form.set("review", previous.savedReviewId);
+    const saved = form.get("retryPhotos") === "true" && previous.savedReviewId
+      ? previous : await submitReview(previous, form);
+    if (!saved.savedReviewId) return { ...saved, savedReviewId: previous.savedReviewId };
+    for (let i = 0; i < photos.length; i++) {
+      setUploadProgress(`Uploading photo ${i + 1} of ${photos.length}…`);
+      const upload = new FormData();
+      upload.set("review", saved.savedReviewId);
+      upload.set("photo", photos[i]);
+      try {
+        const result = await addPhoto({}, upload);
+        if (result.status !== "success") {
+          setPhotos(photos.slice(i));
+          setUploadProgress("");
+          return { ...saved, status: "warning", message: `Your review is saved. ${result.message} The remaining photos are still selected; retry or remove them.` };
+        }
+        setPhotoCount(count => count + 1);
+      } catch {
+        setPhotos(photos.slice(i));
+        setUploadProgress("");
+        return { ...saved, status: "warning", message: "Your review is saved, but photo upload was interrupted. Retry the remaining selected photos." };
+      }
+    }
+    setPhotos([]);
+    setUploadProgress("");
+    router.push("/account/reviews");
+    router.refresh();
+    return { ...saved, status: "success", message: "Review and photos saved." };
+  }, {});
   const [current, setCurrent] = useState(review?.current ?? true);
   const [start, setStart] = useState(review?.start ?? "");
   const [landlordAvailable, setLandlordAvailable] = useState(false);
+  const [body, setBody] = useState(review?.body ?? "");
+  const [preview, setPreview] = useState<LanguageCheck | null>(null);
+  const [languageCheck, setLanguageCheck] = useState<LanguageCheck | null>(null);
+  const [checking, setChecking] = useState(false);
+  const checkVersion = useRef(0);
+  const checkComment = async (text: string) => {
+    if (text.trim().length < 10) return null;
+    const version = ++checkVersion.current;
+    setChecking(true);
+    setLanguageCheck({ ...reviewLanguage(text), source: "local" });
+    try {
+      const result = await checkReviewLanguage(text);
+      if (version !== checkVersion.current) return null;
+      setLanguageCheck(result);
+      return result;
+    } catch {
+      if (version === checkVersion.current) setLanguageCheck({ ...reviewLanguage(text), source: "local", notice: "Language check unavailable. Please try again." });
+      return null;
+    } finally { if (version === checkVersion.current) setChecking(false); }
+  };
+  const confirmation = useRef<HTMLDialogElement>(null);
+  const submission = useRef<FormData | null>(null);
+  const previewTitle = useId();
+  const [, startSubmission] = useTransition();
   const real = review ? review.is_demo === false : property.is_demo === false;
   return (
     <form
       action={action}
+      onSubmit={async e => {
+        e.preventDefault();
+        submission.current = new FormData(e.currentTarget);
+        const result = languageCheck?.original === body ? languageCheck : await checkComment(body);
+        if (!result) return;
+        setPreview(result);
+        confirmation.current?.showModal();
+      }}
       onReset={(e) => e.preventDefault()}
       className="auth-form tenancy-review-form"
     >
       <input type="hidden" name="property" value={property.id} />
+      <input type="hidden" name="withPhotos" value={photos.length || state.savedReviewId ? "true" : "false"} />
       {review && <input type="hidden" name="review" value={review.id} />}
       <p className="review-property-context"><strong>{property.name}</strong><span>{property.property_type} · Your public alias appears with this review.</span></p>
       <fieldset className="review-stay-fields"><legend>Your stay</legend>
@@ -87,11 +162,22 @@ export function ReviewForm({
           minLength={10}
           maxLength={5000}
           required
-          defaultValue={review?.body}
+          value={body}
+          onChange={e => { setBody(e.target.value); ++checkVersion.current; setChecking(false); setLanguageCheck(null); }}
+          onBlur={() => { if (languageCheck?.original !== body) void checkComment(body); }}
+          aria-invalid={languageCheck?.flagged || undefined}
+          aria-describedby="review-language-status"
           rows={4}
           placeholder="What worked well? What could be better?"
         />
       </label>
+      <div id="review-language-status" className="review-language-status" aria-live="polite">
+        {checking && <p>Checking your comment…</p>}
+        {languageCheck?.flagged && <div className="review-language-warning"><p>Please use respectful language. {languageCheck.manualEdit ? "Edit the highlighted comment and check it again." : "Review the suggested wording below."}</p>{languageCheck.changed && <><p className="review-inline-suggestion">{languageCheck.suggestion}</p><button type="button" className="review-action" onClick={() => { setBody(languageCheck.suggestion); setLanguageCheck(null); }}>Use suggested wording</button></>}</div>}
+        {languageCheck?.notice && <p className="field-hint">{languageCheck.notice} <button type="button" className="review-action" disabled={checking} onClick={() => void checkComment(body)}>Check again</button></p>}
+        <p className="field-hint">AI language checks send this comment to Google Gemini. Free-tier text may be used to improve Google’s products. Check suggested wording before accepting it.</p>
+      </div>
+      <ReviewPhotoPicker files={photos} onChange={setPhotos} existingCount={photoCount} disabled={pending} />
       <label>
         <input name="woman" type="checkbox" defaultChecked={review?.woman} /> I
         explicitly self-identify as a woman (optional, private answer).
@@ -100,10 +186,32 @@ export function ReviewForm({
         <input name="synthetic" type="checkbox" required /> {real ? "This is my own tenancy experience and I consent to publication under my alias." : "This is a fictional tenancy and review."}
       </label>
       <ActionFeedback message={state.message} status={state.status} />
-      <button className="primary-button" disabled={pending}>
+      {uploadProgress && <p className="field-hint" role="status">{uploadProgress}</p>}
+      {state.savedReviewId && <div className="review-actions"><button type="button" className="review-action" disabled={pending || !photos.length} onClick={() => { const form = new FormData(); form.set("retryPhotos", "true"); startSubmission(() => action(form)); }}>Retry photo uploads</button><a className="review-action" href="/account/reviews">Go to your reviews</a></div>}
+      <button className="primary-button" disabled={pending || checking || languageCheck?.flagged}>
         <ActionIcon name="check" />
         {pending ? "Saving…" : review ? "Save review" : "Publish review"}
       </button>
+      <dialog ref={confirmation} className="review-delete-dialog review-language-dialog" aria-labelledby={previewTitle}>
+        <h2 id={previewTitle}>Review your comment</h2>
+        {preview && <>
+          <p>{preview.manualEdit ? "Some language needs your attention. Please edit it into respectful wording before submitting." : preview.changed ? "We found language that may be inappropriate. Check that this suggestion preserves what you meant. Nothing is saved until you approve." : "Check your comment before submitting. Its wording is unchanged."}</p>
+          {preview.changed && <section className="review-language-original"><h3>Your original comment</h3><p>{preview.original}</p></section>}
+          <section className="review-language-suggestion"><h3>{preview.changed ? "Suggested respectful wording" : "Your comment"}</h3><p>{preview.suggestion}</p></section>
+          <p className="field-hint">Only the approved comment is published. Ratings, dates and rent stay as you entered them.</p>
+          <div className="review-actions">
+            <button type="button" className="review-action" onClick={() => confirmation.current?.close()}>Keep editing</button>
+            {!preview.manualEdit && <button type="button" disabled={pending} onClick={() => {
+              const form = submission.current;
+              if (!form) return;
+              form.set("body", preview.suggestion);
+              setBody(preview.suggestion);
+              confirmation.current?.close();
+              startSubmission(() => action(form));
+            }}><ActionIcon name="check" />{preview.changed ? "Approve wording and submit" : review ? "Confirm and save" : "Confirm and publish"}</button>}
+          </div>
+        </>}
+      </dialog>
     </form>
   );
 }

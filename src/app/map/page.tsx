@@ -10,5 +10,5 @@ export default async function MapPage() {
     if (error) throw new Error("Map profile unavailable");
     return data ? { ...data, latitude: Number(l.latitude), longitude: Number(l.longitude), precision: l.precision } : null;
   }));
-  return <AccountShell><h1>Recorded property locations.</h1><p>Only explicitly supplied coordinates appear. Approximate pins are not exact building locations. No address is converted into a location automatically. Up to 100 recorded locations are shown.</p><RecordedMap properties={rows.filter((p): p is MappedProperty => p !== null)} /><a href="/search">Back to search</a></AccountShell>;
+  return <AccountShell><h1>Explore places on a map.</h1><p>See where places are located to compare areas before choosing. Only places with a supplied map location appear, up to 100 places. Approximate pins show the area rather than the exact building.</p><RecordedMap properties={rows.filter((p): p is MappedProperty => p !== null)} /><a href="/search">Back to search</a></AccountShell>;
 }

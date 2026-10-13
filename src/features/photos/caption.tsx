@@ -1,4 +1,8 @@
+import { ProfileAvatar } from "@/components/ui/profile-avatar";
 export type PhotoSource = {
+  avatar_url?: string | null;
+  identity_verified?: boolean;
+  review_href?: string;
   id: string;
   alias: string;
   role: "tenant" | "landlord";
@@ -8,9 +12,9 @@ export type PhotoSource = {
 export function PhotoCaption({ photo }: { photo: PhotoSource }) {
   return (
     <figcaption>
-      <strong>Shared by {photo.role}</strong> · {photo.alias}
-      <span className="demo-tag">
-        {photo.verified ? "Verified" : "Unverified"} {photo.role}
+      <div className="photo-uploader"><ProfileAvatar name={photo.alias || "Uploader unavailable"} src={photo.avatar_url} /><div><strong>{photo.alias || "Uploader unavailable"}</strong><small>Shared by {photo.role || "user"}</small></div></div>
+      <span className={photo.identity_verified === true && !photo.is_demo && photo.role === "landlord" ? "photo-verified-badge" : "demo-tag"}>
+        {photo.role === "landlord" ? photo.identity_verified === true && !photo.is_demo ? "Verified Landlord" : photo.verified ? photo.is_demo ? "Demonstration claim approved" : "Representative claim approved" : "Landlord · identity not verified" : photo.verified ? photo.is_demo ? "Demonstration verified tenant" : "Tenant · evidence reviewed" : "Tenant"}
       </span>
       {photo.is_demo && (
         <span className="field-hint">
