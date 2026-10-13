@@ -1,4 +1,5 @@
 "use client";
+import { FilePicker } from "@/components/ui/file-picker";
 import { ActionModal } from "@/components/ui/action-modal";
 import { ActionFeedback, ActionIcon, StatusBadge } from "@/components/ui/action-feedback";
 import { useActionState } from "react";
@@ -32,15 +33,7 @@ export function ClaimForm({
         is visible only to you and trusted administrators. Approval grants
         permitted detail/reply controls.
       </p>
-      <label>
-        {real ? "Redacted representative evidence image or PDF" : "Fictional claim evidence image or PDF"}
-        <input
-          type="file"
-          name="document"
-          accept="image/jpeg,image/png,image/webp,application/pdf"
-          required
-        />
-      </label>
+      <FilePicker label={real ? "Redacted representative evidence image or PDF" : "Fictional claim evidence image or PDF"} name="document" accept="image/jpeg,image/png,image/webp,application/pdf" />
       <label>
         <input name="synthetic" type="checkbox" required /> {real ? "I have authority to submit this redacted evidence and consent to private review and the evidence retention policy." : "This claim and evidence use only invented demonstration information."}
       </label>

@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "./form-controls.css";
 
 .message-body { white-space: pre-wrap; overflow-wrap: anywhere; }
 .comparison-choice { display: flex; gap: .65rem; align-items: center; margin: .6rem 0; }

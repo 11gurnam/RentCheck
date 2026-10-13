@@ -1,4 +1,5 @@
 "use client";
+import { FilePicker } from "@/components/ui/file-picker";
 import { ActionFeedback, ActionIcon } from "@/components/ui/action-feedback";
 import { useActionState } from "react";
 import { addPhoto, removePhoto } from "./photo-actions";
@@ -20,15 +21,7 @@ export function PhotoForm({
       </p>
       <form action={a} className="auth-form">
         <input name="review" type="hidden" value={review} />
-        <label>
-          Photo
-          <input
-            type="file"
-            name="photo"
-            accept="image/jpeg,image/png,image/webp"
-            required
-          />
-        </label>
+        <FilePicker label="Photo" name="photo" accept="image/jpeg,image/png,image/webp" photo />
         <button disabled={p}><ActionIcon name="plus" />Add photo</button>
         <ActionFeedback message={s.message} status={s.status} />
       </form>

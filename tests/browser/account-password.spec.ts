@@ -1,5 +1,6 @@
 import { test, expect } from "@playwright/test";
 import sharp from "sharp";
+import { randomBytes } from "node:crypto";
 import { createClient } from "@supabase/supabase-js";
 import { localBackendConfiguration } from "../helpers/local-backend";
 
@@ -45,6 +46,19 @@ test("account password change verifies current password and enables the new pass
     const profileId = source!.split("/").at(-1)!.split("?")[0];
     const stored = await admin.from("public_profiles").select("avatar_object").eq("id",profileId).single();
     photoPath = stored.data?.avatar_object ?? null;
+    // A second original above 3 MiB is resized in the browser and updates without reload.
+    const large = await sharp(randomBytes(1100 * 1100 * 3), {raw:{width:1100,height:1100,channels:3}}).png({compressionLevel:0}).toBuffer();
+    expect(large.length).toBeGreaterThan(3 * 1024 * 1024);
+    await page.getByRole("button", {name:"Change photo",exact:true}).click();
+    await photoDialog.getByLabel("Profile photo", {exact:true}).setInputFiles({name:"large.png",mimeType:"image/png",buffer:large});
+    await expect(photoDialog.getByAltText("Selected photo preview")).toBeVisible();
+    await photoDialog.getByRole("button", {name:"Save photo",exact:true}).click();
+    await expect(photoDialog.getByRole("status")).toHaveText("Profile photo updated.");
+    await page.keyboard.press("Escape");
+    await expect(image).not.toHaveAttribute("src",source!);
+    await expect.poll(() => image.evaluate((element:HTMLImageElement)=>element.complete&&element.naturalWidth>0)).toBe(true);
+    const replacement = await admin.from("public_profiles").select("avatar_object").eq("id",profileId).single();
+    photoPath = replacement.data?.avatar_object ?? null;
     await page.screenshot({ path: info.outputPath("account.png"), fullPage: true });
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
     await page.getByRole("button", { name: "Change password", exact: true }).click();

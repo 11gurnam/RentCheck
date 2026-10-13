@@ -1,4 +1,5 @@
 "use client";
+import { FilePicker } from "@/components/ui/file-picker";
 import { useActionState } from "react";
 import {
   uploadPropertyPhoto,
@@ -25,15 +26,7 @@ export function PropertyPhotoForm({
       </p>
       <form action={a} className="auth-form">
         <input type="hidden" name="property" value={property} />
-        <label>
-          Landlord photo
-          <input
-            name="photo"
-            type="file"
-            accept="image/jpeg,image/png,image/webp"
-            required
-          />
-        </label>
+        <FilePicker label="Landlord photo" name="photo" accept="image/jpeg,image/png,image/webp" photo />
         <button disabled={p}>Add landlord photo</button>
         {s.message && <p role="status">{s.message}</p>}
       </form>

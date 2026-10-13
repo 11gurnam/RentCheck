@@ -1,4 +1,5 @@
 "use client";
+import { FilePicker } from "@/components/ui/file-picker";
 import { ActionFeedback, ActionIcon, StatusBadge } from "@/components/ui/action-feedback";
 import { useActionState } from "react";
 import { requestVerification, decideVerification } from "./actions";
@@ -41,15 +42,7 @@ export function VerificationForm({
           onReset={(e) => e.preventDefault()}
         >
           <input name="review" type="hidden" value={review} />
-          <label>
-            {real ? "Redacted rental document image or PDF" : "Fictional rental document image or PDF"}
-            <input
-              type="file"
-              name="document"
-              accept="image/jpeg,image/png,image/webp,application/pdf"
-              required
-            />
-          </label>
+          <FilePicker label={real ? "Redacted rental document image or PDF" : "Fictional rental document image or PDF"} name="document" accept="image/jpeg,image/png,image/webp,application/pdf" />
           <label>
             <input type="checkbox" name="synthetic" required /> {real ? "I have permission to submit this redacted document and consent to private review and the evidence retention policy." : "This document contains only invented demonstration information."}
           </label>
