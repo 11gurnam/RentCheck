@@ -57,13 +57,13 @@ test("shortlists persist privately and property contribution checks duplicates",
     for (const [label, value] of [
       ["Property name", "Demo Neem Courtyard"],
       ["Full demo address", "Demo Lane 12, Central Park"],
-      ["State / union territory", "Delhi"],
-      ["City", "New Delhi"],
       ["Locality", "Central Park"],
       ["Minimum monthly rent (₹)", "10000"],
       ["Maximum monthly rent (₹)", "20000"],
     ])
       await page.getByLabel(label, { exact: true }).fill(value);
+    await page.getByLabel("State / union territory").selectOption("Delhi");
+    await page.getByLabel("City",{exact:true}).selectOption("New Delhi");
     await page
       .getByLabel("All details are fictional demonstration data.")
       .check();
@@ -86,7 +86,7 @@ test("shortlists persist privately and property contribution checks duplicates",
     });
     const name = `Browser Fixture ${crypto.randomUUID().slice(0, 8)}`;
     await page.getByLabel("Property name").fill(name);
-    await page.getByLabel("City", { exact: true }).fill("Browser Fixture City");
+    await page.getByLabel("City", { exact: true }).selectOption("Delhi");
     await page
       .getByLabel("Full demo address")
       .fill(`Fictional Lane ${crypto.randomUUID()}`);

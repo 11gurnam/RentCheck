@@ -57,6 +57,9 @@ export async function contribute(
         synthetic: recordMode === "demo",
         consent: true,
         declaredOwner: input.declaredOwner === "on",
+        latitude: input.shareLocation === "on" ? input.latitude : null,
+        longitude: input.shareLocation === "on" ? input.longitude : null,
+        shareLocation: input.shareLocation === "on",
       },
       p_acknowledged: input.acknowledged === "on",
     });
@@ -70,6 +73,7 @@ export async function contribute(
     };
   }
   revalidatePath("/search");
+  revalidatePath("/map");
   redirect(`/properties/${id}`);
 }
 export async function saveProperty(

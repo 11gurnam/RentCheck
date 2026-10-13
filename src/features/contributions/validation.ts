@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { canonicalState } from "../addresses/india";
 const short = (max: number) =>
   z
     .string()
@@ -13,7 +14,7 @@ export const contributionSchema = z
   .object({
     name: short(120).min(3),
     address: short(300).min(5),
-    state: short(80),
+    state: short(80).refine(value=>!!canonicalState(value),"Select an Indian state or union territory."),
     city: short(80),
     locality: short(100),
     type: z.enum(["Flat", "House", "PG", "Hostel", "Homestay"]),
@@ -23,7 +24,12 @@ export const contributionSchema = z
     synthetic: z.literal("on", "Confirm this is synthetic demo data."),
     declaredOwner: z.string().optional(),
     acknowledged: z.string().optional(),
+    postalCode: z.string().regex(/^$|^[1-9]\d{5}$/,"Enter a six-digit PIN code.").optional().default(""),
+    latitude: z.union([z.literal(""),z.coerce.number().min(6).max(38)]).optional().default(""),
+    longitude: z.union([z.literal(""),z.coerce.number().min(68).max(98)]).optional().default(""),
+    shareLocation: z.enum(["on",""]).optional(),
   })
+  .refine(value=>value.shareLocation!=="on"||(typeof value.latitude==="number"&&typeof value.longitude==="number"),{path:["latitude"],message:"Choose both property coordinates before sharing the pin."})
   .refine((v) => v.max >= v.min, {
     path: ["max"],
     message: "Maximum rent must be at least minimum rent.",

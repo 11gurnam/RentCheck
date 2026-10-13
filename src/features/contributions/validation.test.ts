@@ -28,6 +28,9 @@ it.each([
   { name: "<script>" },
   { address: "x" },
   { type: "Hotel" },
+  {postalCode:"000000"},
+  {shareLocation:"on",latitude:"",longitude:""},
+  {state:"Unknown state"},
 ])("rejects contribution boundary %o", (override) =>
   expect(contributionSchema.safeParse({ ...valid, ...override }).success).toBe(
     false,

@@ -39,7 +39,7 @@ export function PropertyCard({ property: p, actions }: { property: Property; act
         </p>
         {p.is_demo && <span className="demo-tag">Synthetic example</span>}
         <div className="property-card-actions"><CardPhotoUpload property={p.id} name={p.name} />{actions}</div>
-        <nav className="property-card-secondary-links" aria-label={`${p.name} discovery tools`}><a href="/compare">Compare properties</a><span aria-hidden="true">·</span><a href="/map">View map</a></nav>
+        <nav className="property-card-secondary-links" aria-label={`${p.name} discovery tools`}><a href="/compare">Compare properties</a><span aria-hidden="true">·</span><a href={p.latitude==null?"/map":`/properties/${p.id}#place-location`}>View map</a></nav>
       </div>
     </article>
   );

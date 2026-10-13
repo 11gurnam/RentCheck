@@ -19,6 +19,7 @@ import { StartConversation } from "@/features/messaging/forms";
 import { ownReviews } from "@/features/reviews/data";
 import { CameraIcon } from "@/components/ui/camera-icon";
 import { ActionIcon } from "@/components/ui/action-feedback";
+import { PropertyLocation } from "@/features/discovery/property-location";
 export default async function PropertyPage({
   params,
   searchParams,
@@ -63,7 +64,7 @@ export default async function PropertyPage({
           {p.property_type} · {p.city}, {p.state}
         </p>
         <h1>{p.name}</h1>
-        <p>{p.address}</p>
+        <p>{p.address}{p.postal_code ? ` · PIN ${p.postal_code}` : ""}</p>
         <p className="rent">
           {money(p.rent_min)}–{money(p.rent_max)} / month
         </p>
@@ -74,6 +75,7 @@ export default async function PropertyPage({
         )}
       </div>
       <PropertyGallery property={id} />
+      <PropertyLocation name={p.name} latitude={p.latitude} longitude={p.longitude} precision={p.precision}/>
       <div className="property-actions" aria-label="Property actions">
         <SaveForm property={id} saved={isSaved} />
         <a className="property-secondary-action" href={`/claims/new?kind=property&target=${id}`}>
@@ -99,6 +101,7 @@ export default async function PropertyPage({
           ) : (
             <p>Manager not recorded</p>
           )}
+          <p className="manager-score">Landlord / management rating: <strong>{p.landlord_rating==null?"No ratings yet":`${Number(p.landlord_rating).toFixed(1)} / 5 · ${p.landlord_review_count??0} rated reviews`}</strong></p>
         </section>
         <section className="dashboard-card">
           <h2>Women’s tenant recommendations</h2>

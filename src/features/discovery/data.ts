@@ -2,6 +2,12 @@ import "server-only";
 import { createDatabaseClient } from "@/lib/database/server";
 import type { Filters } from "./filters";
 export type Property = {
+  latitude?: number | null;
+  longitude?: number | null;
+  precision?: string | null;
+  postal_code?: string | null;
+  landlord_rating?: number | null;
+  landlord_review_count?: number;
   criterion_scores: CriterionScore[];
   id: string;
   name: string;
@@ -55,8 +61,11 @@ export async function searchProperties(filters: Filters) {
   const properties = data as Property[];
   if (!properties.length) return properties;
   const scores = await db.from("property_criterion_scores").select("*").in("property_id", properties.map(p => p.id));
-  if (scores.error) throw new Error("Criterion scores unavailable");
-  return properties.map(p => ({ ...p, criterion_scores: (scores.data ?? []).filter(s => s.property_id === p.id) as CriterionScore[] }));
+  const locations=await db.from("property_locations").select("property_id,latitude,longitude,precision").in("property_id",properties.map(p=>p.id));
+  const managers=properties.map(p=>p.landlord_id).filter((id):id is string=>!!id);
+  const landlordScores=managers.length?await db.from("landlord_scores").select("landlord_id,landlord_rating,review_count").in("landlord_id",managers):{data:[],error:null};
+  if (scores.error||locations.error||landlordScores.error) throw new Error("Property details unavailable");
+  return properties.map(p => {const location=locations.data?.find(l=>l.property_id===p.id),manager=landlordScores.data?.find(s=>s.landlord_id===p.landlord_id);return { ...p, ...location, landlord_rating:manager?.landlord_rating??null,landlord_review_count:manager?.review_count??0,criterion_scores: (scores.data ?? []).filter(s => s.property_id === p.id) as CriterionScore[] };});
 }
 export async function getLocations() {
   const db = await createDatabaseClient();
@@ -84,13 +93,20 @@ export async function getProperty(id: string) {
   const counts = await db.rpc("womens_recommendation_counts", {
     p_property: id,
   });
-  if (scores.error || counts.error)
+  const location=await db.from("property_locations").select("latitude,longitude,precision").eq("property_id",id).maybeSingle();
+  const postal=await db.from("properties").select("postal_code").eq("id",id).maybeSingle();
+  const manager=data.landlord_id?await db.from("landlord_scores").select("landlord_rating,review_count").eq("landlord_id",data.landlord_id).maybeSingle():{data:null,error:null};
+  if (scores.error || counts.error || location.error || postal.error || manager.error)
     throw new Error("Property scores unavailable");
   return {
     ...data,
     property_rating: scores.data?.property_rating ?? null,
     review_count: scores.data?.review_count ?? 0,
     ...counts.data?.[0],
+    ...location.data,
+    postal_code:postal.data?.postal_code??null,
+    landlord_rating:manager.data?.landlord_rating??null,
+    landlord_review_count:manager.data?.review_count??0,
   } as Property;
 }
 export async function getAssociations(

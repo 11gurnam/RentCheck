@@ -74,7 +74,7 @@ test("opt-in messaging, block/report moderation and explicit map coordinates wor
     await page.goto("/admin/locations"); await page.getByRole("combobox", { name: "Property", exact: true }).selectOption(property!); await page.getByLabel("Latitude", { exact: true }).fill("28.61"); await page.getByLabel("Longitude", { exact: true }).fill("77.21"); await page.getByLabel("Coordinate source and audit reason").fill("Synthetic fictional coordinate fixture"); await page.getByRole("button", { name: "Save recorded location" }).click(); await expect(page.getByRole("status")).toContainText("updated and audited");
     await page.goto("/map"); await page.getByLabel("Choose a place").selectOption(property!); await expect(page.getByText("Approximate location:", { exact: false })).toBeVisible(); await expect(page.locator("iframe")).toHaveCount(0);
     await page.route("https://www.openstreetmap.org/**", route => route.fulfill({ contentType: "text/html", body: "<p>Map provider test fixture</p>" }));
-    await page.getByRole("button", { name: "Load OpenStreetMap" }).click(); await expect(page.locator("iframe")).toHaveAttribute("src", /marker=28.61%2C77.21/);
+    await page.getByRole("button", { name: "Load OpenStreetMap" }).click(); await expect(page.getByRole("region",{name:"Property location map"})).toBeVisible();await expect(page.locator(".leaflet-interactive")).toHaveCount(1);
     expect((await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21aa"]).analyze()).violations).toEqual([]);
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
     await page.screenshot({ path: info.outputPath("recorded-map.png"), fullPage: true });

@@ -3,6 +3,8 @@ import { ActionFeedback, ActionIcon } from "@/components/ui/action-feedback";
 import { useActionState, useState } from "react";
 import { contribute, saveProperty } from "./actions";
 import type { ContributionState } from "./validation";
+import { AddressFields } from "@/features/addresses/fields";
+import { LocationPicker } from "@/features/addresses/location-picker";
 export function SaveForm({
   property,
   saved,
@@ -37,8 +39,6 @@ export function ContributionForm({ real = false }: { real?: boolean }) {
   const fields = [
     ["name", "Property name"],
     ["address", real ? "Full address" : "Full demo address"],
-    ["state", "State / union territory"],
-    ["city", "City"],
     ["locality", "Locality"],
     ["min", "Minimum monthly rent (₹)"],
     ["max", "Maximum monthly rent (₹)"],
@@ -47,6 +47,8 @@ export function ContributionForm({ real = false }: { real?: boolean }) {
   return (
     <form action={action} className="contribution-form" onReset={event=>event.preventDefault()}>
       <input type="hidden" name="recordMode" value={real ? "real" : "demo"} />
+      <LocationPicker values={values} onChange={setValues} />
+      <AddressFields values={values} onChange={setValues} />
       {fields.map(([name, label]) => (
         <div className="form-field" key={name}>
           <label htmlFor={name}>{label}</label>
@@ -123,7 +125,7 @@ export function ContributionForm({ real = false }: { real?: boolean }) {
         </div>
       )}
       <button className="button" disabled={pending}>
-        {pending ? "Adding…" : "Add demo property"}
+        {pending ? "Adding…" : real ? "Add property" : "Add demo property"}
       </button>
     </form>
   );
