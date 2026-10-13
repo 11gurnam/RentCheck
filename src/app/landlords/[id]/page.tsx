@@ -34,7 +34,7 @@ export default async function LandlordPage({
         <p className="eyebrow">LANDLORD / MANAGEMENT PROFILE</p>
         <h1>{l.name}</h1>
         <p>{l.description}</p>
-        <span className="demo-tag">Synthetic manager</span>
+        {l.is_demo&&<span className="demo-tag">Synthetic manager</span>}
       </div>
       <p>
         <a className="primary-link" href="#review-landlord">

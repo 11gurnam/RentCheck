@@ -12,6 +12,7 @@ import type { ReviewState } from "./validation";
 import { addPhoto } from "./photo-actions";
 import { ReviewPhotoPicker } from "./photo-picker";
 import { useRouter } from "next/navigation";
+import { StarRating } from "./star-rating";
 export function ReviewForm({
   property,
   review,
@@ -63,6 +64,7 @@ export function ReviewForm({
   const [current, setCurrent] = useState(review?.current ?? true);
   const [start, setStart] = useState(review?.start ?? "");
   const [landlordAvailable, setLandlordAvailable] = useState(false);
+  const [managerRating,setManagerRating]=useState(review?.managerRating??0);
   const [body, setBody] = useState(review?.body ?? "");
   const [preview, setPreview] = useState<LanguageCheck | null>(null);
   const [languageCheck, setLanguageCheck] = useState<LanguageCheck | null>(null);
@@ -127,7 +129,7 @@ export function ReviewForm({
       <div className="review-date-fields">
       <label>
         Tenancy start
-        <input name="start" type="date" required defaultValue={review?.start} readOnly={!!review} onChange={e => setStart(e.target.value)} />
+        <input name="start" type="date" required defaultValue={review?.start} readOnly={!!review} onChange={e => {setStart(e.target.value);setManagerRating(0);}} />
       </label>
       <label>
         Tenancy end
@@ -144,22 +146,17 @@ export function ReviewForm({
       {current && <input name="end" type="hidden" value="" />}
       </fieldset>
       <CriteriaForm type={property.property_type} initial={review?.criteria} />
+      <fieldset className="landlord-rating-section"><legend>Rate your landlord / management</legend>
       {!review && <LandlordPreview property={property.id} start={start} onAvailable={setLandlordAvailable} />}
-      <div className="review-short-fields"><label>
-        Landlord / management rating
-        <select name="managerRating" disabled={!review && !landlordAvailable} defaultValue={review?.managerRating ?? ""}>
-          <option value="">N/A</option>
-          {[5, 4, 3, 2, 1].map((n) => (
-            <option key={n} value={n}>
-              {n} / 5
-            </option>
-          ))}
-        </select>
-      </label>
+      <p className="field-hint">How was communication, maintenance and deposit handling? This score rates management separately from the accommodation.</p>
+      <fieldset disabled={!review&&!landlordAvailable} className="landlord-stars"><legend className="sr-only">Landlord score</legend><StarRating label="Landlord / management" value={managerRating} onChange={setManagerRating} step={1} required={false}/></fieldset>
+      <input type="hidden" name="managerRating" value={(review||landlordAvailable)&&managerRating?managerRating:""}/>
+      {managerRating>0&&<button type="button" className="review-action" onClick={()=>setManagerRating(0)}>Leave landlord unrated</button>}
+      <p className="field-hint">Optional. No score is recorded if you leave the stars unanswered.</p>
+      </fieldset>
+      <div className="review-short-fields">
       <label>Would you recommend this place? (optional)<select name="recommend" defaultValue={review?.recommend == null ? "" : String(review.recommend)}><option value="">N/A</option><option value="true">Yes</option><option value="false">No</option></select></label>
       </div>
-      {!review && !landlordAvailable && <input type="hidden" name="managerRating" value="" />}
-      <p className="field-hint">Management rating is optional; select N/A if the manager is unknown.</p>
       <label>
         Your experience
         <textarea

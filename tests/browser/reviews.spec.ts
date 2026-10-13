@@ -52,11 +52,11 @@ test("author creates, edits, uploads and deletes a review without exposing priva
     await page.getByRole("radiogroup", { name: "Parking rating", exact: true }).getByRole("radio", { name: "2.5 out of 5", exact: true }).check();
     await expect(page.locator(".criteria-footer output")).toContainText("3.8 / 5");
     await page
-      .getByRole("combobox", {
+      .getByRole("radiogroup", {
         name: "Landlord / management rating",
         exact: true,
       })
-      .selectOption("2");
+      .getByRole("radio",{name:"2 out of 5",exact:true}).check();
     await page
       .getByLabel("Your experience")
       .fill(
