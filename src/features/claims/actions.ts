@@ -3,8 +3,8 @@ import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { requireUser, isAdministrator } from "@/lib/auth/session";
 import { createDatabaseClient } from "@/lib/database/server";
-import { createMediaClient } from "@/lib/database/privileged";
-import { normalizeDocument } from "@/features/privacy/document";
+
+import { submitEvidenceBundle } from "@/features/privacy/evidence";
 import type { ReviewState } from "@/features/reviews/validation";
 import { detailsSchema, replySchema } from "./validation";
 export async function requestClaim(
@@ -21,7 +21,7 @@ export async function requestClaim(
     !(file instanceof File) ||
     form.get("synthetic") !== "on"
   )
-    return { message: "Choose a valid profile and fictional evidence image." };
+    return { message: "Choose a valid property or profile, supporting evidence, and confirm consent." };
   const db = await createDatabaseClient();
   const profile = await db
     .from(kind.data === "property" ? "properties" : "landlords")
@@ -30,38 +30,8 @@ export async function requestClaim(
     .maybeSingle();
   if (profile.error || !profile.data)
     return { message: "Profile unavailable." };
-  let documentFile: Awaited<ReturnType<typeof normalizeDocument>>;
-  try {
-    documentFile = await normalizeDocument(file);
-  } catch {
-    return {
-      message:
-        "Use a valid fictional JPEG, PNG, WebP or PDF, up to 3 MiB. PDFs must have at most 30 pages, without encryption, scripts, attachments or interactive forms.",
-    };
-  }
-  const media = createMediaClient();
-  const document = crypto.randomUUID();
-  const path = "claim/" + document + "." + documentFile.extension;
-  const result = await media.storage
-    .from("rental-documents")
-    .upload(path, documentFile.bytes, {
-      contentType: documentFile.mime,
-      upsert: false,
-    });
-  if (result.error) return { message: "Private evidence upload failed." };
-  const claim = await media.rpc("register_evidence_document", {
-    p_user: user.id,
-    p_property: kind.data === "property" ? target.data : null,
-    p_landlord: kind.data === "landlord" ? target.data : null,
-    p_document: document,
-    p_extension: documentFile.extension,
-    p_demo: profile.data.is_demo,
-    p_consent: true,
-  });
-  if (claim.error) {
-    await media.storage.from("rental-documents").remove([path]);
-    return { message: claim.error.message };
-  }
+  const claim = await submitEvidenceBundle(user.id, form, { property: kind.data === "property" ? target.data : undefined, landlord: kind.data === "landlord" ? target.data : undefined, demo: profile.data.is_demo });
+  if (claim.message) return { message: claim.message };
   revalidatePath("/claims");
   revalidatePath("/admin/claims");
   return {
@@ -79,7 +49,7 @@ export async function decideClaim(
   const v = z
     .object({
       claim: z.uuid(),
-      decision: z.enum(["approved", "rejected", "revoked"]),
+      decision: z.enum(["approved", "rejected", "revoked", "disputed"]),
       reason: z.string().trim().min(10).max(2000),
     })
     .safeParse(Object.fromEntries(form));
@@ -93,14 +63,14 @@ export async function decideClaim(
     p_claim: v.data.claim,
     p_decision: v.data.decision,
     p_reason: v.data.reason,
-    p_checks: { identity: form.get("identity") === "on", property: form.get("property") === "on", period_or_authority: form.get("period_or_authority") === "on" },
+    p_checks: { identity: form.get("identity") === "on", property: form.get("property") === "on", period_or_authority: form.get("period_or_authority") === "on", readable: form.get("readable") === "on", complete: form.get("complete") === "on", valid: form.get("valid") === "on" },
   });
   if (error) return { message: error.message };
   revalidatePath("/admin/claims");
   revalidatePath("/claims");
   revalidatePath("/properties", "layout");
   revalidatePath("/landlords", "layout");
-  return { status: "success", message: "Demonstration claim decision saved and audited." };
+  return { status: "success", message: "Property claim decision saved and audited." };
 }
 export async function updateDetails(
   _: ReviewState,

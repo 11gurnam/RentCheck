@@ -15,6 +15,7 @@ export default async function VerificationAdmin() {
   return (
     <AccountShell>
       <h1>Tenancy verification requests</h1>
+      <p><a className="review-action" href="/admin/verification-management">Open Verification Management</a></p>
       <p>
         Inspect the evidence and its demonstration/real label. Real approvals require the manual checklist. Every approval, rejection and
         revocation needs a reason and is audited.

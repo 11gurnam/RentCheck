@@ -1,3 +1,4 @@
+import { ClaimPropertySearch } from "@/features/claims/property-search";
 import { AccountShell } from "@/components/ui/account-shell";
 import { requireUser } from "@/lib/auth/session";
 import { getProperty, getLandlord } from "@/features/discovery/data";
@@ -20,7 +21,7 @@ export default async function NewClaim({
   return (
     <AccountShell>
       <section className="dashboard-card">
-        <h1>{profile?.is_demo === false ? "Claim a representative profile" : "Claim a demonstration profile"}</h1>
+        <h1>{profile?.is_demo === false ? "Claim your property" : "Property claims"}</h1>
         {v.success && profile ? (
           <ClaimForm
             target={v.data.target}
@@ -29,9 +30,7 @@ export default async function NewClaim({
             real={profile.is_demo === false}
           />
         ) : (
-          <p>
-            <a href="/search">Find a profile</a> and choose Claim this profile.
-          </p>
+          <ClaimPropertySearch />
         )}
       </section>
     </AccountShell>

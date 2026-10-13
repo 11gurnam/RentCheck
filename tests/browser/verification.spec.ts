@@ -98,7 +98,7 @@ test("private demonstration documents, trusted approval, recommendation threshol
       identities[n].review = r.data.id;
       await login(page, n);
       await page.goto("/reviews/" + r.data.id + "/edit");
-      await page.getByLabel("Fictional rental document image").setInputFiles({
+      await page.getByLabel("Fictional supporting documents").setInputFiles({
         name: "synthetic-document.png",
         mimeType: "image/png",
         buffer: png,

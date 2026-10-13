@@ -1,3 +1,4 @@
+import { TenantVerificationStatus } from "@/features/verification/account-status";
 import { AccountShell } from "@/components/ui/account-shell";
 import { AliasForm, SignOutForm } from "@/features/accounts/forms";
 import { getOwnProfile, requireUser } from "@/lib/auth/session";
@@ -68,6 +69,7 @@ export default async function AccountPage() {
               </a>
             )}
           </section>
+          <TenantVerificationStatus />
           <section className="dashboard-card account-activity-panel">
             <p className="eyebrow">YOUR RENTCHECK ACTIVITY</p>
             <h2>Your next move</h2>

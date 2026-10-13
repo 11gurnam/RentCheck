@@ -127,10 +127,10 @@ export async function ReviewFeed({
         <article id={`review-${r.id}`} key={r.id} className="dashboard-card tenant-review-card">
           <header className="review-author review-author-structured"><ProfileAvatar name={r.alias} src={avatars[r.id]} /><div><h3>{r.alias}</h3>{r.created_at && <time dateTime={r.created_at}>Reviewed {displayDate(r.created_at.slice(0,10))}</time>}</div><span className="review-header-rating">★ {Number(r.property_rating).toFixed(1)} / 5</span></header>
           <div className="review-stay-facts"><div><span className="review-date-caption">Tenancy</span><div className="review-date-range"><time dateTime={r.start_date}>{displayDate(r.start_date)}</time><span aria-label="to">→</span>{r.end_date ? <time dateTime={r.end_date}>{displayDate(r.end_date)}</time> : <strong>Current</strong>}</div></div><div className="review-rent"><span className="review-date-caption">Monthly rent paid</span><strong>{money(r.rent_paid)} <small>/ month</small></strong></div></div>
-          <div className="review-meta-row"><p className="demo-tag">
+          <div className="review-meta-row"><p className={verified.find((v) => v.id === r.id)?.verified && !r.is_demo ? "semantic-status status-success" : "demo-tag"}>
             {verified.find((v) => v.id === r.id)?.verified
-              ? (r.is_demo ? "Demonstration verified tenant" : "Verified tenant · evidence manually reviewed")
-              : "Unverified tenant"}{" "}
+              ? (r.is_demo ? "Demonstration verified tenant" : "Verified Tenant · this property and tenancy")
+              : "Unverified Tenant"}{" "}
             {r.is_demo ? "· synthetic example" : "· User experience"} {r.was_edited ? "· Updated" : ""}
           </p>
           <p className="review-management-score">
@@ -146,7 +146,7 @@ export async function ReviewFeed({
             .find((x) => x.review === r.id)
             ?.rows.map((reply) => (
               <aside key={reply.id} className="dashboard-card">
-                <header className="review-author"><ProfileAvatar name={reply.alias} src={avatars[reply.id]} /><div><h4>{reply.alias}</h4><small>{reply.representative}</small></div></header>
+                <header className="review-author"><ProfileAvatar name={reply.alias} src={avatars[reply.id]} /><div><h4>{reply.alias}</h4><small className="verified-response-label"><ActionIcon name="shield" />{reply.representative}</small></div></header>
                 <p>{reply.body}</p>
               </aside>
             ))}
@@ -162,15 +162,13 @@ export async function ReviewFeed({
           )}
           {claims.some(
             (c) =>
-              c.property_id === r.property_id ||
-              (c.landlord_id !== null && c.landlord_id === r.landlord_id),
+              c.property_id === r.property_id,
           ) && (
             <ReplyForm
               review={r.id}
               claims={claims.filter(
                 (c) =>
-                  c.property_id === r.property_id ||
-                  (c.landlord_id !== null && c.landlord_id === r.landlord_id),
+                  c.property_id === r.property_id,
               )}
             />
           )}

@@ -14,6 +14,7 @@ export default async function ClaimsAdmin() {
   return (
     <AccountShell>
       <h1>Profile claims and evidence review</h1>
+      <p><a className="review-action" href="/admin/verification-management">Open Verification Management</a></p>
       <p>
         Inspect private evidence and its demonstration/real label. Resolve existing claimant
         tenant-review or representative conflicts explicitly before approval.

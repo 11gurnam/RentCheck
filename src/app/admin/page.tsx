@@ -18,6 +18,7 @@ export default async function AdminPage() {
         </p>
         {permitted && (
           <p>
+            <a href="/admin/verification-management">Verification Management</a> ·{" "}
             <a href="/admin/verification">Verification requests</a> ·{" "}
             <a href="/admin/audit">Audit records</a>
             {" · "}

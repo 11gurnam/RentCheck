@@ -38,6 +38,7 @@ export async function normalizeDocument(
       extension: "jpg",
       mime: "image/jpeg",
     };
+  if (file.type !== "application/pdf") throw new Error("Document content does not match its type");
   const clean = await new Promise<Buffer>((resolve, reject) => {
     const worker = new Worker(workerSource, {
       eval: true,

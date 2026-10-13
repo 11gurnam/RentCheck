@@ -95,7 +95,8 @@ it("real claim evidence, historical reply scopes, self-review conflicts and revo
       ).toBeNull();
       return r.data;
     }
-    const cid = await claim(0, null, historic);
+    const managerClaim = await claim(0, null, historic);
+    const cid = await claim(0, property, null);
     const reply = {
       p_claim: cid,
       p_review: review.data.id,
@@ -112,6 +113,8 @@ it("real claim evidence, historical reply scopes, self-review conflicts and revo
     expect((await clients[0].rpc("decide_claim", decision)).error?.code).toBe(
       "42501",
     );
+    expect((await clients[2].rpc("decide_claim", {...decision, p_claim: managerClaim})).error).toBeNull();
+    expect((await clients[0].rpc("upsert_claimant_reply", {...reply, p_claim: managerClaim})).error?.code).toBe("42501");
     expect((await clients[2].rpc("decide_claim", decision)).error).toBeNull();
     expect(
       (await clients[0].rpc("upsert_claimant_reply", reply)).error,
@@ -126,8 +129,8 @@ it("real claim evidence, historical reply scopes, self-review conflicts and revo
           ...reply,
           p_review: later.data.id,
         })
-      ).error?.code,
-    ).toBe("42501");
+      ).error,
+    ).toBeNull();
     expect(
       (await clients[0].rpc("create_review", { p_input: input })).error?.code,
     ).toBe("42501");
@@ -152,7 +155,7 @@ it("real claim evidence, historical reply scopes, self-review conflicts and revo
     expect(
       (
         await clients[0].rpc("update_claimed_details", {
-          p_claim: cid,
+          p_claim: managerClaim,
           p_input: {
             name: "Injected",
             reason: "Synthetic wrong rent attempt",
