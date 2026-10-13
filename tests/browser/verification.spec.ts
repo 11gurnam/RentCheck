@@ -107,7 +107,7 @@ test("private demonstration documents, trusted approval, recommendation threshol
       await page
         .getByRole("button", { name: "Request demonstration verification" })
         .click();
-      await expect(page.getByRole("status")).toContainText(
+      await expect(page.locator("section").filter({ has: page.getByRole("heading", { name: "Demonstration tenant verification", exact: true }) }).getByRole("status")).toContainText(
         "Private demonstration verification requested",
       );
       const docUrl = await page

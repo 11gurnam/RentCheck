@@ -1,12 +1,16 @@
 import { readFileSync, readdirSync, existsSync } from "node:fs";
 import { parseEnv } from "node:util";
 import { join } from "node:path";
-const secrets = [process.env.SUPABASE_SERVICE_ROLE_KEY, ...[".env.local", ".env.hosted.local"].filter(existsSync).map(file => parseEnv(readFileSync(file, "utf8")).SUPABASE_SERVICE_ROLE_KEY)].filter(Boolean);
-if (existsSync(".env.google.local"))
-  secrets.push(
-    parseEnv(readFileSync(".env.google.local", "utf8"))
-      .SUPABASE_AUTH_EXTERNAL_GOOGLE_SECRET,
-  );
+const privateNames = ["SUPABASE_SERVICE_ROLE_KEY", "SUPABASE_AUTH_EXTERNAL_GOOGLE_SECRET", "SMTP_PASSWORD", "GEMINI_API_KEY"];
+const secrets = [
+  ...privateNames.map(name => process.env[name]),
+  ...[".env.local", ".env.hosted.local", ".env.google.local", ".env.google.hosted.local", ".env.smtp.local"]
+    .filter(existsSync).flatMap(file => {
+      const env = parseEnv(readFileSync(file, "utf8"));
+      return privateNames.map(name => env[name]);
+    }),
+].filter(Boolean);
+secrets.push(...secrets.filter(secret => secret.includes(" ")).map(secret => secret.replaceAll(" ", "")));
 if (existsSync("work/demo-accounts.json"))
   secrets.push(
     ...JSON.parse(readFileSync("work/demo-accounts.json", "utf8")).map(

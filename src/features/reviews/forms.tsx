@@ -23,33 +23,38 @@ export function ReviewForm({
 }) {
   const router = useRouter();
   const [photos, setPhotos] = useState<File[]>([]);
+  const selectedPhotos = useRef<File[]>([]);
+  const selectPhotos = (files: File[]) => { selectedPhotos.current = files; setPhotos(files); };
   const [photoCount, setPhotoCount] = useState(existingPhotoCount);
   const [uploadProgress, setUploadProgress] = useState("");
   const [state, action, pending] = useActionState<ReviewState, FormData>(async (previous, form) => {
+    // Capture the current selection and keep navigation in this upload workflow.
+    const uploads = selectedPhotos.current.slice();
+    form.set("withPhotos", "true");
     if (previous.savedReviewId) form.set("review", previous.savedReviewId);
     const saved = form.get("retryPhotos") === "true" && previous.savedReviewId
       ? previous : await submitReview(previous, form);
     if (!saved.savedReviewId) return { ...saved, savedReviewId: previous.savedReviewId };
-    for (let i = 0; i < photos.length; i++) {
-      setUploadProgress(`Uploading photo ${i + 1} of ${photos.length}…`);
+    for (let i = 0; i < uploads.length; i++) {
+      setUploadProgress(`Uploading photo ${i + 1} of ${uploads.length}…`);
       const upload = new FormData();
       upload.set("review", saved.savedReviewId);
-      upload.set("photo", photos[i]);
+      upload.set("photo", uploads[i]);
       try {
         const result = await addPhoto({}, upload);
         if (result.status !== "success") {
-          setPhotos(photos.slice(i));
+          selectPhotos(uploads.slice(i));
           setUploadProgress("");
           return { ...saved, status: "warning", message: `Your review is saved. ${result.message} The remaining photos are still selected; retry or remove them.` };
         }
         setPhotoCount(count => count + 1);
       } catch {
-        setPhotos(photos.slice(i));
+        selectPhotos(uploads.slice(i));
         setUploadProgress("");
         return { ...saved, status: "warning", message: "Your review is saved, but photo upload was interrupted. Retry the remaining selected photos." };
       }
     }
-    setPhotos([]);
+    selectPhotos([]);
     setUploadProgress("");
     router.push("/account/reviews");
     router.refresh();
@@ -172,12 +177,12 @@ export function ReviewForm({
         />
       </label>
       <div id="review-language-status" className="review-language-status" aria-live="polite">
-        {checking && <p>Checking your comment…</p>}
+        {checking && <p className="sr-only">Checking your comment…</p>}
         {languageCheck?.flagged && <div className="review-language-warning"><p>Please use respectful language. {languageCheck.manualEdit ? "Edit the highlighted comment and check it again." : "Review the suggested wording below."}</p>{languageCheck.changed && <><p className="review-inline-suggestion">{languageCheck.suggestion}</p><button type="button" className="review-action" onClick={() => { setBody(languageCheck.suggestion); setLanguageCheck(null); }}>Use suggested wording</button></>}</div>}
         {languageCheck?.notice && <p className="field-hint">{languageCheck.notice} <button type="button" className="review-action" disabled={checking} onClick={() => void checkComment(body)}>Check again</button></p>}
         <p className="field-hint">AI language checks send this comment to Google Gemini. Free-tier text may be used to improve Google’s products. Check suggested wording before accepting it.</p>
       </div>
-      <ReviewPhotoPicker files={photos} onChange={setPhotos} existingCount={photoCount} disabled={pending} />
+      <ReviewPhotoPicker files={photos} onChange={selectPhotos} existingCount={photoCount} disabled={pending} />
       <label>
         <input name="woman" type="checkbox" defaultChecked={review?.woman} /> I
         explicitly self-identify as a woman (optional, private answer).
@@ -190,7 +195,7 @@ export function ReviewForm({
       {state.savedReviewId && <div className="review-actions"><button type="button" className="review-action" disabled={pending || !photos.length} onClick={() => { const form = new FormData(); form.set("retryPhotos", "true"); startSubmission(() => action(form)); }}>Retry photo uploads</button><a className="review-action" href="/account/reviews">Go to your reviews</a></div>}
       <button className="primary-button" disabled={pending || checking || languageCheck?.flagged}>
         <ActionIcon name="check" />
-        {pending ? "Saving…" : review ? "Save review" : "Publish review"}
+        {pending ? "Saving…" : checking ? "Checking comment…" : review ? "Save review" : "Publish review"}
       </button>
       <dialog ref={confirmation} className="review-delete-dialog review-language-dialog" aria-labelledby={previewTitle}>
         <h2 id={previewTitle}>Review your comment</h2>

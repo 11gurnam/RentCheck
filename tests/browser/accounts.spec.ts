@@ -170,7 +170,8 @@ test("live account persists, public alias changes, admin remains denied, and log
     });
     await page.goto("/account");
     await expect(page.getByText(email, { exact: true })).toBeVisible();
-    await expect(page.getByText("Not granted", { exact: true })).toBeVisible();
+    await expect(page.getByRole("link", { name: "Administrator area" })).toHaveCount(0);
+    expect((await page.request.get("/api/admin/access")).status()).toBe(403);
     await page.getByLabel("Public alias").fill("CalmTenantUpdated");
     await page.getByRole("button", { name: "Save alias" }).click();
     await expect(page.getByRole("status")).toContainText("has been saved");

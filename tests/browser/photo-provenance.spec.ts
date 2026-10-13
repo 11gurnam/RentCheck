@@ -75,6 +75,7 @@ test("landlord photos preserve source, change verification with claims and obey 
     await page.getByRole("button", { name: "Sign in", exact: true }).click();
     await expect(page).toHaveURL(/\/account$/);
     await page.goto("/properties/" + property);
+    await page.getByText("Add or manage landlord photos", { exact: true }).click();
     await page
       .getByLabel("Landlord photo", { exact: true })
       .setInputFiles({
@@ -85,7 +86,7 @@ test("landlord photos preserve source, change verification with claims and obey 
     await page
       .getByRole("button", { name: "Add landlord photo", exact: true })
       .click();
-    await expect(page.getByRole("status")).toContainText("Choose a valid");
+    await expect(page.locator(".gallery-photo-tools").getByRole("status")).toContainText("Choose a valid");
     await page
       .getByLabel("Landlord photo", { exact: true })
       .setInputFiles({
@@ -107,10 +108,10 @@ test("landlord photos preserve source, change verification with claims and obey 
       url = "/api/photos/" + photo;
     paths.push("property/" + property + "/" + photo + ".jpg");
     const figure = page
-      .locator("figure")
+      .locator(".media-tile")
       .filter({ has: page.locator('img[src="' + url + '"]') });
     await expect(figure).toContainText("Shared by landlord");
-    await expect(figure).toContainText("Unverified landlord");
+    await expect(figure).toContainText("Landlord · identity not verified");
     expect((await page.request.get(url)).status()).toBe(200);
     expect(
       (
@@ -139,17 +140,19 @@ test("landlord photos preserve source, change verification with claims and obey 
       ).error,
     ).toBeNull();
     await page.reload();
-    await expect(figure).toContainText("Verified landlord");
+    await expect(figure).toContainText("Demonstration claim approved");
     await page.screenshot({
       path: info.outputPath("landlord-photo-approved.png"),
       fullPage: true,
     });
-    await figure.getByText("Report this photo", { exact: true }).click();
-    await figure
+    await page.getByText("Report a property photo", { exact: true }).click();
+    const report = page.locator(".gallery-photo-tools").filter({ has: page.getByText("Report a property photo", { exact: true }) });
+    await report.getByText("Report this photo", { exact: true }).click();
+    await report
       .getByLabel("Photo report reason")
       .fill("Synthetic photo report for moderation test");
-    await figure.getByRole("button", { name: "Submit photo report" }).click();
-    await expect(figure.getByRole("status")).toContainText("Photo reported");
+    await report.getByRole("button", { name: "Submit photo report" }).click();
+    await expect(report.getByRole("status")).toContainText("Photo reported");
     await page.goto("/admin/reports");
     const card = page
       .locator("section.dashboard-card")

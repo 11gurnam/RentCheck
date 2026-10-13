@@ -5,8 +5,9 @@ test("search combines URL filters and reset restores all examples", async ({
 }) => {
   await page.goto("/search");
   await expect(
-    page.getByRole("heading", { name: /accommodation examples/ }),
+    page.getByRole("heading", { name: /places found/ }),
   ).toBeVisible();
+  await page.getByRole("button", { name: "Filters", exact: true }).click();
   await page.getByLabel("City", { exact: true }).selectOption("Mumbai");
   await page.getByLabel("Accommodation type").selectOption("PG");
   await page.getByLabel("Maximum rent").fill("12000");
@@ -16,8 +17,10 @@ test("search combines URL filters and reset restores all examples", async ({
     page.getByRole("link", { name: "Demo Sea Breeze PG" }),
   ).toBeVisible();
   await page.reload();
+  await page.getByRole("button", { name: "Filters", exact: true }).click();
   await expect(page.getByLabel("City", { exact: true })).toHaveValue("Mumbai");
   await page.getByRole("link", { name: "Reset", exact: true }).click();
+  await page.getByRole("button", { name: "Filters", exact: true }).click();
   await expect(page.getByLabel("City", { exact: true })).toHaveValue("");
   await expect(page).toHaveURL(/\/search$/);
 });
@@ -54,7 +57,7 @@ test("profiles preserve dated historic associations and unknown profiles return 
     page.getByRole("heading", { name: "Management history" }),
   ).toBeVisible();
   await expect(page.locator(".history-panel").last()).toContainText(
-    "2025-01-01",
+    "01 Jan 2025",
   );
   await page.screenshot({
     path: info.outputPath("property.png"),

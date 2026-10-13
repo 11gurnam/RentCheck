@@ -6,7 +6,7 @@ if (!process.argv.includes("--confirm-hosted-storage")) throw new Error("Review 
 const env = parseEnv(readFileSync(".env.hosted.local", "utf8"));
 if (checkDeploymentEnvironment(env).length) throw new Error("Hosted environment incomplete; no private values printed.");
 const service = createClient(env.NEXT_PUBLIC_SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY, { auth: { persistSession: false, autoRefreshToken: false } });
-for (const [name, types] of [["review-photos", ["image/jpeg"]], ["rental-documents", ["image/jpeg", "application/pdf"]]]) {
+for (const [name, types] of [["review-photos", ["image/jpeg"]], ["rental-documents", ["image/jpeg", "application/pdf"]], ["profile-photos", ["image/jpeg"]]]) {
   const existing = await service.storage.getBucket(name);
   if (existing.error && existing.error.status !== 404 && String(existing.error.statusCode) !== "404") throw new Error("Could not inspect hosted storage; no bucket settings changed.");
   const settings = { public: false, fileSizeLimit: 5242880, allowedMimeTypes: types };
@@ -15,4 +15,4 @@ for (const [name, types] of [["review-photos", ["image/jpeg"]], ["rental-documen
   const verified = await service.storage.getBucket(name);
   if (verified.error || verified.data.public || Number(verified.data.file_size_limit) !== 5242880 || types.some(type => !verified.data.allowed_mime_types?.includes(type))) throw new Error("Private storage verification failed.");
 }
-console.log("PASS: both hosted buckets are private with bounded JPEG/PDF settings. No credentials or object paths printed.");
+console.log("PASS: all three hosted buckets are private with bounded JPEG/PDF settings. No credentials or object paths printed.");

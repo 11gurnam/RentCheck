@@ -8,16 +8,25 @@ const config = localBackendConfiguration();
 if (!config) throw new Error("Local backend required");
 test("comparison limits selection to three and remains accessible", async ({ page }, info) => {
   await page.goto("/compare");
-  const choices = page.getByRole("checkbox");
-  expect(await choices.count()).toBeGreaterThan(3);
-  for (let i = 0; i < 3; i++) await choices.nth(i).check();
-  await expect(choices.nth(3)).toBeDisabled();
-  await expect(page.getByRole("status")).toHaveText("3 of 3 selected.");
-  await expect(page.locator(".comparison-grid article")).toHaveCount(3);
-  await choices.nth(0).uncheck(); await expect(choices.nth(3)).toBeEnabled();
+  const add = page.getByRole("button", { name: "Add a place" });
+  for (let i = 0; i < 3; i++) {
+    await add.click();
+    if (i === 0) {
+      await page.getByRole("searchbox", { name: "Find a place" }).fill("Jaipur");
+      await expect(page.locator(".compare-option")).toHaveCount(1);
+    }
+    await page.locator(".compare-option").first().click();
+  }
+  await expect(page.locator(".compare-dropdown-trigger")).toBeDisabled();
+  await expect(page.getByRole("status")).toHaveText("3 of 3 selected");
+  await expect(page.locator(".compare-table thead th")).toHaveCount(4);
+  await page.locator(".compare-selected-place button").first().click();
+  await expect(add).toBeEnabled();
   expect((await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21aa"]).analyze()).violations).toEqual([]);
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   await page.screenshot({ path: info.outputPath("property-comparison.png"), fullPage: true });
+  await page.getByRole("button", { name: "Clear selection" }).click();
+  await expect(page.locator(".compare-table")).toHaveCount(0);
 });
 test("opt-in messaging, block/report moderation and explicit map coordinates work", async ({ page, browser }, info) => {
   test.setTimeout(100000);
@@ -63,7 +72,7 @@ test("opt-in messaging, block/report moderation and explicit map coordinates wor
     await page.goto("/admin/messages"); const report = page.locator("article").filter({ hasText: "Synthetic report for browser moderation" }); await report.getByLabel("Message decision").selectOption("removed"); await report.getByLabel("Decision reason").fill("Synthetic message moderation decision"); await report.getByRole("button", { name: "Save message decision" }).click(); await expect(report.getByRole("heading", { name: "removed", exact: true })).toBeVisible();
     await tenantPage.reload(); await expect(tenantPage.getByText("[Removed following moderation]", { exact: true })).toBeVisible();
     await page.goto("/admin/locations"); await page.getByRole("combobox", { name: "Property", exact: true }).selectOption(property!); await page.getByLabel("Latitude", { exact: true }).fill("28.61"); await page.getByLabel("Longitude", { exact: true }).fill("77.21"); await page.getByLabel("Coordinate source and audit reason").fill("Synthetic fictional coordinate fixture"); await page.getByRole("button", { name: "Save recorded location" }).click(); await expect(page.getByRole("status")).toContainText("updated and audited");
-    await page.goto("/map"); await page.getByLabel("Recorded property location").selectOption(property!); await expect(page.getByText("Approximate location:", { exact: false })).toBeVisible(); await expect(page.locator("iframe")).toHaveCount(0);
+    await page.goto("/map"); await page.getByLabel("Choose a place").selectOption(property!); await expect(page.getByText("Approximate location:", { exact: false })).toBeVisible(); await expect(page.locator("iframe")).toHaveCount(0);
     await page.route("https://www.openstreetmap.org/**", route => route.fulfill({ contentType: "text/html", body: "<p>Map provider test fixture</p>" }));
     await page.getByRole("button", { name: "Load OpenStreetMap" }).click(); await expect(page.locator("iframe")).toHaveAttribute("src", /marker=28.61%2C77.21/);
     expect((await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21aa"]).analyze()).violations).toEqual([]);

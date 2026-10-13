@@ -1,15 +1,15 @@
 # RentCheck
 
-India-wide accommodation research prototype: Google/email accounts and public aliases, multi-city discovery, private shortlists, fictional property contributions, canonical tenancies, separate property/management reviews and photos, private demonstration verification, women's recommendation counts, property/manager claims, representative replies, reports, trusted moderation, dated management history and conflict-safe property merges.
+India-wide accommodation research: Google/email accounts and public aliases, multi-city discovery, private shortlists, canonical tenancies, separate property/management reviews and photos, private evidence review, women's recommendation counts, property/manager claims, representative replies, reports, trusted moderation, dated management history and conflict-safe property merges.
 
-The original eight phases and enhancement Phases 09–12 are implemented. Photos include tenant/landlord provenance; accounts support recovery, private PDFs, notifications and deletion. Opt-in private messaging, reporting/blocking, three-property comparison and explicitly recorded maps are available. Real-data intake is controlled in the database with per-record demo labels, manual evidence checklists, expiry/cleanup and local encrypted backup/restore checks. Existing local records remain demonstration examples. Free hosted deployment is now being prepared in Phase 13; provider sign-in and hosted acceptance are pending. There are no bookings, payments or independent ownership/tenancy certification.
+The hosted site is https://rentcheck-india.netlify.app. Google sign-in and SMTP were configured in earlier hosted phases. The current release work is [Phase 22](docs/enhancements/phase-22-tested-ui-deployment.md): searchable comparison, profile photos, criterion ratings and five-photo review uploads. Photos include tenant/landlord provenance; accounts support recovery, private PDFs, notifications and deletion. Opt-in private messaging, reporting/blocking and explicitly recorded maps are available. Hosted examples remain labelled and real-data intake remains closed. There are no bookings, payments or independent ownership/tenancy certification.
 
 ## Start on a fresh local checkout
 
-Use Node24 LTS, npm11+, Git and Docker Desktop with the Linux engine running. The latest implementation is on branch phase-13-hosted-deployment; main retains the earlier merged foundation until a separately authorized merge.
+Use Node24 LTS, npm11+, Git and Docker Desktop with the Linux engine running. The latest release branch is phase-22-tested-ui-deployment; main retains the earlier merged foundation until a separately authorized merge.
 
 ```sh
-git switch phase-13-hosted-deployment
+git switch phase-22-tested-ui-deployment
 npm ci
 npm run backend:start
 npm run backend:env
@@ -36,12 +36,13 @@ npm run ops:backup-check
 node scripts/check-browser-secrets.mjs
 ```
 
-check runs lint, generated Next route types/strict TypeScript, unit tests and a production build. SQL cases roll back; live API/browser tests create and remove uniquely named fictional accounts/data on the loopback backend. Audit fixtures intentionally retain immutable history. test:recovery runs serially after the ordinary suite and temporarily denies exactly one local review RPC; finally restores its grants. Do not run it concurrently with other tests. CI runs clean npm install and the isolated backend, then these checks.
+check runs lint, generated Next route types/strict TypeScript, unit tests and a production build. SQL cases roll back; live API/browser tests create and remove uniquely named fictional accounts/data on the loopback backend. Run SQL, integration and browser suites sequentially because their fixtures share this database. Audit fixtures intentionally retain immutable history. test:recovery runs serially after the ordinary suite and temporarily denies exactly one local review RPC; finally restores its grants. Do not run it concurrently with other tests. CI runs clean npm install and the isolated backend, then these checks.
 
 If Chrome is already installed on Windows, set $env:PLAYWRIGHT_CHANNEL='chrome' before browser commands. CI uses bundled Chromium. Phone tests emulate a viewport/touch; physical-device/Safari review is separate. Screenshots/traces are generated under ignored test-results/ and playwright-report/. Committed phase evidence uses synthetic profiles only.
 
 ## Review and hosting
 
+- [Phase 22 release and beginner checks](docs/enhancements/phase-22-tested-ui-deployment.md)
 - [Beginner review guide](docs/review-guide.md)
 - [Current tenant and landlord demo walkthrough](docs/enhancements/demo-walkthrough.md)
 - [Phase 10 account/privacy checking guide](docs/enhancements/phase-10-account-privacy.md)
@@ -55,6 +56,6 @@ If Chrome is already installed on Windows, set $env:PLAYWRIGHT_CHANNEL='chrome' 
 - [Deployment preparation](docs/deployment.md)
 - [Google provider setup](docs/phases/phase-01/provider-setup.md)
 
-Phases were tested and pushed sequentially under the user's continuation instruction. No main merge or public deployment was performed. The final branch contains all earlier phases.
+Phase branches contain the prior work and teammate updates. This release does not merge main. Git pushes do not automatically deploy the site: production publication currently uses a checked Linux Netlify build and manual CLI deployment. Database migrations are applied separately to RentCheck Staging.
 
 Hosted preparation and beginner checks: [Phase 13](docs/enhancements/phase-13-hosted-deployment.md) and [deployment guide](docs/deployment.md). New photo/document uploads are limited to 3 MiB to fit free-host request limits.

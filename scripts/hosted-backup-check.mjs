@@ -32,7 +32,7 @@ const localBucket='restore-'+scratch.slice(-32), uploaded=[];
 try {
  const mode = requireData(await anon.rpc('get_operation_mode'));
  const settings = Array.isArray(mode)?mode[0]:mode;
- if(settings.accepts_real_data || settings.allows_demo_data)throw new Error('Hosted intake must remain closed');
+ if(settings.accepts_real_data)throw new Error('Hosted real intake must remain closed');
  const dumps={};
  for(const name of ['schema','data','roles']) {
   const args=['db','dump','--linked','--file',`${directory}/${name}.sql`,'--agent','no','--output-format','text'];
@@ -63,11 +63,12 @@ try {
    if(entries.length<100)break;
   }
  }
- for(const name of ['review-photos','rental-documents']) {
+ const mediaBuckets=['review-photos','rental-documents',...(buckets.some(bucket=>bucket.name==='profile-photos')?['profile-photos']:[])];
+ for(const name of mediaBuckets) {
   if(!buckets.some(bucket=>bucket.name===name && bucket.public===false))throw new Error('Private bucket missing');
   await collect(name);
  }
- writeFileSync(`${directory}/manifest.enc`,seal(Buffer.from(JSON.stringify({buckets:buckets.filter(b=>['review-photos','rental-documents'].includes(b.name)),objects:manifest}))));
+ writeFileSync(`${directory}/manifest.enc`,seal(Buffer.from(JSON.stringify({buckets:buckets.filter(b=>mediaBuckets.includes(b.name)),objects:manifest}))));
  docker(['createdb','-U','supabase_admin','--template=template0',scratch]); madeDatabase=true;
  sql('create schema extensions; create extension pg_trgm with schema extensions; create extension btree_gist with schema extensions; create extension pgcrypto with schema extensions; create extension "uuid-ossp" with schema extensions;');
  importSql(dumps.schema); importSql(dumps.data);
@@ -80,7 +81,7 @@ try {
  if(copyRows.length<10)throw new Error('Incomplete data dump');
  const boundary=sql("select not has_schema_privilege('anon','private','USAGE') and not has_function_privilege('authenticated','public.register_evidence_document(uuid,uuid,text,uuid,uuid,uuid,boolean,boolean)','EXECUTE') and (select bool_and(relrowsecurity) from pg_class where oid in ('public.properties'::regclass,'public.reviews'::regclass,'public.public_profiles'::regclass))");
  if(boundary!=='t')throw new Error('Restored access boundary failed');
- const restoredMode=sql('select not allows_demo_data and not accepts_real_data from private.operation_settings');
+ const restoredMode=sql(`select allows_demo_data=${settings.allows_demo_data?'true':'false'} and not accepts_real_data from private.operation_settings`);
  if(restoredMode!=='t')throw new Error('Restored intake mode differs');
  if(manifest.length) {requireData(await local.storage.createBucket(localBucket,{public:false}));madeBucket=true;}
  for(const [index,object] of manifest.entries()) {
@@ -90,7 +91,7 @@ try {
   const blob=requireData(await local.storage.from(localBucket).download(`object-${index}`));
   if(createHash('sha256').update(Buffer.from(await blob.arrayBuffer())).digest('hex')!==object.hash)throw new Error('Restored media checksum differs');
  }
- const report={checkedAt:new Date().toISOString(),encryptedExports:['schema','data','roles','manifest'],databaseRestored:true,tablesChecked:copyRows.length,authorizationPreserved:true,intakeStillClosed:true,storageObjectsRestored:manifest.length,rolesExportedNotAppliedToLocalCluster:true};
+ const report={checkedAt:new Date().toISOString(),encryptedExports:['schema','data','roles','manifest'],databaseRestored:true,tablesChecked:copyRows.length,authorizationPreserved:true,intakeStillClosed:true,demoVisibilityPreserved:settings.allows_demo_data,storageObjectsRestored:manifest.length,rolesExportedNotAppliedToLocalCluster:true};
  writeFileSync(`${directory}/report.json`,JSON.stringify(report,null,2));
  console.log(JSON.stringify(report));
 } catch(error) {

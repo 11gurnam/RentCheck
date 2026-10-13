@@ -27,6 +27,8 @@ test("review photos support selection, removal, five attachments and interrupted
     for (const group of await page.locator('.criteria-form [role="radiogroup"]').all())
       await group.getByRole("radio", { name: "4 out of 5", exact: true }).check();
     await page.getByLabel("Your experience").fill("The rooms were clean and the water supply was reliable.");
+    await page.getByLabel("Your experience").press("Tab");
+    await expect(page.getByText("AI language checking is not configured.", { exact: false })).toBeVisible();
     const picker = page.locator('.review-photo-picker input[type="file"]');
     await picker.setInputFiles({ name: "document.pdf", mimeType: "application/pdf", buffer: Buffer.from("invalid") });
     await expect(page.locator(".review-photo-error")).toContainText("JPG, PNG or WebP");
@@ -36,16 +38,21 @@ test("review photos support selection, removal, five attachments and interrupted
     await expect(page.locator(".review-photo-selection li")).toHaveCount(5);
     await expect(page.locator(".review-photo-picker-heading small")).toContainText("5/5");
     await page.getByRole("button", { name: "Remove room-0.png", exact: true }).click();
+    await expect(page.locator(".review-photo-selection li")).toHaveCount(4);
     await picker.setInputFiles({ name: "fake.png", mimeType: "image/png", buffer: Buffer.from("not an image") });
+    await expect(page.getByRole("button", { name: "Remove fake.png", exact: true })).toBeVisible();
     await page.setViewportSize({ width: 390, height: 844 });
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
     await page.getByLabel("This is a fictional").check();
     await expect(page.getByRole("button", { name: "Publish review", exact: true })).toBeEnabled({ timeout: 30000 });
+    await expect(page.locator(".review-photo-selection li")).toHaveCount(5);
     await page.getByRole("button", { name: "Publish review", exact: true }).click();
+    await expect(page.locator(".review-photo-selection li")).toHaveCount(5);
     await page.getByRole("button", { name: "Confirm and publish", exact: true }).click();
     await expect(page.getByText(/Your review is saved\. Photo rejected/)).toBeVisible({ timeout: 30000 });
     await expect(page.locator(".review-photo-selection li")).toHaveCount(1);
     await page.getByRole("button", { name: "Remove fake.png" }).click();
+    await expect(page.locator(".review-photo-selection li")).toHaveCount(0);
     await picker.setInputFiles(photo(9));
     await page.getByRole("button", { name: "Retry photo uploads" }).click();
     await expect(page).toHaveURL(/\/account\/reviews$/, { timeout: 30000 });

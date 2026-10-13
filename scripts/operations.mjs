@@ -17,7 +17,7 @@ if (command === "mode") {
     if (evidence.error || photos.error) throw new Error("Media queue preparation failed.");
     const result = await client.rpc("get_media_purge_jobs", { p_user: null }); if (result.error) throw new Error("Media queue unavailable.");
     if (!result.data.length) { console.log("PASS: expired evidence and retired photos queued; registered-media cleanup queue is empty."); process.exit(0); }
-    for (const bucket of ["rental-documents", "review-photos"]) {
+    for (const bucket of ["rental-documents", "review-photos", "profile-photos"]) {
       const rows = result.data.filter(j => j.bucket === bucket); if (!rows.length) continue;
       const removed = await client.storage.from(bucket).remove(rows.map(j => j.object_path)); if (removed.error) throw new Error("Storage removal failed; durable jobs remain for retry.");
       const ack = await client.rpc("finish_media_purge", { p_jobs: rows.map(j => j.id) }); if (ack.error) throw new Error("Cleanup acknowledgement failed; retry is safe.");

@@ -186,7 +186,7 @@ test("private PDFs, decision notifications and account deletion remove actual re
     await page
       .getByRole("button", { name: "Request demonstration verification" })
       .click();
-    await expect(page.getByRole("status")).toContainText(
+    await expect(page.getByRole("main").getByRole("alert")).toContainText(
       "without encryption, scripts",
     );
     await page.getByLabel("Fictional rental document image").setInputFiles({
@@ -197,7 +197,7 @@ test("private PDFs, decision notifications and account deletion remove actual re
     await page
       .getByRole("button", { name: "Request demonstration verification" })
       .click();
-    await expect(page.getByRole("status")).toContainText(
+    await expect(page.locator("section").filter({ has: page.getByRole("heading", { name: "Demonstration tenant verification", exact: true }) }).getByRole("status")).toContainText(
       "verification requested",
     );
     const verification = (await users[0].client.rpc("get_my_verifications"))

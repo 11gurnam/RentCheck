@@ -108,8 +108,8 @@ test("reports stay visible, history preserves snapshots, and merge requires expl
         .png()
         .toBuffer(),
     });
-    await page.getByRole("button", { name: "Add photo" }).click();
-    await expect(page.getByRole("status")).toContainText("Photo added");
+    await page.getByRole("button", { name: "Add photo", exact: true }).click();
+    await expect(page.locator("#review-photos").getByRole("status")).toContainText("Photo added");
     const photoUrl = await page
       .getByRole("link", { name: "View photo" })
       .getAttribute("href");
@@ -124,12 +124,13 @@ test("reports stay visible, history preserves snapshots, and merge requires expl
     const article = page
       .locator("article")
       .filter({ has: page.getByText(body, { exact: true }) });
-    await article.getByText("Report this review", { exact: true }).click();
+    await article.getByRole("button", { name: "Report this review", exact: true }).click();
     await article
       .getByLabel("Report reason")
       .fill("Fictional concern submitted for administrator investigation.");
     await article.getByRole("button", { name: "Submit report" }).click();
     await expect(article.getByRole("status")).toContainText("remains visible");
+    await page.keyboard.press("Escape");
     await expect(page.getByText(body, { exact: true })).toBeVisible();
     fixtureAdmin(users[1].id, true);
     await login(admin, 1);
@@ -155,7 +156,7 @@ test("reports stay visible, history preserves snapshots, and merge requires expl
       "snapshots remain unchanged",
     );
     await page.reload();
-    await expect(article).toContainText("Management Unanswered");
+    await expect(article).toContainText("Management N/A");
     await admin.goto("/admin/merge?source=" + source + "&target=" + target);
     await admin
       .getByRole("combobox", { name: "Profile details to retain" })
@@ -170,7 +171,7 @@ test("reports stay visible, history preserves snapshots, and merge requires expl
     await admin
       .getByRole("button", { name: "Merge with these resolutions" })
       .click();
-    await expect(admin.getByRole("status")).toContainText(
+    await expect(admin.getByRole("main").getByRole("alert")).toContainText(
       "overlapping tenancies",
     );
     await admin.getByRole("checkbox", { name: /Target ·/ }).check();
@@ -193,7 +194,7 @@ test("reports stay visible, history preserves snapshots, and merge requires expl
     await admin
       .getByRole("button", { name: "Merge with these resolutions" })
       .click();
-    await expect(admin.getByRole("status")).toContainText(
+    await expect(admin.getByRole("status").filter({ hasText: "merged transactionally" })).toContainText(
       "merged transactionally",
     );
     expect((await page.request.get("/properties/" + source)).status()).toBe(

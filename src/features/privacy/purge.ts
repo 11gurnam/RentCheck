@@ -15,7 +15,7 @@ export async function purgeMedia(
       object_path: string;
     }[];
     if (!rows.length) return true;
-    for (const bucket of ["review-photos", "rental-documents"]) {
+    for (const bucket of ["review-photos", "rental-documents", "profile-photos"]) {
       const group = rows.filter((j) => j.bucket === bucket);
       if (!group.length) continue;
       const removed = await service.storage

@@ -66,9 +66,10 @@ test("signed-in users see account actions on desktop and mobile", async ({ page 
     const nav = page.getByRole("navigation", { name: "Main navigation" });
     for (const path of ["/account", "/"]) {
       await page.goto(path);
-      for (const label of ["Shortlist", "Your reviews", "Your claims", "Add a place", "Your account"])
+      for (const label of ["Shortlist", "Your reviews", "Your claims", "Add a place"])
         await expect(nav.getByRole("link", { name: label, exact: true })).toBeVisible();
       await expect(nav.getByRole("link", { name: "Sign in", exact: true })).toHaveCount(0);
+      await expect(page.locator(".header-profile-link")).toHaveAttribute("aria-label", /Your account, signed in/);
     }
     await page.setViewportSize({ width: 320, height: 844 });
     await page.getByRole("button", { name: "Menu", exact: true }).click();
@@ -100,17 +101,18 @@ test("mouse-wheel scrolling reaches the footer in mobile emulation", async ({ br
   }
 });
 
-test("search actions align with filters and navigation highlights the current page", async ({ page }, testInfo) => {
+test("filter dialog actions remain visible and navigation highlights the current page", async ({ page }, testInfo) => {
   await page.setViewportSize({ width: 1440, height: 1000 });
   await page.goto("/search");
   const explore = page.getByRole("navigation", { name: "Main navigation" }).getByRole("link", { name: "Explore", exact: true });
   await expect(explore).toHaveAttribute("aria-current", "page");
   await expect(explore.locator("svg")).toHaveCount(1);
+  await page.getByRole("button", { name: "Filters", exact: true }).click();
   const apply = page.getByRole("button", { name: "Apply filters", exact: true });
   const rating = page.getByLabel("Minimum property rating");
   const buttonBounds = await apply.boundingBox();
   const inputBounds = await rating.boundingBox();
-  expect(Math.abs(buttonBounds!.y + buttonBounds!.height - inputBounds!.y - inputBounds!.height)).toBeLessThanOrEqual(1);
+  expect(buttonBounds!.y).toBeGreaterThanOrEqual(inputBounds!.y + inputBounds!.height);
   await page.screenshot({ path: testInfo.outputPath("desktop-search.png"), fullPage: true });
   await page.setViewportSize({ width: 390, height: 740 });
   const reset = page.locator(".filter-actions a");

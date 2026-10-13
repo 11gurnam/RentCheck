@@ -7,6 +7,7 @@ const sensitiveNames = [
   "SUPABASE_TEST_SERVICE_ROLE_KEY",
   "SUPABASE_SERVICE_ROLE_KEY",
   "SMTP_PASSWORD",
+  "GEMINI_API_KEY",
 ];
 const secrets = [".env.google.local", ".env.google.hosted.local", ".env.test.local", ".env.local", ".env.hosted.local", ".env.smtp.local"]
   .filter(existsSync)

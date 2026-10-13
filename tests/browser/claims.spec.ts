@@ -123,6 +123,7 @@ test("claim upload, trusted approval, details, separate reply and revocation", a
     await expect(
       page.getByRole("heading", { name: name + " Updated", exact: true }),
     ).toBeVisible();
+    await page.getByRole("button", { name: "Reply to review", exact: true }).click();
     await page
       .getByLabel("Your public representative reply")
       .fill("Fictional representative response recorded separately.");

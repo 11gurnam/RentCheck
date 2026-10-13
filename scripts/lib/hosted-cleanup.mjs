@@ -5,8 +5,8 @@ export async function runCleanup(service, deadline = Date.now() + 15000) {
     ensure(await service.rpc("queue_retired_photos", { p_limit: 100 }));
     const jobs = ensure(await service.rpc("get_media_purge_jobs", { p_user: null }));
     if (!jobs.length) return { complete: true };
-    if (jobs.some(job => !["rental-documents", "review-photos"].includes(job.bucket) || !job.object_path || job.object_path.includes(".."))) throw new Error("Unexpected media cleanup job; operator inspection required.");
-    for (const bucket of ["rental-documents", "review-photos"]) {
+    if (jobs.some(job => !["rental-documents", "review-photos", "profile-photos"].includes(job.bucket) || !job.object_path || job.object_path.includes(".."))) throw new Error("Unexpected media cleanup job; operator inspection required.");
+    for (const bucket of ["rental-documents", "review-photos", "profile-photos"]) {
       const rows = jobs.filter(job => job.bucket === bucket);
       if (!rows.length) continue;
       if (Date.now() >= deadline) return { complete: false };

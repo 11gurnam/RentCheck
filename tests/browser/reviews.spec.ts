@@ -40,7 +40,7 @@ test("author creates, edits, uploads and deletes a review without exposing priva
       /\/reviews\/new\?property=20000000-0000-4000-8000-000000000001$/,
     );
     await page.getByLabel("Tenancy start").fill("2024-01-01");
-    await expect(page.getByRole("status")).toContainText(
+    await expect(page.getByText("Your landlord rating will go to:")).toContainText(
       "Your landlord rating will go to:",
     );
     await page.getByLabel("Tenancy status").selectOption("false");
@@ -62,6 +62,8 @@ test("author creates, edits, uploads and deletes a review without exposing priva
       .fill(
         "A fictional stay with a pleasant courtyard and slow management responses.",
       );
+    await page.getByLabel("Your experience").press("Tab");
+    await expect(page.getByText("AI language checking is not configured.", { exact: false })).toBeVisible();
     await page.getByLabel("I explicitly self-identify").check();
     await page.getByLabel("Would you recommend").selectOption("true");
     await page.getByLabel("This is a fictional").check();
@@ -83,6 +85,7 @@ test("author creates, edits, uploads and deletes a review without exposing priva
       fullPage: true,
     });
     await page.getByRole("button", { name: "Publish review" }).click();
+    await page.getByRole("button", { name: "Confirm and publish", exact: true }).click();
     await expect(page).toHaveURL(/\/account\/reviews$/);
     await expect(page.getByRole("dialog")).not.toBeVisible();
     await page.getByLabel("Search reviews").fill("no matching fictional property");
@@ -115,10 +118,13 @@ test("author creates, edits, uploads and deletes a review without exposing priva
       .fill(
         "Updated fictional experience: the courtyard was pleasant throughout our tenancy.",
       );
+    await page.getByLabel("Your experience").press("Tab");
+    await expect(page.getByText("AI language checking is not configured.", { exact: false })).toBeVisible();
     await page.getByLabel("This is a fictional").check();
     await page
       .getByRole("button", { name: "Save review", exact: true })
       .click();
+    await page.getByRole("button", { name: "Confirm and save", exact: true }).click();
     await expect(page).toHaveURL(/\/account\/reviews$/);
     await page.getByRole("link", { name: "Edit review" }).click();
     await page.getByLabel("Photo", { exact: true }).setInputFiles({
@@ -126,7 +132,7 @@ test("author creates, edits, uploads and deletes a review without exposing priva
       mimeType: "image/jpeg",
       buffer: Buffer.from("<html>not a photo</html>"),
     });
-    await page.getByRole("button", { name: "Add photo" }).click();
+    await page.getByRole("button", { name: "Add photo", exact: true }).click();
     await expect(page.locator("#review-photos").getByRole("alert")).toContainText("Photo rejected");
     const png = await sharp({
       create: { width: 600, height: 400, channels: 3, background: "#2a705b" },
@@ -168,25 +174,26 @@ test("author creates, edits, uploads and deletes a review without exposing priva
     await expect(
       page.getByText("Updated fictional experience:", { exact: false }),
     ).toBeVisible();
+    await page.getByText("Ratings by category", { exact: false }).click();
     await expect(page.getByRole("region", { name: "Average tenant ratings" })).toContainText("Water supply");
     await expect(page.getByRole("region", { name: "Average tenant ratings" })).toContainText("Parking");
-    await page.locator(".review-criterion-details").filter({ hasText: "3.8 / 5" }).getByText("Criterion ratings", { exact: false }).click();
+    await page.locator(".tenant-review-card").filter({ hasText: "Updated fictional experience:" }).getByText("View detailed ratings", { exact: true }).click();
     await expect(page.locator(".review-criteria-scores").filter({ hasText: "Parking" })).toBeVisible();
-    await expect(page.locator('img[src="' + url + '"]')).toBeVisible();
+    await expect(page.locator('.tenant-photo-track img[src="' + url + '"]')).toBeVisible();
     await expect(
       page
-        .locator("figure")
+        .locator(".media-tile")
         .filter({ has: page.locator('img[src="' + url + '"]') }),
     ).toContainText("Shared by tenant");
     await expect(
       page
-        .locator("figure")
+        .locator(".media-tile")
         .filter({ has: page.locator('img[src="' + url + '"]') }),
-    ).toContainText("Unverified tenant");
+    ).toContainText("not verified");
     await expect(page.getByRole("main")).not.toContainText(email);
     await expect(page.getByRole("main")).not.toContainText("self-identify");
     const reviewCard = page.locator(".tenant-review-card").filter({ hasText: "Updated fictional experience:" });
-    await expect(reviewCard.getByRole("heading", { name: "Description", exact: true })).toBeVisible();
+    await expect(reviewCard.getByRole("heading", { name: "Experience", exact: true })).toBeVisible();
     await reviewCard.getByRole("button", { name: "Report this review", exact: true }).click();
     const reportDialog = page.getByRole("dialog", { name: "Report this review", exact: true });
     await expect(reportDialog).toBeVisible();

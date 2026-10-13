@@ -14,7 +14,7 @@ export function PhotoCaption({ photo }: { photo: PhotoSource }) {
     <figcaption>
       <div className="photo-uploader"><ProfileAvatar name={photo.alias || "Uploader unavailable"} src={photo.avatar_url} /><div><strong>{photo.alias || "Uploader unavailable"}</strong><small>Shared by {photo.role || "user"}</small></div></div>
       <span className={photo.identity_verified === true && !photo.is_demo && photo.role === "landlord" ? "photo-verified-badge" : "demo-tag"}>
-        {photo.role === "landlord" ? photo.identity_verified === true && !photo.is_demo ? "Verified Landlord" : photo.verified ? photo.is_demo ? "Demonstration claim approved" : "Representative claim approved" : "Landlord · identity not verified" : photo.verified ? photo.is_demo ? "Demonstration verified tenant" : "Tenant · evidence reviewed" : "Tenant"}
+        {photo.role === "landlord" ? photo.identity_verified === true && !photo.is_demo ? "Verified Landlord" : photo.verified ? photo.is_demo ? "Demonstration claim approved" : "Representative claim approved" : "Landlord · identity not verified" : photo.verified ? photo.is_demo ? "Demonstration verified tenant" : "Tenant · evidence reviewed" : "Tenant · not verified"}
       </span>
       {photo.is_demo && (
         <span className="field-hint">

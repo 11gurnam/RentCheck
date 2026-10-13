@@ -1,7 +1,7 @@
 begin;
 create extension if not exists pgtap with schema extensions;
 set search_path to public, extensions;
-select plan(20);
+select plan(21);
 
 insert into auth.users (id, email, raw_user_meta_data) values
  ('10000000-0000-0000-0000-000000000001', 'phase1-a@example.test', '{"public_alias":"TenantOne","role":"admin","is_administrator":true}'),
@@ -13,7 +13,8 @@ select isnt((select public_profile_id from private.accounts where user_id = '100
 select ok((select public_alias like 'Tenant-%' from public.public_profiles where id = (select public_profile_id from private.accounts where user_id = '10000000-0000-0000-0000-000000000002')), 'Google name/email does not become an alias');
 
 set local role anon;
-select lives_ok('select * from public.public_profiles', 'Anonymous reads contain alias fields only');
+select lives_ok('select id,public_alias,avatar_url,created_at,updated_at from public.public_profiles', 'Anonymous reads contain public alias and avatar fields only');
+select throws_ok('select avatar_object from public.public_profiles', '42501', null, 'Anonymous cannot read avatar storage paths');
 select throws_ok('select email from public.public_profiles', '42703', null, 'Public projection has no email field');
 select throws_ok('select * from private.accounts', '42501', null, 'Anonymous cannot read private account mapping');
 select throws_ok('select public.set_public_alias(''Hacked'')', '42501', null, 'Anonymous cannot change alias');

@@ -64,11 +64,12 @@ describe("live isolated account access", () => {
   it("anonymous readers receive only public alias fields, never account IDs or email", async () => {
     const { data, error } = await createPublicClient()
       .from("public_profiles")
-      .select("*");
+      .select("id,public_alias,avatar_url,created_at,updated_at");
     expect(error).toBeNull();
     expect(data?.length).toBeGreaterThanOrEqual(2);
     for (const profile of data ?? []) {
       expect(Object.keys(profile).sort()).toEqual([
+        "avatar_url",
         "created_at",
         "id",
         "public_alias",
@@ -76,6 +77,7 @@ describe("live isolated account access", () => {
       ]);
       expect([firstId, secondId]).not.toContain(profile.id);
     }
+    expect((await createPublicClient().from("public_profiles").select("avatar_object")).error?.code).toBe("42501");
   });
   it("anonymous direct RPC and private schema access are denied", async () => {
     expect(

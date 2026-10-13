@@ -59,7 +59,7 @@ it("serializes repeated tenancy reviews, keeps historic manager, enforces author
     })
       .jpeg()
       .toBuffer();
-    const photoIds = Array.from({ length: 4 }, () => crypto.randomUUID());
+    const photoIds = Array.from({ length: 6 }, () => crypto.randomUUID());
     for (const photo of photoIds) {
       const path = id + "/" + photo + ".jpg";
       photoPaths.push(path);
@@ -80,7 +80,7 @@ it("serializes repeated tenancy reviews, keeps historic manager, enforces author
         }),
       ),
     );
-    expect(registrations.filter((r) => !r.error)).toHaveLength(3);
+    expect(registrations.filter((r) => !r.error)).toHaveLength(5);
     const accepted = photoIds[registrations.findIndex((r) => !r.error)];
     expect(
       (await clients[1].rpc("remove_review_photo", { p_photo: accepted })).error
