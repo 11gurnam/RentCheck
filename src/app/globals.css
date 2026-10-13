@@ -1500,3 +1500,40 @@ dialog:modal {position:fixed;inset:0;margin:auto;max-height:calc(100dvh - 32px);
 .rating-category-unrated {font-size:11px;line-height:1.7;color:#65716b;margin:8px 0;max-width:80ch;}
 .rating-category-breakdown>.field-hint {font-size:10px;color:#65716b;line-height:1.6;margin:8px 0 0;}
 @media(max-width:600px){.rating-summary-compact{gap:14px;padding:12px;}.rating-summary-score>strong{font-size:18px;}.rating-category-breakdown summary>span{display:block;margin:3px 0 0;}.rating-category-row{grid-template-columns:1fr auto;gap:4px 8px;}.rating-category-row .rating-meter{grid-column:1;grid-row:2;}.rating-category-row>strong{grid-column:2;grid-row:1;}.rating-category-row>small{grid-column:2;grid-row:2;}}
+.verified-response-label {display:inline-flex;align-items:center;gap:6px;color:#315740;background:#edf4e7;border-radius:6px;padding:4px 7px;font-size:11px;}
+.evidence-document-links {margin:12px 0;padding-left:18px;font-size:13px;line-height:1.8;}
+.claim-search-bar {display:flex;gap:10px;margin:16px 0;align-items:center;}
+.claim-search-bar label {flex:1;min-width:0;}.claim-search-bar input {width:100%;padding:12px;border:1px solid #b8c8b8;border-radius:8px;}
+.claim-search-result,.tenancy-verification-row {display:flex;gap:16px;align-items:center;justify-content:space-between;padding:14px 0;border-bottom:1px solid #dde2d5;}
+.claim-search-result>div,.tenancy-verification-row>div {display:grid;gap:4px;min-width:0;}
+.claim-search-result span,.tenancy-verification-row span {font-size:13px;color:#65716b;}.claim-search-result small,.tenancy-verification-row small {font-size:11px;color:#65716b;}
+@media(max-width:600px){.claim-search-result,.tenancy-verification-row{align-items:flex-start;flex-direction:column;gap:10px;}.claim-search-bar{flex-wrap:wrap;}.claim-search-bar button{font-size:13px;}}
+.verification-summary {display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;margin:24px 0 12px}
+.verification-summary .dashboard-card {padding:18px;margin:0;display:grid;gap:8px}
+.verification-summary span {font-size:.8rem;color:var(--muted,#60746d)}
+.verification-summary strong {font-size:1.75rem;color:#214d40}
+.verification-filters {display:flex;flex-wrap:wrap;align-items:end;gap:12px;padding:18px;background:#f1f5ed;border:1px solid #dce4d7;border-radius:12px;margin:20px 0}
+.verification-filters label {display:grid;gap:6px;font-size:.8rem;flex:1 1 140px}
+.verification-filters label:first-child {flex:2 1 230px}
+.verification-filters input,.verification-filters select {width:100%;min-height:42px;padding:9px 12px;background:white;border:1px solid #9cae9f;border-radius:6px;font-size:.85rem}
+.verification-filters button {min-height:42px;padding:9px 18px}
+.verification-table-wrap {overflow:auto;border:1px solid #dce4d7;border-radius:12px;background:white}
+.verification-table {width:100%;min-width:980px;border-collapse:collapse;font-size:.85rem;text-align:left}
+.verification-table th {background:#eef3e9;color:#37564a;font-size:.75rem;letter-spacing:.035em;padding:14px}
+.verification-table td {padding:14px;vertical-align:top;border-top:1px solid #e7ebe1}
+.verification-table td:nth-child(2) {white-space:nowrap}
+.verification-table small {display:block;color:#64776e;margin-top:4px;max-width:220px}
+.verification-applicant {display:flex;align-items:center;gap:8px}
+.verification-table details {margin-top:8px}
+.verification-table details a {display:block;padding:6px 0;white-space:nowrap}
+.verification-pagination {display:flex;gap:12px;margin:20px 0}
+.verification-facts {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px;margin-top:20px}
+.verification-facts>div {display:grid;align-content:start;gap:6px}
+.verification-facts strong {font-size:.75rem;text-transform:uppercase;letter-spacing:.05em;color:#61766b}
+.verification-previews {display:flex;flex-wrap:wrap;gap:16px;margin-top:16px}
+.verification-previews a {display:grid;gap:6px;font-size:.8rem}
+.verification-previews img {width:220px;height:160px;object-fit:contain;border:1px solid #dce4d7;background:white;border-radius:8px}
+.verification-history {padding-left:22px}
+.verification-history li {padding:12px 0;border-bottom:1px solid #e7ebe1}
+.verification-history p {margin:6px 0}
+@media(max-width:800px){.verification-summary {grid-template-columns:repeat(2,minmax(0,1fr))}.verification-facts {grid-template-columns:1fr}}

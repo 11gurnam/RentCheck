@@ -1,0 +1,15 @@
+"use client";
+import { useActionState, useState, useRef } from "react";
+import { ActionModal } from "@/components/ui/action-modal";
+import { ActionFeedback, ActionIcon } from "@/components/ui/action-feedback";
+import { EvidenceChecklist } from "@/features/operations/checklist";
+import { manageApplication } from "./actions";
+export function ManagementDecision({ id, kind, status, demo, own, intent }: { id: string; kind: "tenant" | "landlord"; status: string; demo: boolean; own: boolean; intent?: string }) {
+  const options = status === "approved" ? [["revoked", "Revoke verification"], ...(kind === "landlord" ? [["disputed", "Mark disputed and suspend privileges"]] : [])] : ["pending", "disputed"].includes(status) ? [["assign", "Assign to me / start review"], ["request_information", "Request more information"], ["approved", status === "disputed" ? "Resolve dispute and approve" : "Approve verification"], ["rejected", "Reject application / resolve dispute"]] : [];
+  const allowed = options.filter(([value]) => !(own && value === "approved"));
+  const [action, setAction] = useState(allowed.some(([value]) => value === intent) ? intent! : allowed[0]?.[0] ?? "");
+  const [state, submit, pending] = useActionState(manageApplication, {});
+  const form = useRef<HTMLFormElement>(null);
+  if (!allowed.length) return <p className="field-hint">This application is closed. The applicant can submit a new application where permitted.</p>;
+  return <section className="dashboard-card"><h2>Review actions</h2>{own && <p className="action-feedback feedback-warning">Another administrator must approve your application.</p>}<form ref={form} action={submit} className="auth-form"><input name="application" type="hidden" value={id}/><input name="kind" type="hidden" value={kind}/><label>Administrative action<select name="action" value={action} onChange={e => setAction(e.target.value)}>{allowed.map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></label><label>Decision or information request reason<textarea name="reason" required minLength={10} maxLength={2000} placeholder="Explain the evidence basis, missing information, or policy reason." /></label>{action === "approved" && !demo && <EvidenceChecklist/>}<p className="field-hint">Information requests notify the applicant and allow a replacement evidence set. Approval grants only the badge and permissions for this property. All actions are audited.</p><ActionModal beforeOpen={() => form.current?.reportValidity() ?? false} title="Confirm verification action" trigger="Review and confirm action" warning={action !== "approved" && action !== "assign"}><p>Confirm that you reviewed this application and entered the correct reason. Decisions change verification status and related permissions immediately.</p><button type="submit" disabled={pending}><ActionIcon name="save"/>{pending ? "Saving…" : "Confirm action"}</button><ActionFeedback message={state.message} status={state.status}/></ActionModal><ActionFeedback message={state.message} status={state.status}/></form></section>;
+}

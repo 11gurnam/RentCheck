@@ -9,6 +9,7 @@ import {
   replyToReview,
 } from "./actions";
 import type { Claim } from "./data";
+import { EvidenceUpload, EvidenceLinks } from "@/features/privacy/evidence-upload";
 import { EvidenceChecklist } from "@/features/operations/checklist";
 export function ClaimForm({
   target,
@@ -30,17 +31,9 @@ export function ClaimForm({
       <p>
         Request {real ? "manual representative review" : "demonstration representative access"} for {name}. Private evidence
         is visible only to you and trusted administrators. Approval grants
-        permitted detail/reply controls.
+        permitted detail controls. Only an approved claim for this specific property permits official replies; a manager-profile claim alone does not.
       </p>
-      <label>
-        {real ? "Redacted representative evidence image or PDF" : "Fictional claim evidence image or PDF"}
-        <input
-          type="file"
-          name="document"
-          accept="image/jpeg,image/png,image/webp,application/pdf"
-          required
-        />
-      </label>
+      <EvidenceUpload claim demo={!real} />
       <label>
         <input name="synthetic" type="checkbox" required /> {real ? "I have authority to submit this redacted evidence and consent to private review and the evidence retention policy." : "This claim and evidence use only invented demonstration information."}
       </label>
@@ -58,13 +51,9 @@ export function ClaimDecision({ claim }: { claim: Claim }) {
       </h2>
       <p>{claim.is_demo === false ? "Real evidence · manual review" : "Demonstration claim"} · <StatusBadge status={claim.status} /></p>
       <p>Evidence expires: {claim.expires_at ?? "Not recorded"}{claim.evidence_expired ? " · Download unavailable" : ""}</p>
-      <p>{claim.reason}</p>
-      <p>
-        <a href={"/api/documents/" + claim.document_id}>
-          Download private claim evidence
-        </a>
-      </p>
-      {["pending", "approved"].includes(claim.status) && (
+      <p>{claim.reason}</p><p>{claim.address}</p>
+      <EvidenceLinks documents={claim.documents ?? []} />
+      {["pending", "approved", "disputed"].includes(claim.status) && (
         <form
           action={a}
           className="auth-form"
@@ -74,13 +63,13 @@ export function ClaimDecision({ claim }: { claim: Claim }) {
           <label>
             Claim decision
             <select name="decision">
-              {claim.status === "pending" ? (
+              {claim.status !== "approved" ? (
                 <>
                   <option value="approved">{claim.is_demo === false ? "Approve representative evidence" : "Approve demonstration claim"}</option>
-                  <option value="rejected">Reject claim</option>
+                  <option value="rejected">Reject claim / resolve dispute</option>
                 </>
               ) : (
-                <option value="revoked">Revoke claim</option>
+                <><option value="revoked">Revoke claim</option><option value="disputed">Dispute claim (suspend privileges)</option></>
               )}
             </select>
           </label>
@@ -181,7 +170,7 @@ export function ReplyForm({
     <ActionModal title="Reply to this review" trigger="Reply to review"><form action={a} className="auth-form" onReset={(e) => e.preventDefault()}>
       <input name="review" type="hidden" value={review} />
       <label>
-        Reply as approved representative
+        Reply as verified property representative
         <select name="claim">
           {claims.map((c) => (
             <option key={c.id} value={c.id}>

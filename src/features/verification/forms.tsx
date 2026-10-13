@@ -3,7 +3,9 @@ import { ActionFeedback, ActionIcon, StatusBadge } from "@/components/ui/action-
 import { useActionState } from "react";
 import { requestVerification, decideVerification } from "./actions";
 import type { Verification } from "./data";
+import { EvidenceUpload, EvidenceLinks } from "@/features/privacy/evidence-upload";
 import { EvidenceChecklist } from "@/features/operations/checklist";
+import { displayDate } from "@/lib/display-date";
 export function VerificationForm({
   review,
   requests,
@@ -15,23 +17,21 @@ export function VerificationForm({
 }) {
   const [s, a, p] = useActionState(requestVerification, {});
   const active = requests.some((r) =>
-    ["pending", "approved"].includes(r.status),
+    ["pending", "approved"].includes(r.status) && r.stage !== "awaiting_information",
   );
   return (
     <section className="dashboard-card">
       <h2>{real ? "Manual tenancy evidence review" : "Demonstration tenant verification"}</h2>
       <p>Read the <a href="/privacy">privacy and evidence retention policy</a> before uploading.</p>
       <p>
-        {real ? "Upload a redacted rental document supporting your tenancy dates and property. Remove bank details, identity numbers and unrelated people's information. Only you and authorized reviewers can access it. Manual review is not independent identity certification." : "Use fictional rental-document images or PDFs only. This prototype simulates verification; it never verifies a real tenancy."}
+        {real ? "Upload redacted utility bills, internet bills, a rent agreement or other evidence supporting this property and tenancy period. Remove bank details, identity numbers and unrelated people's information. Only you and authorized reviewers can access it. Manual review is not independent identity certification." : "Use fictional utility bills, internet bills, rent agreements or other supporting documents only. Demo approval is separate from real tenancy verification."}
       </p>
       {requests.map((r) => (
         <div key={r.id}>
           <p>
-            <StatusBadge status={r.status} /> {r.reason ? "· " + r.reason : ""}
+            <StatusBadge status={r.status}>{r.stage === "awaiting_information" ? "Awaiting your information" : r.stage === "under_review" ? "Under review" : r.status}</StatusBadge> {r.reason ? "· " + r.reason : ""}
           </p>
-          {r.evidence_expired ? <p>Evidence expired; download unavailable.</p> : <a href={"/api/documents/" + r.document_id}>
-            Download your private document
-          </a>}
+          <EvidenceLinks documents={r.documents ?? []} />
         </div>
       ))}
       {!active && (
@@ -41,15 +41,8 @@ export function VerificationForm({
           onReset={(e) => e.preventDefault()}
         >
           <input name="review" type="hidden" value={review} />
-          <label>
-            {real ? "Redacted rental document image or PDF" : "Fictional rental document image or PDF"}
-            <input
-              type="file"
-              name="document"
-              accept="image/jpeg,image/png,image/webp,application/pdf"
-              required
-            />
-          </label>
+          {requests.some(r => r.stage === "awaiting_information") && <p className="action-feedback feedback-warning">Upload a complete updated evidence set addressing the administrator’s request. This replaces the current documents for this application; previous evidence remains private until its retention deadline.</p>}
+          <EvidenceUpload demo={!real} />
           <label>
             <input type="checkbox" name="synthetic" required /> {real ? "I have permission to submit this redacted document and consent to private review and the evidence retention policy." : "This document contains only invented demonstration information."}
           </label>
@@ -69,12 +62,8 @@ export function VerificationDecision({ request }: { request: Verification }) {
       </h2>
       <p>{request.is_demo === false ? "Real evidence · manual review" : "Demonstration request"} · <StatusBadge status={request.status} /></p>
       <p>Evidence expires: {request.expires_at ?? "Not recorded"}{request.evidence_expired ? " · Download unavailable" : ""}</p>
-      <p>{request.reason}</p>
-      <p>
-        <a href={"/api/documents/" + request.document_id}>
-          {request.is_demo === false ? "Download private evidence" : "Download private demonstration document"}
-        </a>
-      </p>
+      <p>{request.reason}</p><p>{request.address} · Tenancy: {request.start_date ? displayDate(request.start_date) : "Not recorded"} → {request.end_date ? displayDate(request.end_date) : "Current"}</p>
+      <EvidenceLinks documents={request.documents ?? []} />
       {["pending", "approved"].includes(request.status) && (
         <form
           action={a}

@@ -1,3 +1,4 @@
+import { PropertyClaimStatus } from "@/features/claims/property-status";
 import { displayDate } from "@/lib/display-date";
 import { notFound } from "next/navigation";
 import { z } from "zod";
@@ -77,7 +78,7 @@ export default async function PropertyPage({
       <div className="property-actions" aria-label="Property actions">
         <SaveForm property={id} saved={isSaved} />
         <a className="property-secondary-action" href={`/claims/new?kind=property&target=${id}`}>
-          <ActionIcon name="shield" />Claim this profile
+          <ActionIcon name="shield" />Claim this property
         </a>
         {allowed?.data === false ? (
           <span>You cannot review your own property.</span>
@@ -116,7 +117,7 @@ export default async function PropertyPage({
           </p>
         </section>
       </div>
-      <section className="dashboard-card" id="representative-contact"><h2>Private representative contact</h2><p><a href="/messages">Your conversations and contact preference</a></p>{contacts?.error ? <p role="status">Representative contact is temporarily unavailable. You can still explore this property and its reviews.</p> : contacts?.data?.length ? contacts.data.map((c: { profile_id: string; alias: string }) => <StartConversation key={c.profile_id} property={id} profile={c.profile_id} alias={c.alias} />) : <p>No approved representative is currently accepting contact for this property.</p>}</section>
+      <section className="dashboard-card" id="representative-contact"><h2>Landlord and representative</h2><PropertyClaimStatus property={id} /><p><a href="/messages">Your conversations and contact preference</a></p>{contacts?.error ? <p role="status">Representative contact is temporarily unavailable. You can still explore this property and its reviews.</p> : contacts?.data?.length ? contacts.data.map((c: { profile_id: string; alias: string }) => <StartConversation key={c.profile_id} property={id} profile={c.profile_id} alias={c.alias} />) : <p>No approved representative is currently accepting contact for this property.</p>}</section>
       <ReviewFeed
         property={id}
         propertyType={p.property_type}

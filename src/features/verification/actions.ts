@@ -3,9 +3,9 @@ import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { requireUser, isAdministrator } from "@/lib/auth/session";
 import { createDatabaseClient } from "@/lib/database/server";
-import { createMediaClient } from "@/lib/database/privileged";
+
 import { ownReviews } from "@/features/reviews/data";
-import { normalizeDocument } from "@/features/privacy/document";
+import { submitEvidenceBundle } from "@/features/privacy/evidence";
 import type { ReviewState } from "@/features/reviews/validation";
 export async function requestVerification(
   _: ReviewState,
@@ -16,45 +16,15 @@ export async function requestVerification(
   const file = form.get("document");
   if (!id.success || !(file instanceof File) || form.get("synthetic") !== "on")
     return {
-      message: "Choose a fictional document image and confirm it is synthetic.",
+      message: "Choose supporting documents and confirm your consent.",
     };
   const review = (await ownReviews()).find(
     (r) => r.id === id.data && r.status === "visible",
   );
   if (!review)
     return { message: "Only the author can verify a visible review." };
-  let documentFile: Awaited<ReturnType<typeof normalizeDocument>>;
-  try {
-    documentFile = await normalizeDocument(file);
-  } catch {
-    return {
-      message:
-        "Use a valid fictional JPEG, PNG, WebP or PDF, up to 3 MiB. PDFs must have at most 30 pages, without encryption, scripts, attachments or interactive forms.",
-    };
-  }
-  const media = createMediaClient();
-  const document = crypto.randomUUID();
-  const path = "verification/" + document + "." + documentFile.extension;
-  const upload = await media.storage
-    .from("rental-documents")
-    .upload(path, documentFile.bytes, {
-      contentType: documentFile.mime,
-      upsert: false,
-    });
-  if (upload.error)
-    return { message: "Private upload failed. Please try again." };
-  const result = await media.rpc("register_evidence_document", {
-    p_user: user.id,
-    p_review: id.data,
-    p_document: document,
-    p_extension: documentFile.extension,
-    p_demo: review.is_demo !== false,
-    p_consent: true,
-  });
-  if (result.error) {
-    await media.storage.from("rental-documents").remove([path]);
-    return { message: result.error.message };
-  }
+  const result = await submitEvidenceBundle(user.id, form, { review: id.data, demo: review.is_demo !== false });
+  if (result.message) return { message: result.message };
   revalidatePath("/reviews/" + id.data + "/edit");
   revalidatePath("/admin/verification");
   return {
@@ -87,7 +57,7 @@ export async function decideVerification(
     p_request: v.request,
     p_decision: v.decision,
     p_reason: v.reason,
-    p_checks: { identity: form.get("identity") === "on", property: form.get("property") === "on", period_or_authority: form.get("period_or_authority") === "on" },
+    p_checks: { identity: form.get("identity") === "on", property: form.get("property") === "on", period_or_authority: form.get("period_or_authority") === "on", readable: form.get("readable") === "on", complete: form.get("complete") === "on", valid: form.get("valid") === "on" },
   });
   if (error) return { message: error.message };
   revalidatePath("/admin/verification");
@@ -95,6 +65,6 @@ export async function decideVerification(
   revalidatePath("/reviews", "layout");
   revalidatePath("/search");
   return {
-    status: "success", message: "Demonstration decision saved with an immutable audit record.",
+    status: "success", message: "Verification decision saved and audited.",
   };
 }

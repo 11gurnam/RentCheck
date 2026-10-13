@@ -77,7 +77,7 @@ test("claim upload, trusted approval, details, separate reply and revocation", a
     expect(r.error).toBeNull();
     await login(page, 0);
     await page.goto("/claims/new?kind=property&target=" + property);
-    await page.getByLabel("Fictional claim evidence image").setInputFiles({
+    await page.getByLabel("Fictional supporting documents").setInputFiles({
       name: "fictional.png",
       mimeType: "image/png",
       buffer: await sharp({
