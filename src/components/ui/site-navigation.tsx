@@ -11,6 +11,7 @@ function NavigationIcon({ href }: { href: string }) {
     "/claims": "M12 3l8 4v6c0 5-8 9-8 9s-8-4-8-9V7ZM8 12l3 3 5-6",
     "/properties/new": "M3 11l9-8 9 8M5 10v11h14V10M9 15h6M12 12v6",
     "/account": "M16 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0M4 21v-2a8 8 0 0 1 16 0v2",
+    "/admin": "M12 3l8 4v6c0 5-8 9-8 9s-8-4-8-9V7ZM8 12l3 3 5-6",
     "/sign-in": "M14 3h6v18h-6M3 12h12M10 7l5 5-5 5",
     "#how-it-works": "M5 5h14v14H5ZM8 9h8M8 13h5",
     "#our-principles": "M12 3l8 4v6c0 5-8 9-8 9s-8-4-8-9V7ZM8 12l3 3 5-6",
@@ -67,7 +68,7 @@ export function SiteNavigation({ links }: {
       </button>
       <nav id={id} className={`site-navigation${open ? " is-open" : ""}`} aria-label="Main navigation">
         {links.map(({ href, label }) => (
-          <a key={href} href={href} aria-current={pathname === href ? "page" : undefined}
+          <a key={href} href={href} aria-current={pathname === href || (href === "/admin" && pathname.startsWith("/admin/")) ? "page" : undefined}
             className={href === "/sign-in" ? "navigation-sign-in" : undefined}
             onClick={() => setOpen(false)}>
             <NavigationIcon href={href} /><span>{label}</span>

@@ -8,6 +8,6 @@ export function ActionFeedback({ message, status = "error" }: { message?: string
  return message ? <p className={`action-feedback feedback-${tone}`} role={tone === "error" ? "alert" : "status"}><ActionIcon name={tone === "success" ? "check" : "warning"}/><span>{message}</span></p> : null;
 }
 export function StatusBadge({ status, children }: { status: string; children?: ReactNode }) {
- const tone = ["visible","published","approved","resolved","kept"].includes(status) ? "success" : ["deleted","removed","rejected","revoked"].includes(status) ? "danger" : "warning";
+ const tone = ["visible","published","approved","resolved","kept","active"].includes(status) ? "success" : ["deleted","removed","rejected","revoked","suspended"].includes(status) ? "danger" : "warning";
  return <span className={`semantic-status status-${tone}`}><ActionIcon name={tone === "success" ? "check" : tone === "danger" ? "trash" : "warning"}/>{children ?? status.replaceAll("_"," ")}</span>;
 }

@@ -1,7 +1,10 @@
 import "server-only";
 import { createDatabaseClient } from "@/lib/database/server";
 import { womenRecommended } from "./rules";
+import type { EvidenceDocument } from "@/features/privacy/evidence-upload";
 export type Verification = {
+  stage?: string | null;
+  documents?: EvidenceDocument[]; address?: string; start_date?: string; end_date?: string | null;
   is_demo?: boolean;
   evidence_expired?: boolean;
   expires_at?: string;
@@ -18,14 +21,26 @@ export async function myVerifications(): Promise<Verification[]> {
     await createDatabaseClient()
   ).rpc("get_my_verifications");
   if (error) throw new Error("Verification unavailable");
-  return data;
+  return await Promise.all((data as Verification[]).map(async row => {
+    const db = await createDatabaseClient();
+    const [docs, context] = await Promise.all([db.rpc("get_evidence_documents", {p_primary: row.document_id}), db.rpc("get_verification_context", {p_request: row.id})]);
+    if (docs.error || context.error) throw new Error("Evidence details unavailable");
+    const stage = await db.rpc("get_my_verification_stage", {p_kind: "tenant", p_application: row.id});
+    if (stage.error) throw new Error("Verification progress unavailable");
+    return {...row, ...context.data, stage: stage.data, documents: docs.data as EvidenceDocument[]};
+  }));
 }
 export async function adminVerifications(): Promise<Verification[]> {
   const { data, error } = await (
     await createDatabaseClient()
   ).rpc("get_admin_verifications");
   if (error) throw new Error("Administrator access required");
-  return data;
+  return await Promise.all((data as Verification[]).map(async row => {
+    const db = await createDatabaseClient();
+    const [docs, context] = await Promise.all([db.rpc("get_evidence_documents", {p_primary: row.document_id}), db.rpc("get_verification_context", {p_request: row.id})]);
+    if (docs.error || context.error) throw new Error("Evidence details unavailable");
+    return {...row, ...context.data, documents: docs.data as EvidenceDocument[]};
+  }));
 }
 export async function womensCounts(property: string) {
   const { data, error } = await (

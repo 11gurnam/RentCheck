@@ -21,6 +21,9 @@ export async function requireUser(destination = "/account") {
     redirect(
       `/sign-in?next=${encodeURIComponent(safeDestination(destination))}`,
     );
+  const { data: status, error } = await (await createDatabaseClient()).rpc("get_my_account_status");
+  if (error) throw new Error("Account status is unavailable.");
+  if (status === "suspended") redirect("/account/suspended");
   return user;
 }
 

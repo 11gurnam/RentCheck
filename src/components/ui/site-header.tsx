@@ -1,14 +1,19 @@
 import { ProfileAvatar } from "./profile-avatar";
 import { createDatabaseClient } from "@/lib/database/server";
-import { getOwnProfile, getVerifiedUser } from "@/lib/auth/session";
+import { getOwnProfile, getVerifiedUser, isAdministrator } from "@/lib/auth/session";
 import { Brand } from "./brand";
 import { SiteNavigation } from "./site-navigation";
 
 export async function SiteHeader({ home = false }: { home?: boolean }) {
   const user = await getVerifiedUser();
   const profile = user ? await getOwnProfile() : null;
+  const admin = user ? await isAdministrator() : false;
   const photo = profile ? await (await createDatabaseClient()).from("public_profiles").select("avatar_url").eq("id",profile.profile_id).maybeSingle() : null;
-  const links = [
+  const links = admin ? [
+    { href: "/search", label: "Explore" },
+    { href: "/properties/new", label: "Add a place" },
+    { href: "/admin", label: "Admin Dashboard" },
+  ] : [
     { href: "/search", label: "Explore" },
     ...(user ? [
       { href: "/saved", label: "Shortlist" },

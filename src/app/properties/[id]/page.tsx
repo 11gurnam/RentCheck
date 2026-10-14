@@ -1,3 +1,4 @@
+import { PropertyClaimStatus } from "@/features/claims/property-status";
 import { displayDate } from "@/lib/display-date";
 import { notFound } from "next/navigation";
 import { z } from "zod";
@@ -20,6 +21,7 @@ import { ownReviews } from "@/features/reviews/data";
 import { CameraIcon } from "@/components/ui/camera-icon";
 import { ActionIcon } from "@/components/ui/action-feedback";
 import { PropertyLocation } from "@/features/discovery/property-location";
+import { AppealForm } from "@/features/admin-platform/forms";
 export default async function PropertyPage({
   params,
   searchParams,
@@ -79,7 +81,7 @@ export default async function PropertyPage({
       <div className="property-actions" aria-label="Property actions">
         <SaveForm property={id} saved={isSaved} />
         <a className="property-secondary-action" href={`/claims/new?kind=property&target=${id}`}>
-          <ActionIcon name="shield" />Claim this profile
+          <ActionIcon name="shield" />Claim this property
         </a>
         {allowed?.data === false ? (
           <span>You cannot review your own property.</span>
@@ -90,6 +92,7 @@ export default async function PropertyPage({
         )}
         <a className="property-secondary-action" href="#representative-contact"><ActionIcon name="shield" />Contact representative</a>
         {allowed?.data !== false && <a className="property-secondary-action camera-action" href={ownReview ? `/reviews/${ownReview.id}/edit#review-photos` : `/reviews/new?property=${id}`}><CameraIcon />Add review photos</a>}
+        {user && <AppealForm kind="property" target={id} label="Report this property" />}
       </div>
       <div className="dashboard-grid property-detail-panels">
         <section className="dashboard-card">
@@ -119,7 +122,7 @@ export default async function PropertyPage({
           </p>
         </section>
       </div>
-      <section className="dashboard-card" id="representative-contact"><h2>Private representative contact</h2><p><a href="/messages">Your conversations and contact preference</a></p>{contacts?.error ? <p role="status">Representative contact is temporarily unavailable. You can still explore this property and its reviews.</p> : contacts?.data?.length ? contacts.data.map((c: { profile_id: string; alias: string }) => <StartConversation key={c.profile_id} property={id} profile={c.profile_id} alias={c.alias} />) : <p>No approved representative is currently accepting contact for this property.</p>}</section>
+      <section className="dashboard-card" id="representative-contact"><h2>Landlord and representative</h2><PropertyClaimStatus property={id} /><p><a href="/messages">Your conversations and contact preference</a></p>{contacts?.error ? <p role="status">Representative contact is temporarily unavailable. You can still explore this property and its reviews.</p> : contacts?.data?.length ? contacts.data.map((c: { profile_id: string; alias: string }) => <StartConversation key={c.profile_id} property={id} profile={c.profile_id} alias={c.alias} />) : <p>No approved representative is currently accepting contact for this property.</p>}</section>
       <ReviewFeed
         property={id}
         propertyType={p.property_type}

@@ -1,42 +1,24 @@
-import { AccountShell } from "@/components/ui/account-shell";
-import { isAdministrator, requireUser } from "@/lib/auth/session";
-
+import Link from "next/link";
+import { overview } from "@/features/admin-platform/data";
+import { displayDate } from "@/lib/display-date";
+import { ActivityChart } from "@/features/admin-platform/activity-chart";
+function Distribution({title,rows}:{title:string;rows:{label:string;count:number}[]}) {
+  const maximum=Math.max(1,...rows.map(row=>row.count));
+  return <section className="dashboard-card admin-chart"><h2>{title}</h2>{rows.length?rows.map(row=><div className="admin-bar-row" key={row.label}><span>{row.label.replaceAll("_"," ")}</span><strong>{row.count}</strong><div className="admin-chart-bar" aria-hidden="true"><span style={{width:`${row.count/maximum*100}%`}}/></div></div>):<p>No records yet.</p>}</section>;
+}
 export default async function AdminPage() {
-  await requireUser("/admin");
-  const permitted = await isAdministrator();
-  return (
-    <AccountShell>
-      <section className="dashboard-card boundary-card">
-        <p className="eyebrow">ADMINISTRATOR AREA</p>
-        <h1>
-          {permitted ? "Administrator access verified." : "Access restricted."}
-        </h1>
-        <p>
-          {permitted
-            ? "Your account has administrator access. Demonstration verification and audit tools are ready."
-            : "This account does not have administrator access. A public alias or account setting cannot grant it."}
-        </p>
-        {permitted && (
-          <p>
-            <a href="/admin/verification">Verification requests</a> ·{" "}
-            <a href="/admin/audit">Audit records</a>
-            {" · "}
-            <a href="/admin/claims">Profile claims</a>
-            {" · "}
-            <a href="/admin/reports">Review reports</a>
-            {" · "}<a href="/admin/messages">Message reports</a>
-            {" · "}<a href="/admin/locations">Property locations</a>
-            {" · "}<a href="/admin/operations">Operations and cleanup</a>
-            {" · "}
-            <a href="/admin/duplicates">Possible duplicates</a>
-            {" · "}
-            <a href="/admin/associations">Management history</a>
-          </p>
-        )}
-        <a className="primary-link" href="/account">
-          Back to your account
-        </a>
-      </section>
-    </AccountShell>
-  );
+  const data=await overview();
+  const metrics:[string,number,string,string?][]=[
+    ["Total properties",data.properties,"/admin/properties","Published and suspended; merged profiles excluded"],
+    ["Tenant accounts",data.tenants,"/admin/users?role=tenant","All accounts have tenant access"],
+    ["Verified tenants",data.verified_tenants,"/admin/users?verified=true","Real residence evidence approved"],
+    ["Landlord accounts",data.landlords,"/admin/users?role=landlord","Accounts that submitted a representative claim"],
+    ["Verified landlords",data.verified_landlords,"/admin/users?landlord_verified=true","At least one real property claim approved"],
+    ["Verified property claims",data.verified_claims,"/admin/verification-management?type=landlord&status=verified&demo=real","Real property claims; demo approvals excluded"],
+    ["Pending verifications",data.pending,"/admin/verification-management?status=pending","Tenant and landlord applications"],
+    ["Total reviews",data.reviews,"/admin/reviews","Includes hidden, removed and deleted records"],
+    ["Flagged reviews",data.flagged,"/admin/reviews?flagged=true","Distinct reviews with unresolved reports"],
+    ["Open investigations",data.disputes,"/admin/disputes","Unresolved disputes, reports and appeals"],
+  ];
+  return <><header className="admin-page-heading"><p className="eyebrow">RENTCHECK ADMINISTRATION</p><h1>Platform overview</h1><p>Manage places, people, evidence and moderation from one workspace.</p></header><div className="admin-metrics">{metrics.map(([label,count,href,hint])=><Link key={label} href={href} className="admin-metric"><span>{label}</span><strong>{count.toLocaleString("en-IN")}</strong><small>{hint}</small></Link>)}</div><section className="dashboard-card admin-task-panel"><div><h2>Review workload</h2><p><strong>{data.overdue}</strong> pending applications are older than 7 days. This is an age indicator, not a promised processing deadline.</p>{data.oldest&&<p className="field-hint">Oldest pending submission: {displayDate(data.oldest.slice(0,10))}</p>}</div><div className="review-actions"><Link className="review-action" href="/admin/verification-management?status=pending&sort=oldest">Review oldest applications</Link><Link className="review-action warning-action" href="/admin/reviews?flagged=true">Moderation queue</Link></div></section><div className="admin-chart-grid"><Distribution title="Residence verification coverage" rows={[{label:"Verified tenants",count:data.verified_tenants},{label:"Not yet verified",count:Math.max(0,data.tenants-data.verified_tenants)}]}/><Distribution title="Application decisions" rows={data.verification_states}/><Distribution title="Properties by city" rows={data.cities}/><section className="dashboard-card admin-chart"><h2>Platform activity</h2><p className="field-hint">Six calendar months of actual creation and submission timestamps. Landlord registrations track the first claim; reports count submissions.</p><ActivityChart rows={data.trends}/><div className="admin-table-wrap" tabIndex={0} role="region" aria-label="Monthly activity data"><table className="admin-table admin-trend-table"><caption className="sr-only">Monthly registrations, properties and reviews</caption><thead><tr>{["Month","Places","Tenants","Landlords","Reviews","Reports"].map(label=><th key={label} scope="col">{label}</th>)}</tr></thead><tbody>{data.trends.map(row=><tr key={row.month}><th scope="row">{row.month}</th><td>{row.properties}</td><td>{row.tenants}</td><td>{row.landlords}</td><td>{row.reviews}</td><td>{row.flagged}</td></tr>)}</tbody></table></div></section></div><section className="dashboard-card"><h2>Other platform tools</h2><div className="review-actions">{[["/admin/duplicates","Duplicate listings"],["/admin/associations","Management history"],["/admin/locations","Property locations"],["/admin/reports","Review and photo reports"],["/admin/messages","Message reports"]].map(([href,label])=><Link className="review-action" key={href} href={href}>{label}</Link>)}</div></section></>;
 }

@@ -41,7 +41,7 @@ export function ReviewCollection({ rows }: { rows: OwnReview[] }) {
         {!!r.criteria?.length && <details className="review-criterion-details"><summary>All criterion ratings</summary><div className="review-criteria-scores">{r.criteria.map(c => <span key={c.key}>{c.label}<strong>{c.rating} / 5</strong></span>)}</div></details>}
         <section className="review-description"><h4>Description</h4><p className="review-excerpt">{r.body.length > 180 ? r.body.slice(0, 177).trimEnd() + "…" : r.body}</p>
         </section>{r.body.length > 180 && <details className="review-full-text"><summary>Read full review</summary><p>{r.body}</p></details>}
-        {r.status === "visible" ? <div className="review-actions"><a className="review-action" href={`/reviews/${r.id}/edit`}><ActionIcon name="edit" />Edit review</a><a className="review-action camera-action" href={`/reviews/${r.id}/edit#review-photos`}><CameraIcon />Photos</a><DeleteReview id={r.id} /></div> : r.archived ? <p>Archived duplicate tenancy retained for audit.</p> : <CloseTenancy review={r} />}
+        {r.status === "visible" ? <div className="review-actions"><a className="review-action" href={`/reviews/${r.id}/edit`}><ActionIcon name="edit" />Edit review</a><a className="review-action camera-action" href={`/reviews/${r.id}/edit#review-photos`}><CameraIcon />Photos</a><DeleteReview id={r.id} /></div> : r.archived ? <p>Archived duplicate tenancy retained for audit.</p> : r.status === "hidden" ? <div className="review-actions"><p className="field-hint">Temporarily hidden during moderation.</p><a className="review-action" href="/account/appeals">Appeal this decision</a><DeleteReview id={r.id}/></div> : <CloseTenancy review={r} />}
       </section>)}
     </>}
   </>;

@@ -159,11 +159,12 @@ test("older experiences, escaped tenant text, admin boundaries and filtered mana
       await service.from("landlords").select("id").eq("name", name).single()
     ).data!.id;
     await page.goto("/admin/audit");
+    await page.getByRole("button", { name: "Filters", exact: true }).click();
     await page.getByLabel("Record ID filter").fill(manager!);
     await page
       .getByRole("combobox", { name: "Action filter" })
       .selectOption("manager_created");
-    await page.getByRole("button", { name: "Filter audit records" }).click();
+    await page.getByRole("button", { name: "Apply filters" }).click();
     await expect(page.getByRole("main")).toContainText("1 matching records");
     await page
       .getByText("Inspect previous and new values", { exact: true })

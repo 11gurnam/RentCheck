@@ -1,4 +1,4 @@
-import { AccountShell } from "@/components/ui/account-shell";
+import { AdminContent as AccountShell } from "@/features/admin-platform/content";
 import { requireUser, isAdministrator } from "@/lib/auth/session";
 import { createDatabaseClient } from "@/lib/database/server";
 import { LocationForm } from "@/features/discovery/location-form";
