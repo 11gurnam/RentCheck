@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useId, useRef, useState } from "react";
+import Link from "next/link";
+import { NavigationPending } from "./navigation-pending";
 import { usePathname } from "next/navigation";
 
 function NavigationIcon({ href }: { href: string }) {
@@ -68,11 +70,11 @@ export function SiteNavigation({ links }: {
       </button>
       <nav id={id} className={`site-navigation${open ? " is-open" : ""}`} aria-label="Main navigation">
         {links.map(({ href, label }) => (
-          <a key={href} href={href} aria-current={pathname === href || (href === "/admin" && pathname.startsWith("/admin/")) ? "page" : undefined}
+          <Link key={href} href={href} aria-current={pathname === href || (href === "/admin" && pathname.startsWith("/admin/")) ? "page" : undefined}
             className={href === "/sign-in" ? "navigation-sign-in" : undefined}
             onClick={() => setOpen(false)}>
-            <NavigationIcon href={href} /><span>{label}</span>
-          </a>
+            <NavigationIcon href={href} /><span>{label}</span><NavigationPending/>
+          </Link>
         ))}
       </nav>
     </div>
