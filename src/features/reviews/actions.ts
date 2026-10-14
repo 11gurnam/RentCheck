@@ -80,6 +80,11 @@ export async function removeReview(
   ).rpc("delete_review", { p_review: id });
   if (error) return { message: error.message };
   revalidatePath("/account/reviews");
+  revalidatePath("/search");
+  revalidatePath("/compare");
+  revalidatePath("/saved");
+  revalidatePath("/landlords", "layout");
+  revalidatePath("/admin", "layout");
   revalidatePath("/properties", "layout");
   return {
     status: "success", message: "Review deleted. It no longer contributes to public ratings.",

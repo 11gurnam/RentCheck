@@ -1,6 +1,7 @@
 "use client";
+import { useFeedbackAction } from "@/components/ui/use-feedback-action";
+import { ActionFeedback } from "@/components/ui/action-feedback";
 import { FilePicker } from "@/components/ui/file-picker";
-import { useActionState } from "react";
 import {
   uploadPropertyPhoto,
   removePropertyPhoto,
@@ -14,7 +15,7 @@ export function PropertyPhotoForm({
   property: string;
   own: { id: string }[];
 }) {
-  const [s, a, p] = useActionState(uploadPropertyPhoto, {});
+  const [s, a, p] = useFeedbackAction(uploadPropertyPhoto, {});
   return (
     <section className="dashboard-card">
       <h3>Add landlord photos</h3>
@@ -28,7 +29,7 @@ export function PropertyPhotoForm({
         <input type="hidden" name="property" value={property} />
         <FilePicker label="Landlord photo" name="photo" accept="image/jpeg,image/png,image/webp" photo />
         <button disabled={p}>Add landlord photo</button>
-        {s.message && <p role="status">{s.message}</p>}
+        <ActionFeedback receipt={s} message={s.message} status={s.status}/>
       </form>
       {own.map((ph) => (
         <Remove key={ph.id} photo={ph.id} />
@@ -37,18 +38,18 @@ export function PropertyPhotoForm({
   );
 }
 function Remove({ photo }: { photo: string }) {
-  const [s, a, p] = useActionState(removePropertyPhoto, {});
+  const [s, a, p] = useFeedbackAction(removePropertyPhoto, {});
   return (
     <form action={a}>
       <input type="hidden" name="photo" value={photo} />
       <a href={"/api/photos/" + photo}>View your landlord photo</a>
       <button disabled={p}>Remove landlord photo</button>
-      {s.message && <p role="status">{s.message}</p>}
+      <ActionFeedback receipt={s} message={s.message} status={s.status}/>
     </form>
   );
 }
 export function PhotoReport({ photo }: { photo: string }) {
-  const [s, a, p] = useActionState(reportPropertyPhoto, {});
+  const [s, a, p] = useFeedbackAction(reportPropertyPhoto, {});
   return (
     <details>
       <summary>Report this photo</summary>
@@ -59,7 +60,7 @@ export function PhotoReport({ photo }: { photo: string }) {
           <textarea name="reason" required minLength={10} maxLength={2000} />
         </label>
         <button disabled={p}>Submit photo report</button>
-        {s.message && <p role="status">{s.message}</p>}
+        <ActionFeedback receipt={s} message={s.message} status={s.status}/>
       </form>
     </details>
   );
@@ -73,7 +74,7 @@ export type PhotoReportRecord = {
   decision_reason: string | null;
 };
 export function PhotoReportCard({ report: r }: { report: PhotoReportRecord }) {
-  const [s, a, p] = useActionState(decidePhotoReport, {});
+  const [s, a, p] = useFeedbackAction(decidePhotoReport, {});
   return (
     <section className="dashboard-card">
       <h3>{r.property} · photo report</h3>
@@ -97,7 +98,7 @@ export function PhotoReportCard({ report: r }: { report: PhotoReportRecord }) {
             <textarea name="reason" required minLength={10} maxLength={2000} />
           </label>
           <button disabled={p}>Save photo decision</button>
-          {s.message && <p role="status">{s.message}</p>}
+          <ActionFeedback receipt={s} message={s.message} status={s.status}/>
         </form>
       )}
     </section>

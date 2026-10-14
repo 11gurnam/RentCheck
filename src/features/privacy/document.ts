@@ -1,10 +1,21 @@
 import { Worker } from "node:worker_threads";
+import nodeModule from "node:module";
 import { normalizePhoto } from "../reviews/image";
 const limit = 3 * 1024 * 1024;
+function pdfLibraryPath() {
+  const bases=[typeof __filename==="string"?__filename:import.meta.url,`${process.cwd()}/package.json`];
+  for(const base of bases) {
+    // An indirect native resolver avoids bundlers replacing the path with a module ID.
+    const nativeRequire=Reflect.apply(Reflect.get(nodeModule,"createRequire"),undefined,[base]) as NodeJS.Require;
+    const resolve=nativeRequire.resolve.bind(nativeRequire);
+    try { return resolve("pdf-lib"); } catch { /* Try the runtime package root. */ }
+  }
+  throw new Error("PDF processing service is unavailable.");
+}
 // Run the PDF parser in a bounded worker. No user PDF scripts or external links execute.
 const workerSource = String.raw`
-const {parentPort}=require('node:worker_threads');
-const {PDFDocument,PDFDict,PDFName}=require('pdf-lib');
+const {parentPort,workerData}=require('node:worker_threads');
+const {PDFDocument,PDFDict,PDFName}=require(workerData.library);
 parentPort.on('message',async(bytes)=>{try{
  const input=await PDFDocument.load(bytes,{ignoreEncryption:false,throwOnInvalidObject:true,updateMetadata:false});
  if(input.getPageCount()<1||input.getPageCount()>30)throw new Error('Page limit');
@@ -42,6 +53,7 @@ export async function normalizeDocument(
   const clean = await new Promise<Buffer>((resolve, reject) => {
     const worker = new Worker(workerSource, {
       eval: true,
+      workerData: { library: pdfLibraryPath() },
       env: {},
       stdout: true,
       stderr: true,

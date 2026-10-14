@@ -4,13 +4,13 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireUser, isAdministrator } from "@/lib/auth/session";
 import { createDatabaseClient } from "@/lib/database/server";
-type State = { message?: string };
+type State = { message?: string; status?: "success" | "error" };
 export async function contactPreference(_: State, form: FormData): Promise<State> {
   await requireUser("/messages");
   const { error } = await (await createDatabaseClient()).rpc("set_contact_preference", { p_enabled: form.get("enabled") === "on" });
   if (error) return { message: "Could not save contact preference." };
   revalidatePath("/messages");
-  return { message: "Contact preference saved." };
+  return { status:"success", message: "Contact preference saved." };
 }
 export async function startConversation(_: State, form: FormData): Promise<State> {
   await requireUser("/messages");
@@ -40,7 +40,7 @@ export async function messagingAction(_: State, form: FormData): Promise<State> 
   if (error) return { message: error.message };
   revalidatePath("/messages", "layout");
   revalidatePath("/admin/messages");
-  return { message: kind === "send" ? "Message sent." : kind === "report" ? "Report submitted for administrator review." : "Blocking preference saved." };
+  return { status:"success", message: kind === "send" ? "Message sent." : kind === "report" ? "Report submitted for administrator review." : "Blocking preference saved." };
 }
 export async function decideMessageReport(_: State, form: FormData): Promise<State> {
   await requireUser("/admin");
@@ -50,5 +50,5 @@ export async function decideMessageReport(_: State, form: FormData): Promise<Sta
   const { error } = await (await createDatabaseClient()).rpc("decide_message_report", { p_report: v.data.report, p_decision: v.data.decision, p_reason: v.data.reason });
   if (error) return { message: error.message };
   revalidatePath("/admin/messages"); revalidatePath("/messages", "layout");
-  return { message: "Message report decision saved and audited." };
+  return { status:"success", message: "Message report decision saved and audited." };
 }

@@ -3,7 +3,7 @@ import { revalidatePath } from "next/cache";
 import { requireUser, isAdministrator } from "@/lib/auth/session";
 import { createMediaClient } from "@/lib/database/privileged";
 import { purgeMedia } from "@/features/privacy/purge";
-export async function retryCleanup(_: { message?: string }, form: FormData): Promise<{ message?: string }> {
+export async function retryCleanup(_: { message?: string; status?: "success" | "error" }, form: FormData): Promise<{ message?: string; status?: "success" | "error" }> {
   await requireUser("/admin");
   if (!(await isAdministrator())) return { message: "Administrator access required." };
   if (form.get("confirmed") !== "on") return { message: "Confirm removal of expired evidence and retired photos." };
@@ -12,5 +12,5 @@ export async function retryCleanup(_: { message?: string }, form: FormData): Pro
   if (queued.error || photos.error) return { message: "Could not prepare cleanup. Please retry." };
   const complete = await purgeMedia(client, null, 2);
   revalidatePath("/admin/operations"); revalidatePath("/reviews", "layout"); revalidatePath("/claims");
-  return { message: complete ? "Cleanup completed. No queued media jobs remain." : "Cleanup has remaining jobs or storage is unavailable. Retry safely." };
+  return { status: complete ? "success" : "error", message: complete ? "Cleanup completed. No queued media jobs remain." : "Cleanup has remaining jobs or storage is unavailable. Retry safely." };
 }

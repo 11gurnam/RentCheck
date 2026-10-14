@@ -103,9 +103,9 @@ export async function ReviewFeed({
             : "No tenant ratings yet."}
       </p>
       <p>
-        {total} experiences · Page {page}
+        {total} {total === 1 ? "review" : "reviews"} · Page {page}
       </p>
-      {property && <section className="rating-summary-compact" aria-label="Average tenant ratings">
+      {property && count > 0 && <section className="rating-summary-compact" aria-label="Average tenant ratings">
         <div className="rating-summary-score"><strong>★ {rating == null ? "N/A" : Number(rating).toFixed(1)} <small>/ 5</small></strong><span>{count} {count === 1 ? "tenant rating" : "tenant ratings"}</span></div>
         <details className="rating-category-breakdown"><summary>Ratings by category <span>View breakdown</span></summary>
           <div className="rating-category-rows">{categorySummary.filter(c => c.rating != null).map(c => <div className="rating-category-row" key={c.criterion_key}><span>{c.label}</span><div className={`rating-meter rating-${ratingTone(Number(c.rating))}`} role="meter" aria-valuemin={0} aria-valuemax={5} aria-valuenow={Number(c.rating)} aria-label={`${c.label} average rating`}><span style={{ width: `${Number(c.rating) / 5 * 100}%` }} /></div><strong>{Number(c.rating).toFixed(1)} <small>/ 5</small></strong><small>{c.review_count} {c.review_count === 1 ? "rating" : "ratings"}</small></div>)}</div>
@@ -120,7 +120,7 @@ export async function ReviewFeed({
             <a href={href(1)}>Return to the first experiences page</a>.
           </p>
         ) : (
-          <p>Be the first to share an experience.</p>
+          <p>No reviews yet. Be the first to share your experience.</p>
         ))}
       <PhotoMedia carousel photos={tenantPhotos} title="Photos shared by tenants" />
       {rows.map((r) => (

@@ -8,7 +8,7 @@ import { requireUser } from "@/lib/auth/session";
 import { getSiteOrigin } from "@/lib/environment";
 import { purgeMedia } from "./purge";
 import { recentAuthentication } from "./recent-auth";
-type State = { message?: string };
+type State = { message?: string; status?: "success" | "error" };
 export async function recoverPassword(
   _: State,
   form: FormData,
@@ -27,7 +27,7 @@ export async function recoverPassword(
     return { message: "Account service unavailable. Try again shortly." };
   }
   return {
-    message:
+    status:"success", message:
       "If that address has an account, a password recovery email has been sent. Open its link to choose a new password.",
   };
 }
@@ -58,7 +58,7 @@ export async function changePassword(_: State, form: FormData): Promise<State> {
   await db.auth.signOut({ scope: "others" });
   revalidatePath("/account");
   return {
-    message: "Password updated. Use the new password next time you sign in.",
+    status:"success", message: "Password updated. Use the new password next time you sign in.",
   };
 }
 export async function deleteAccount(_: State, form: FormData): Promise<State> {
@@ -109,5 +109,5 @@ export async function markNotificationRead(
   ).rpc("mark_notification_read", { p_notification: id.data });
   if (error) return { message: "Notification unavailable." };
   revalidatePath("/account/notifications");
-  return { message: "Marked as read." };
+  return { status:"success", message: "Marked as read." };
 }

@@ -1,7 +1,8 @@
 "use client";
+import { useFeedbackAction } from "@/components/ui/use-feedback-action";
 import { FilePicker } from "@/components/ui/file-picker";
 import { ActionFeedback, ActionIcon } from "@/components/ui/action-feedback";
-import { useActionState, useId, useRef, useState, useTransition } from "react";
+import { useId, useRef, useState, useTransition } from "react";
 import { CameraIcon } from "@/components/ui/camera-icon";
 import { addPhoto, photoUploadContext } from "./photo-actions";
 
@@ -11,7 +12,7 @@ export function CardPhotoUpload({ property, name }: { property: string; name: st
   const [context, setContext] = useState<Awaited<ReturnType<typeof photoUploadContext>> | null>(null);
   const [error, setError] = useState("");
   const [loading, load] = useTransition();
-  const [state, action, pending] = useActionState(addPhoto, {});
+  const [state, action, pending] = useFeedbackAction(addPhoto, {});
   function open() {
     dialog.current?.showModal();
     setError("");
@@ -29,7 +30,7 @@ export function CardPhotoUpload({ property, name }: { property: string; name: st
         {context.reviews.length === 1 ? <input type="hidden" name="review" value={context.reviews[0].id} /> : <label>Choose your stay<select name="review" required>{context.reviews.map(r => <option key={r.id} value={r.id}>{dateLabel(r.start)} → {r.end ? dateLabel(r.end) : "Current"}</option>)}</select></label>}
         <FilePicker label="Photo" name="photo" accept="image/jpeg,image/png,image/webp" photo disabled={pending} />
         <p className="field-hint">JPEG, PNG or WebP · up to 3 MiB · 5 photos per review. Fictional examples only.</p>
-        <ActionFeedback message={state.message} status={state.status} />
+        <ActionFeedback receipt={state} message={state.message} status={state.status} />
         <div className="card-photo-dialog-actions"><button disabled={pending}><ActionIcon name="upload" />{pending ? "Uploading…" : "Upload photo"}</button><button type="button" className="photo-dialog-cancel" disabled={pending} onClick={() => dialog.current?.close()}>Done</button></div>
       </form>}
     </dialog>

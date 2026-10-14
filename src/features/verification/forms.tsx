@@ -1,6 +1,6 @@
 "use client";
+import { useFeedbackAction } from "@/components/ui/use-feedback-action";
 import { ActionFeedback, ActionIcon, StatusBadge } from "@/components/ui/action-feedback";
-import { useActionState } from "react";
 import { requestVerification, decideVerification } from "./actions";
 import type { Verification } from "./data";
 import { EvidenceUpload, EvidenceLinks } from "@/features/privacy/evidence-upload";
@@ -15,7 +15,7 @@ export function VerificationForm({
   requests: Verification[];
   real?: boolean;
 }) {
-  const [s, a, p] = useActionState(requestVerification, {});
+  const [s, a, p] = useFeedbackAction(requestVerification, {});
   const active = requests.some((r) =>
     ["pending", "approved"].includes(r.status) && r.stage !== "awaiting_information",
   );
@@ -49,12 +49,12 @@ export function VerificationForm({
           <button disabled={p}><ActionIcon name="save" />{real ? "Request manual evidence review" : "Request demonstration verification"}</button>
         </form>
       )}
-      <ActionFeedback message={s.message} status={s.status} />
+      <ActionFeedback receipt={s} message={s.message} status={s.status} />
     </section>
   );
 }
 export function VerificationDecision({ request }: { request: Verification }) {
-  const [s, a, p] = useActionState(decideVerification, {});
+  const [s, a, p] = useFeedbackAction(decideVerification, {});
   return (
     <section className="dashboard-card">
       <h2>
@@ -92,7 +92,7 @@ export function VerificationDecision({ request }: { request: Verification }) {
           <button disabled={p}><ActionIcon name="save" />Save verification decision</button>
         </form>
       )}
-      <ActionFeedback message={s.message} status={s.status} />
+      <ActionFeedback receipt={s} message={s.message} status={s.status} />
     </section>
   );
 }

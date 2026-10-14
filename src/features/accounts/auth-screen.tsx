@@ -54,8 +54,7 @@ export function AuthScreen({
           )}
           {notice === "auth-error" && (
             <p className="form-feedback error" role="alert">
-              Sign-in couldn’t finish. Try again, or request a new confirmation
-              email by registering again.
+              Sign-in couldn’t finish. Please try again, or use your email and password.
             </p>
           )}
           {(notice === "account-deleted" ||
@@ -101,7 +100,7 @@ export function AuthScreen({
             appears publicly.
           </p>
           {mode === "sign-in" && (
-            <p>
+            <p className="auth-forgot">
               <a href="/forgot-password">Forgot your password?</a>
             </p>
           )}

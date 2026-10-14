@@ -2,9 +2,11 @@
 import { useState } from "react";
 import type { Property } from "./data";
 import { money } from "./filters";
+import { recommendationText } from "./women-recommendation";
 
-export function PropertyComparison({ properties }: { properties: Property[] }) {
-  const [selected, setSelected] = useState<string[]>([]);
+export function PropertyComparison({ properties, initialSelected=[] }: { properties: Property[]; initialSelected?:string[] }) {
+  const availableSaved=initialSelected.filter(id=>properties.some(p=>p.id===id));
+  const [selected, setSelected] = useState<string[]>(initialSelected.filter(id=>properties.some(p=>p.id===id)).slice(0,3));
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState(false);
   const rows = selected.map(id => properties.find(p => p.id === id)).filter(p => p !== undefined);
@@ -18,11 +20,14 @@ export function PropertyComparison({ properties }: { properties: Property[] }) {
     { label: "Current manager", value: (p: Property) => p.landlord_name ?? "Not recorded" },
     { label: "Landlord / management rating", value: (p: Property) => p.landlord_rating == null ? "No landlord ratings yet" : `${Number(p.landlord_rating).toFixed(1)} / 5 · ${p.landlord_review_count??0} rated reviews` },
     { label: "Map location", value: (p: Property) => p.latitude==null||p.longitude==null?"No map pin supplied":<a target="_blank" rel="noreferrer" href={`https://www.google.com/maps/search/?api=1&query=${p.latitude},${p.longitude}`}>View {p.precision==="approximate"?"area":"property pin"} on map ↗</a> },
-    { label: "Women’s tenant recommendations", value: (p: Property) => `${p.positive_count ?? 0}/${p.eligible_count ?? 0} eligible positive responses · ${p.recommended ? "Threshold reached" : "Threshold not reached"}` },
+    { label: "Women’s tenant recommendations", value: (p: Property) => recommendationText(p.positive_count??0,p.eligible_count??0,p.recommended) },
     { label: "Profile", value: (p: Property) => p.is_demo ? "Demonstration example" : "User-contributed" },
   ];
   return <div className="compare-workspace">
     <section className="compare-picker dashboard-card" aria-labelledby="compare-picker-title">
+      {availableSaved.length<initialSelected.length&&<p className="field-hint">Some saved places are unavailable and aren’t included. You can add another place below.</p>}
+      {!initialSelected.length&&<p className="field-hint">No shortlisted places yet. Save places while exploring, or add them below.</p>}
+      {initialSelected.length>3&&<p className="field-hint">Showing your first three available saved places. Remove one to compare another.</p>}
       <div className="compare-picker-header"><div><h2 id="compare-picker-title">Choose places to compare</h2><p>Search by property name, city or neighbourhood.</p></div><span className="compare-selection-count" role="status">{rows.length} of 3 selected</span></div>
       <div className="compare-dropdown" onBlur={e => { if (!e.currentTarget.contains(e.relatedTarget)) setOpen(false); }}>
         <button className="compare-dropdown-trigger" type="button" aria-expanded={open} aria-controls="compare-place-options" disabled={rows.length >= 3 || !properties.length} onClick={() => setOpen(!open)}><span>{rows.length >= 3 ? "3 places selected · remove one to add another" : "＋ Add a place"}</span><span aria-hidden="true">⌄</span></button>

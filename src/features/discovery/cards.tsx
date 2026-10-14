@@ -1,3 +1,4 @@
+import { recommendationText } from "./women-recommendation";
 import type { Property } from "./data";
 import type { ReactNode } from "react";
 import { CardPhotoUpload } from "@/features/reviews/card-photo-upload";
@@ -25,17 +26,15 @@ export function PropertyCard({ property: p, actions }: { property: Property; act
         </p>
         <p className="field-hint">
           {p.property_rating == null
-            ? "No tenant ratings yet"
+            ? "0 reviews · No tenant ratings yet"
             : Number(p.property_rating).toFixed(1) +
               " / 5 · " +
               p.review_count +
-              " property ratings"}
+              (p.review_count === 1 ? " review" : " reviews")}
         </p>
         {!!p.criterion_scores?.length && <div className="card-criterion-scores" aria-label="Average tenant criteria ratings">{p.criterion_scores.filter(c => ["water", "electricity", "cleanliness"].includes(c.criterion_key)).map(c => <span key={c.criterion_key}>{c.label} <strong>{Number(c.rating).toFixed(1)}/5</strong></span>)}</div>}
         <p className="field-hint">
-          {p.positive_count ?? 0}/{p.eligible_count ?? 0} eligible women’s
-          positive responses ·{" "}
-          {p.recommended ? "Recommended" : "Threshold not reached"}
+          {recommendationText(p.positive_count??0,p.eligible_count??0,p.recommended)}
         </p>
         {p.is_demo && <span className="demo-tag">Synthetic example</span>}
         <div className="property-card-actions"><CardPhotoUpload property={p.id} name={p.name} />{actions}</div>

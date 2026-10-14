@@ -74,7 +74,7 @@ test("older experiences, escaped tenant text, admin boundaries and filtered mana
       page.locator("#experiences>article.dashboard-card"),
     ).toHaveCount(20);
     await expect(page.locator("#experiences")).toContainText(
-      "21 experiences · Page 1",
+      "21 reviews · Page 1",
     );
     await page.getByRole("link", { name: "Next experiences page" }).click();
     await expect(page).toHaveURL(/reviews=2#experiences$/);

@@ -1,3 +1,5 @@
+import { WomenRecommendation } from "@/features/discovery/women-recommendation";
+import { InfoPopover } from "@/components/ui/info-popover";
 import { PropertyClaimStatus } from "@/features/claims/property-status";
 import { displayDate } from "@/lib/display-date";
 import { notFound } from "next/navigation";
@@ -104,22 +106,10 @@ export default async function PropertyPage({
           ) : (
             <p>Manager not recorded</p>
           )}
-          <p className="manager-score">Landlord / management rating: <strong>{p.landlord_rating==null?"No ratings yet":`${Number(p.landlord_rating).toFixed(1)} / 5 · ${p.landlord_review_count??0} rated reviews`}</strong></p>
+          <p className="manager-score">Landlord / management rating: <strong>{p.landlord_rating==null?"No ratings yet":`${Number(p.landlord_rating).toFixed(1)} / 5 · ${p.landlord_review_count??0} rated reviews`}</strong></p><div className="landlord-rating-actions"><InfoPopover label="About landlord ratings">Share your experience with a landlord. Your feedback helps other tenants make informed rental decisions.</InfoPopover><a className="review-action" href={`/reviews/new?property=${id}#manager-rating`}>★ Leave Landlord Rating</a></div>
         </section>
         <section className="dashboard-card">
-          <h2>Women’s tenant recommendations</h2>
-
-          <p className="field-hint">
-            Property and management ratings remain separate.
-          </p>
-          <p>
-            {women?.recommended
-              ? "Recommended by eligible women tenants."
-              : "Recommendation threshold not reached."}{" "}
-            {women?.positive_count ?? 0}/{women?.eligible_count ?? 0} eligible
-            positive responses. {p.is_demo ? "Demonstration verification only." : "Verification records manual evidence review; it does not independently certify identity."} Tenant
-            recommendations are never a safety guarantee.
-          </p>
+          <WomenRecommendation positive={women?.positive_count??0} eligible={women?.eligible_count??0} recommended={women?.recommended??false} demo={p.is_demo}/>
         </section>
       </div>
       <section className="dashboard-card" id="representative-contact"><h2>Landlord and representative</h2><PropertyClaimStatus property={id} /><p><a href="/messages">Your conversations and contact preference</a></p>{contacts?.error ? <p role="status">Representative contact is temporarily unavailable. You can still explore this property and its reviews.</p> : contacts?.data?.length ? contacts.data.map((c: { profile_id: string; alias: string }) => <StartConversation key={c.profile_id} property={id} profile={c.profile_id} alias={c.alias} />) : <p>No approved representative is currently accepting contact for this property.</p>}</section>

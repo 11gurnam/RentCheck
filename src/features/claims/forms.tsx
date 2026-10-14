@@ -1,7 +1,8 @@
 "use client";
+import { useFeedbackAction } from "@/components/ui/use-feedback-action";
+import { SuccessNotice } from "@/components/ui/success-notice";
 import { ActionModal } from "@/components/ui/action-modal";
 import { ActionFeedback, ActionIcon, StatusBadge } from "@/components/ui/action-feedback";
-import { useActionState } from "react";
 import {
   requestClaim,
   decideClaim,
@@ -22,7 +23,11 @@ export function ClaimForm({
   name: string;
   real?: boolean;
 }) {
-  const [s, a, p] = useActionState(requestClaim, {});
+  const [s, a, p] = useFeedbackAction(async (previous: Parameters<typeof requestClaim>[0], form:FormData) => {
+    try { return await requestClaim(previous, form); }
+    catch { return {status:"error" as const,message:"Your claim could not be submitted. Check your connection and try again. Your selected documents are still available."}; }
+  }, {});
+  if(s.status==="success")return <div className="claim-confirmation"><h2><ActionIcon name="check"/>Claim submitted</h2><p>Your documents will be reviewed privately. You can track the decision from Your claims.</p><a className="review-action" href="/claims">View Your claims</a><SuccessNotice message={s.message??"Claim submitted"} receipt={s}/></div>;
   return (
     <form action={a} onReset={(e) => e.preventDefault()} className="auth-form">
       <input name="target" type="hidden" value={target} />
@@ -37,13 +42,13 @@ export function ClaimForm({
       <label>
         <input name="synthetic" type="checkbox" required /> {real ? "I have authority to submit this redacted evidence and consent to private review and the evidence retention policy." : "This claim and evidence use only invented demonstration information."}
       </label>
-      <button disabled={p}><ActionIcon name="save" />{real ? "Submit representative evidence" : "Submit demonstration claim"}</button>
-      <ActionFeedback message={s.message} status={s.status} />
+      <button disabled={p}><ActionIcon name="save" />{p ? "Submitting claim…" : real ? "Submit representative evidence" : "Submit demonstration claim"}</button>
+      <ActionFeedback receipt={s} message={s.message} status={s.status} />
     </form>
   );
 }
 export function ClaimDecision({ claim }: { claim: Claim }) {
-  const [s, a, p] = useActionState(decideClaim, {});
+  const [s, a, p] = useFeedbackAction(decideClaim, {});
   return (
     <section className="dashboard-card">
       <h2>
@@ -81,7 +86,7 @@ export function ClaimDecision({ claim }: { claim: Claim }) {
           <button disabled={p}><ActionIcon name="save" />Save claim decision</button>
         </form>
       )}
-      <ActionFeedback message={s.message} status={s.status} />
+      <ActionFeedback receipt={s} message={s.message} status={s.status} />
     </section>
   );
 }
@@ -97,7 +102,7 @@ export function DetailsForm({
     rent_max?: number;
   };
 }) {
-  const [s, a, p] = useActionState(updateDetails, {});
+  const [s, a, p] = useFeedbackAction(updateDetails, {});
   return (
     <form action={a} className="auth-form" onReset={(e) => e.preventDefault()}>
       <input name="claim" type="hidden" value={claim.id} />
@@ -154,7 +159,7 @@ export function DetailsForm({
         <textarea name="reason" required minLength={10} maxLength={2000} />
       </label>
       <button disabled={p}><ActionIcon name="save" />Save claimed details</button>
-      <ActionFeedback message={s.message} status={s.status} />
+      <ActionFeedback receipt={s} message={s.message} status={s.status} />
     </form>
   );
 }
@@ -165,7 +170,7 @@ export function ReplyForm({
   review: string;
   claims: Claim[];
 }) {
-  const [s, a, p] = useActionState(replyToReview, {});
+  const [s, a, p] = useFeedbackAction(replyToReview, {});
   return (
     <ActionModal title="Reply to this review" trigger="Reply to review"><form action={a} className="auth-form" onReset={(e) => e.preventDefault()}>
       <input name="review" type="hidden" value={review} />
@@ -184,7 +189,7 @@ export function ReplyForm({
         <textarea name="body" minLength={10} maxLength={3000} required />
       </label>
       <button disabled={p}><ActionIcon name="save" />Save representative reply</button>
-      <ActionFeedback message={s.message} status={s.status} />
+      <ActionFeedback receipt={s} message={s.message} status={s.status} />
     </form></ActionModal>
   );
 }

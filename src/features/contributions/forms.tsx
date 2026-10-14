@@ -1,6 +1,7 @@
 "use client";
+import { useFeedbackAction } from "@/components/ui/use-feedback-action";
 import { ActionFeedback, ActionIcon } from "@/components/ui/action-feedback";
-import { useActionState, useState } from "react";
+import { useState } from "react";
 import { contribute, saveProperty } from "./actions";
 import type { ContributionState } from "./validation";
 import { AddressFields } from "@/features/addresses/fields";
@@ -12,7 +13,7 @@ export function SaveForm({
   property: string;
   saved: boolean;
 }) {
-  const [state, action, pending] = useActionState(saveProperty, {message:""});
+  const [state, action, pending] = useFeedbackAction(saveProperty, {message:""});
   return (
     <form action={action} className="save-form">
       <input type="hidden" name="property" value={property} />
@@ -25,12 +26,12 @@ export function SaveForm({
             ? "Remove from shortlist"
             : "Save to shortlist"}
       </button>
-      <ActionFeedback message={state.message} status={state.status} />
+      <ActionFeedback receipt={state} message={state.message} status={state.status} />
     </form>
   );
 }
 export function ContributionForm({ real = false }: { real?: boolean }) {
-  const [state, action, pending] = useActionState(contribute, {
+  const [state, action, pending] = useFeedbackAction(contribute, {
     status: "idle",
   } as ContributionState);
   const [values, setValues] = useState<Record<string, string>>({

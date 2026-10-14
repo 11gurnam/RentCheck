@@ -16,7 +16,7 @@ export default async function AdminPage() {
     ["Verified landlords",data.verified_landlords,"/admin/users?landlord_verified=true","At least one real property claim approved"],
     ["Verified property claims",data.verified_claims,"/admin/verification-management?type=landlord&status=verified&demo=real","Real property claims; demo approvals excluded"],
     ["Pending verifications",data.pending,"/admin/verification-management?status=pending","Tenant and landlord applications"],
-    ["Total reviews",data.reviews,"/admin/reviews","Includes hidden, removed and deleted records"],
+    ["Published reviews",data.reviews,"/admin/reviews","Visible reviews contributing to public ratings"],
     ["Flagged reviews",data.flagged,"/admin/reviews?flagged=true","Distinct reviews with unresolved reports"],
     ["Open investigations",data.disputes,"/admin/disputes","Unresolved disputes, reports and appeals"],
   ];
