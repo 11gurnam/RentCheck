@@ -8,7 +8,7 @@ Published review counts exclude deleted reviews, including administrator summary
 
 ## Deployment
 
-Apply `202610140001_active_review_counts.sql` and `202610140002_pdf_evidence_storage.sql` through the normal migration workflow, then deploy the application. These migrations have been applied locally; the hosted site has not been changed.
+Apply `202610140003_active_review_counts.sql` and `202610140002_pdf_evidence_storage.sql` through the normal migration workflow, then deploy the application. These migrations have been applied locally; the hosted site has not been changed.
 
 An older local private evidence bucket accepted JPEG only. The storage migration permits sanitized PDF evidence as well, without changing bucket privacy or access rules. PDF workers now receive a native resolved dependency path, including when the server working directory changes. Claims accept up to three documents, 3 MiB each and 4 MiB in total, with friendly validation and configuration errors. The hosted PDF claim still requires verification after deployment; no hosted server logs or deployment credentials were available for this task.
 
