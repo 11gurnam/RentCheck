@@ -1,8 +1,8 @@
 "use client";
+import { useFeedbackAction } from "@/components/ui/use-feedback-action";
 import { ActionModal } from "@/components/ui/action-modal";
 import { displayDate } from "@/lib/display-date";
 import { ActionFeedback, ActionIcon, StatusBadge } from "@/components/ui/action-feedback";
-import { useActionState } from "react";
 import {
   reportReview,
   decideReport,
@@ -67,7 +67,7 @@ function Reason({ label = "Decision reason" }: { label?: string }) {
   );
 }
 export function ReportForm({ review }: { review: string }) {
-  const [s, a, p] = useActionState(reportReview, {});
+  const [s, a, p] = useFeedbackAction(reportReview, {});
   return (
     <ActionModal title="Report this review" trigger="Report this review" warning>
       <form
@@ -78,13 +78,13 @@ export function ReportForm({ review }: { review: string }) {
         <input name="review" value={review} type="hidden" />
         <Reason label="Report reason" />
         <button disabled={p}><ActionIcon name="check" />Submit report</button>
-        <ActionFeedback message={s.message} status={s.status} />
+        <ActionFeedback receipt={s} message={s.message} status={s.status} />
       </form>
     </ActionModal>
   );
 }
 export function ReportCard({ r }: { r: Report }) {
-  const [s, a, p] = useActionState(decideReport, {});
+  const [s, a, p] = useFeedbackAction(decideReport, {});
   return (
     <section className="dashboard-card">
       <h2>{r.property}</h2>
@@ -112,12 +112,12 @@ export function ReportCard({ r }: { r: Report }) {
           <button disabled={p}><ActionIcon name="save" />Save report decision</button>
         </form>
       )}
-      <ActionFeedback message={s.message} status={s.status} />
+      <ActionFeedback receipt={s} message={s.message} status={s.status} />
     </section>
   );
 }
 export function DuplicateCard({ d }: { d: Duplicate }) {
-  const [s, a, p] = useActionState(markDistinct, {});
+  const [s, a, p] = useFeedbackAction(markDistinct, {});
   return (
     <section className="dashboard-card">
       <h2>
@@ -142,7 +142,7 @@ export function DuplicateCard({ d }: { d: Duplicate }) {
           </form>
         </>
       )}
-      <ActionFeedback message={s.message} status={s.status} />
+      <ActionFeedback receipt={s} message={s.message} status={s.status} />
     </section>
   );
 }
@@ -155,7 +155,7 @@ export function MergeForm({
   target: string;
   preview: Preview;
 }) {
-  const [s, a, p] = useActionState(mergeProperties, {});
+  const [s, a, p] = useFeedbackAction(mergeProperties, {});
   return (
     <form action={a} className="auth-form" onReset={(e) => e.preventDefault()}>
       <input type="hidden" name="source" value={source} />
@@ -221,7 +221,7 @@ export function MergeForm({
       </label>
       <ActionFeedback status="warning" message="Merging archives the source profile and moves its records. Review the selected removals and revoked claims before continuing." />
       <button className="action-danger" disabled={p}><ActionIcon name="warning" />Merge with these resolutions</button>
-      <ActionFeedback message={s.message} status={s.status} />
+      <ActionFeedback receipt={s} message={s.message} status={s.status} />
     </form>
   );
 }
@@ -234,7 +234,7 @@ export function AssociationForm({
   managers: Profile[];
   history: History[];
 }) {
-  const [s, a, p] = useActionState(maintainAssociation, {});
+  const [s, a, p] = useFeedbackAction(maintainAssociation, {});
   return (
     <form action={a} className="auth-form" onReset={(e) => e.preventDefault()}>
       <input name="property" type="hidden" value={property} />
@@ -269,12 +269,12 @@ export function AssociationForm({
       </label>
       <Reason label="Association change reason" />
       <button disabled={p}><ActionIcon name="save" />Save management period</button>
-      <ActionFeedback message={s.message} status={s.status} />
+      <ActionFeedback receipt={s} message={s.message} status={s.status} />
     </form>
   );
 }
 export function ManagerForm({ real = false }: { real?: boolean }) {
-  const [s, a, p] = useActionState(createManager, {});
+  const [s, a, p] = useFeedbackAction(createManager, {});
   return (
     <form action={a} className="auth-form" onReset={(e) => e.preventDefault()}>
       <input type="hidden" name="recordMode" value={real ? "real" : "demo"} />
@@ -296,7 +296,7 @@ export function ManagerForm({ real = false }: { real?: boolean }) {
         manager profiles and acknowledge any similar names.
       </label>
       <button disabled={p}><ActionIcon name="save" />{real ? "Create manager profile" : "Create fictional manager"}</button>
-      <ActionFeedback message={s.message} status={s.status} />
+      <ActionFeedback receipt={s} message={s.message} status={s.status} />
     </form>
   );
 }

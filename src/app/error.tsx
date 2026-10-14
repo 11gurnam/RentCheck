@@ -11,6 +11,7 @@ export default function ErrorPage({ retry }: { retry: () => void }) {
           Your connection or the service may be temporarily unavailable. Try
           again, or return to Explore.
         </p>
+        <div className="form-actions">
         <button
           className="button"
           disabled={pending}
@@ -18,9 +19,8 @@ export default function ErrorPage({ retry }: { retry: () => void }) {
         >
           {pending ? "Trying again…" : "Try again"}
         </button>
-        <p>
-          <a href="/search">Return to Explore</a>
-        </p>
+        <a className="review-action" href="/search">Return to Explore</a>
+        </div>
       </section>
     </AccountShell>
   );

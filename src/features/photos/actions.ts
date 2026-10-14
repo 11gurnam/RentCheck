@@ -5,7 +5,7 @@ import { requireUser, isAdministrator } from "@/lib/auth/session";
 import { createDatabaseClient } from "@/lib/database/server";
 import { createMediaClient } from "@/lib/database/privileged";
 import { normalizePhoto } from "@/features/reviews/image";
-type State = { message?: string };
+type State = { message?: string; status?: "success" | "error" };
 function refresh() {
   revalidatePath("/properties", "layout");
   revalidatePath("/admin/reports");
@@ -55,7 +55,7 @@ export async function uploadPropertyPhoto(
   }
   refresh();
   return {
-    message:
+    status: "success", message:
       "Landlord photo added. Its verification label follows your current approved claim. Image metadata was removed.",
   };
 }
@@ -71,7 +71,7 @@ export async function removePropertyPhoto(
   ).rpc("remove_property_photo", { p_photo: id.data });
   if (error) return { message: "Only the uploader can remove this photo." };
   refresh();
-  return { message: "Photo removed from public access." };
+  return { status:"success", message: "Photo removed from public access." };
 }
 export async function reportPropertyPhoto(
   _: State,
@@ -91,7 +91,7 @@ export async function reportPropertyPhoto(
   });
   if (error) return { message: "Could not report this photo." };
   refresh();
-  return { message: "Photo reported. It remains visible pending review." };
+  return { status:"success", message: "Photo reported. It remains visible pending review." };
 }
 export async function decidePhotoReport(
   _: State,
@@ -117,5 +117,5 @@ export async function decidePhotoReport(
   });
   if (error) return { message: error.message };
   refresh();
-  return { message: "Photo report decided and audited." };
+  return {status:"success", message: "Photo report decided and audited." };
 }

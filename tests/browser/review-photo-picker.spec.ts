@@ -28,7 +28,6 @@ test("review photos support selection, removal, five attachments and interrupted
       await group.getByRole("radio", { name: "4 out of 5", exact: true }).check();
     await page.getByLabel("Your experience").fill("The rooms were clean and the water supply was reliable.");
     await page.getByLabel("Your experience").press("Tab");
-    await expect(page.getByText("AI language checking is not configured.", { exact: false })).toBeVisible();
     const picker = page.locator('.review-photo-picker input[type="file"]');
     await picker.setInputFiles({ name: "document.pdf", mimeType: "application/pdf", buffer: Buffer.from("invalid") });
     await expect(page.locator(".review-photo-error")).toContainText("JPG, PNG or WebP");
@@ -72,9 +71,14 @@ test("review photos support selection, removal, five attachments and interrupted
     await page.goto(edit!);
     await expect(page.locator(".review-photo-picker-heading small")).toContainText("5/5");
     await expect(page.getByRole("button", { name: "Add Photos", exact: true })).toBeDisabled();
-    await page.locator('#review-photos input[type="file"]').setInputFiles(photo(10));
-    await page.getByRole("button", { name: "Add photo", exact: true }).click();
-    await expect(page.locator("#review-photos").getByRole("alert")).toContainText("Maximum five photos");
+    await expect(page.locator('#review-photos input[type="file"]')).toHaveCount(0);
+    await page.locator('#review-photos').getByRole('button',{name:'Remove photo',exact:true}).first().click();
+    await expect(page.locator('.review-photo-picker-heading small')).toContainText('4/5');
+    await picker.setInputFiles(photo(10));
+    await page.getByLabel("This is a fictional").check();
+    await page.getByRole('button',{name:'Save review',exact:true}).click();
+    await page.getByRole('button',{name:'Confirm and save',exact:true}).click();
+    await expect(page).toHaveURL(/\/account\/reviews$/);
     await page.goto("/reviews/new?property=20000000-0000-4000-8000-000000000001");
     await page.getByLabel("Tenancy start").fill("2024-01-01");
     await page.getByLabel("Monthly rent paid (INR)").fill("12000");

@@ -1,11 +1,21 @@
 import { it, expect } from "vitest";
 import { PDFDocument, PDFName, PDFString } from "pdf-lib";
 import { normalizeDocument } from "./document";
+import { tmpdir } from "node:os";
 async function pdfFile(doc: PDFDocument) {
   return new File([Buffer.from(await doc.save())], "fictional.pdf", {
     type: "application/pdf",
   });
 }
+it("processes a PDF when the runtime working directory is outside the project", async () => {
+  const doc=await PDFDocument.create();doc.addPage();
+  const file=await pdfFile(doc), directory=process.cwd();
+  try {
+    process.chdir(tmpdir());
+    const result=await normalizeDocument(file);
+    expect((await PDFDocument.load(result.bytes)).getPageCount()).toBe(1);
+  } finally { process.chdir(directory); }
+});
 it("rewrites bounded PDF pages, removes metadata and annotations", async () => {
   const input = await PDFDocument.create();
   const page = input.addPage();

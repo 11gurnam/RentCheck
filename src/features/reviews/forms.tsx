@@ -1,6 +1,7 @@
 "use client";
+import { useFeedbackAction } from "@/components/ui/use-feedback-action";
 import { ActionFeedback, ActionIcon } from "@/components/ui/action-feedback";
-import { useActionState, useState, useRef, useId, useTransition } from "react";
+import { useState, useRef, useId, useTransition } from "react";
 import { submitReview, removeReview, closeTenancy } from "./actions";
 import type { OwnReview } from "./validation";
 import { LandlordPreview } from "./landlord-preview";
@@ -27,10 +28,13 @@ export function ReviewForm({
   const selectedPhotos = useRef<File[]>([]);
   const selectPhotos = (files: File[]) => { selectedPhotos.current = files; setPhotos(files); };
   const [photoCount, setPhotoCount] = useState(existingPhotoCount);
+  const [serverPhotoCount,setServerPhotoCount]=useState(existingPhotoCount);
+  if(serverPhotoCount!==existingPhotoCount){setServerPhotoCount(existingPhotoCount);setPhotoCount(existingPhotoCount);}
   const [uploadProgress, setUploadProgress] = useState("");
-  const [state, action, pending] = useActionState<ReviewState, FormData>(async (previous, form) => {
+  const [state, action, pending] = useFeedbackAction<ReviewState, FormData>(async (previous, form) => {
     // Capture the current selection and keep navigation in this upload workflow.
     const uploads = selectedPhotos.current.slice();
+    let successfulCount=photoCount;
     form.set("withPhotos", "true");
     if (previous.savedReviewId) form.set("review", previous.savedReviewId);
     const saved = form.get("retryPhotos") === "true" && previous.savedReviewId
@@ -48,7 +52,7 @@ export function ReviewForm({
           setUploadProgress("");
           return { ...saved, status: "warning", message: `Your review is saved. ${result.message} The remaining photos are still selected; retry or remove them.` };
         }
-        setPhotoCount(count => count + 1);
+        successfulCount++;setPhotoCount(successfulCount);
       } catch {
         selectPhotos(uploads.slice(i));
         setUploadProgress("");
@@ -59,7 +63,7 @@ export function ReviewForm({
     setUploadProgress("");
     router.push("/account/reviews");
     router.refresh();
-    return { ...saved, status: "success", message: "Review and photos saved." };
+    return { ...saved, status: "success", message: uploads.length ? "Review and photos saved." : "Review saved." };
   }, {});
   const [current, setCurrent] = useState(review?.current ?? true);
   const [start, setStart] = useState(review?.start ?? "");
@@ -146,7 +150,7 @@ export function ReviewForm({
       {current && <input name="end" type="hidden" value="" />}
       </fieldset>
       <CriteriaForm type={property.property_type} initial={review?.criteria} />
-      <fieldset className="landlord-rating-section"><legend>Rate your landlord / management</legend>
+      <fieldset id="manager-rating" className="landlord-rating-section"><legend>Rate your landlord / management</legend>
       {!review && <LandlordPreview property={property.id} start={start} onAvailable={setLandlordAvailable} />}
       <p className="field-hint">How was communication, maintenance and deposit handling? This score rates management separately from the accommodation.</p>
       <fieldset disabled={!review&&!landlordAvailable} className="landlord-stars"><legend className="sr-only">Landlord score</legend><StarRating label="Landlord / management" value={managerRating} onChange={setManagerRating} step={1} required={false}/></fieldset>
@@ -173,13 +177,13 @@ export function ReviewForm({
           placeholder="What worked well? What could be better?"
         />
       </label>
+      <ReviewPhotoPicker files={photos} onChange={selectPhotos} existingCount={photoCount} disabled={pending} />
       <div id="review-language-status" className="review-language-status" aria-live="polite">
         {checking && <p className="sr-only">Checking your comment…</p>}
         {languageCheck?.flagged && <div className="review-language-warning"><p>Please use respectful language. {languageCheck.manualEdit ? "Edit the highlighted comment and check it again." : "Review the suggested wording below."}</p>{languageCheck.changed && <><p className="review-inline-suggestion">{languageCheck.suggestion}</p><button type="button" className="review-action" onClick={() => { setBody(languageCheck.suggestion); setLanguageCheck(null); }}>Use suggested wording</button></>}</div>}
         {languageCheck?.notice && <p className="field-hint">{languageCheck.notice} <button type="button" className="review-action" disabled={checking} onClick={() => void checkComment(body)}>Check again</button></p>}
         <p className="field-hint">AI language checks send this comment to Google Gemini. Free-tier text may be used to improve Google’s products. Check suggested wording before accepting it.</p>
       </div>
-      <ReviewPhotoPicker files={photos} onChange={selectPhotos} existingCount={photoCount} disabled={pending} />
       <label>
         <input name="woman" type="checkbox" defaultChecked={review?.woman} /> I
         explicitly self-identify as a woman (optional, private answer).
@@ -187,7 +191,7 @@ export function ReviewForm({
       <label>
         <input name="synthetic" type="checkbox" required /> {real ? "This is my own tenancy experience and I consent to publication under my alias." : "This is a fictional tenancy and review."}
       </label>
-      <ActionFeedback message={state.message} status={state.status} />
+      <ActionFeedback receipt={state} message={state.message} status={state.status} />
       {uploadProgress && <p className="field-hint" role="status">{uploadProgress}</p>}
       {state.savedReviewId && <div className="review-actions"><button type="button" className="review-action" disabled={pending || !photos.length} onClick={() => { const form = new FormData(); form.set("retryPhotos", "true"); startSubmission(() => action(form)); }}>Retry photo uploads</button><a className="review-action" href="/account/reviews">Go to your reviews</a></div>}
       <button className="primary-button" disabled={pending || checking || languageCheck?.flagged}>
@@ -218,7 +222,7 @@ export function ReviewForm({
   );
 }
 export function DeleteReview({ id }: { id: string }) {
-  const [s, a, p] = useActionState(removeReview, {});
+  const [s, a, p] = useFeedbackAction(removeReview, {});
   const dialog = useRef<HTMLDialogElement>(null);
   const title = useId();
   return (
@@ -229,7 +233,7 @@ export function DeleteReview({ id }: { id: string }) {
         <p>Your review and its ratings will be removed from public view. This review cannot be republished.</p>
         <form action={a}>
           <input type="hidden" name="review" value={id} />
-          <ActionFeedback message={s.message} status={s.status} />
+          <ActionFeedback receipt={s} message={s.message} status={s.status} />
           <div className="review-actions">
             <button type="button" className="review-action" autoFocus disabled={p} onClick={() => dialog.current?.close()}>Cancel</button>
             <button className="review-action review-delete action-danger" disabled={p}><ActionIcon name="trash" />{p ? "Deleting…" : "Confirm delete"}</button>
@@ -240,7 +244,7 @@ export function DeleteReview({ id }: { id: string }) {
   );
 }
 export function CloseTenancy({ review }: { review: OwnReview }) {
-  const [s, a, p] = useActionState(closeTenancy, {});
+  const [s, a, p] = useFeedbackAction(closeTenancy, {});
   const dialog = useRef<HTMLDialogElement>(null);
   const title = useId();
   return (
@@ -266,7 +270,7 @@ export function CloseTenancy({ review }: { review: OwnReview }) {
           defaultValue={review.end ?? ""}
         />
       </label>
-      <ActionFeedback message={s.message} status={s.status} />
+      <ActionFeedback receipt={s} message={s.message} status={s.status} />
       <div className="review-actions">
         <button disabled={p}><ActionIcon name="save" />{p ? "Saving…" : "Save move-out date"}</button>
         <button type="button" className="review-action" disabled={p} onClick={() => dialog.current?.close()}>{s.message === "Tenancy end saved." ? "Done" : "Cancel"}</button>

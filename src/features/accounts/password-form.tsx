@@ -1,12 +1,12 @@
 "use client";
-import { useActionState } from "react";
+import { useFeedbackAction } from "@/components/ui/use-feedback-action";
 import { ActionModal } from "@/components/ui/action-modal";
 import { ActionFeedback, ActionIcon } from "@/components/ui/action-feedback";
 import { changePassword } from "./actions";
 import { initialFormState } from "./validation";
 
 export function PasswordForm() {
-  const [state, action, pending] = useActionState(changePassword, initialFormState);
+  const [state, action, pending] = useFeedbackAction(changePassword, initialFormState);
   return <ActionModal title="Change password" trigger="Change password">
     {state.status === "success" ? <ActionFeedback message={state.message} status="success" /> : <form action={action} className="auth-form" onReset={event => event.preventDefault()}>
       <p className="field-hint">Confirm your current password, then choose a new password with at least 10 characters.</p>

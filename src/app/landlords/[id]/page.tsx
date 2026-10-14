@@ -1,3 +1,4 @@
+import { InfoPopover } from "@/components/ui/info-popover";
 import { displayDate } from "@/lib/display-date";
 import { notFound } from "next/navigation";
 import { z } from "zod";
@@ -38,7 +39,7 @@ export default async function LandlordPage({
       </div>
       <p>
         <a className="primary-link" href="#review-landlord">
-          Review this landlord
+          ★ Leave Landlord Rating
         </a>
       </p>
       <p>
@@ -47,7 +48,7 @@ export default async function LandlordPage({
         </a>
       </p>
       <section className="dashboard-card" id="review-landlord">
-        <h2>How to review this landlord</h2>
+        <div className="section-title"><h2>How to review this landlord</h2><InfoPopover label="About landlord ratings">Share your landlord experience to help other tenants make informed rental decisions.</InfoPopover></div>
         <p>
           Choose the accommodation you rented from the list below, then rate
           Landlord / management in your tenancy review. Your tenancy dates

@@ -33,7 +33,7 @@ export default async function EditReview({
           existingPhotoCount={data?.length ?? 0}
         />
       </section>
-      <PhotoForm review={id} photos={data} real={r.is_demo === false} />
+      <PhotoForm review={id} photos={data} real={r.is_demo === false} allowUpload={false} />
       <VerificationForm
         review={id}
         real={r.is_demo === false}

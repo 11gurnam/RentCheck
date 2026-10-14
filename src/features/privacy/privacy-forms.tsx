@@ -1,5 +1,6 @@
 "use client";
-import { useActionState } from "react";
+import { useFeedbackAction } from "@/components/ui/use-feedback-action";
+import { ActionFeedback } from "@/components/ui/action-feedback";
 import {
   recoverPassword,
   changePassword,
@@ -7,7 +8,7 @@ import {
   markNotificationRead,
 } from "./privacy-actions";
 export function RecoveryForm() {
-  const [s, a, p] = useActionState(recoverPassword, {});
+  const [s, a, p] = useFeedbackAction(recoverPassword, {});
   return (
     <form action={a} className="auth-form">
       <label>
@@ -21,12 +22,12 @@ export function RecoveryForm() {
         />
       </label>
       <button disabled={p}>Send recovery email</button>
-      {s.message && <p role="status">{s.message}</p>}
+      <ActionFeedback receipt={s} message={s.message} status={s.status}/>
     </form>
   );
 }
 export function PasswordForm() {
-  const [s, a, p] = useActionState(changePassword, {});
+  const [s, a, p] = useFeedbackAction(changePassword, {});
   return (
     <form action={a} className="auth-form">
       <p>
@@ -56,12 +57,12 @@ export function PasswordForm() {
         />
       </label>
       <button disabled={p}>Update password</button>
-      {s.message && <p role="status">{s.message}</p>}
+      <ActionFeedback receipt={s} message={s.message} status={s.status}/>
     </form>
   );
 }
 export function DeleteAccountForm() {
-  const [s, a, p] = useActionState(deleteAccount, {});
+  const [s, a, p] = useFeedbackAction(deleteAccount, {});
   return (
     <form
       action={a}
@@ -94,7 +95,7 @@ export function DeleteAccountForm() {
         permanent and audit records are retained.
       </label>
       <button disabled={p}>Delete my account permanently</button>
-      {s.message && <p role="status">{s.message}</p>}
+      <ActionFeedback receipt={s} message={s.message} status={s.status}/>
     </form>
   );
 }
@@ -111,7 +112,7 @@ export function NotificationCard({
 }: {
   notification: Notification;
 }) {
-  const [s, a, p] = useActionState(markNotificationRead, {});
+  const [s, a, p] = useFeedbackAction(markNotificationRead, {});
   return (
     <article className="dashboard-card">
       <p>
@@ -128,7 +129,7 @@ export function NotificationCard({
           <button disabled={p}>Mark as read</button>
         </form>
       )}
-      {s.message && <p role="status">{s.message}</p>}
+      <ActionFeedback receipt={s} message={s.message} status={s.status}/>
     </article>
   );
 }

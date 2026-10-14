@@ -17,6 +17,7 @@ export const contributionSchema = z
     state: short(80).refine(value=>!!canonicalState(value),"Select an Indian state or union territory."),
     city: short(80),
     locality: short(100),
+    country: z.literal("India", "RentCheck currently supports properties in India.").optional().default("India"),
     type: z.enum(["Flat", "House", "PG", "Hostel", "Homestay"]),
     min: z.coerce.number().int().min(0).max(10000000),
     max: z.coerce.number().int().min(0).max(10000000),
