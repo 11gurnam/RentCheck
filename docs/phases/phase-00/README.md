@@ -1,5 +1,7 @@
 # Phase 0 — Foundation
 
+[Plain-language review checklist](review-checklist.md) — exact clicks and expected results, no coding knowledge needed. Phase 1 changes the geography to India-wide; the evidence below records the original phase as delivered.
+
 ## Objectives and delivered features
 Preserve and inspect the supplied repository, establish a readable tested application and document the complete product before adding backend workflows. Delivered: responsive public introduction, Jaipur SVG illustration, shared brand/styles, keyboard skip link, real section navigation, prototype/privacy/recommendation labels, strict TypeScript, Zod public environment validation, lint/unit/browser checks and branch CI. App entry points remain thin. Feature modules/schema are introduced when used rather than empty placeholders.
 

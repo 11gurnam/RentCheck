@@ -1,7 +1,7 @@
 import { test, expect } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
 
-test("public introduction loads without backend configuration", async ({
+test("public introduction remains accessible with India-wide scope", async ({
   page,
 }) => {
   const errors: string[] = [];
@@ -12,12 +12,19 @@ test("public introduction loads without backend configuration", async ({
     "before you move",
   );
   await expect(
-    page.getByText("Search and accounts are coming", { exact: false }),
+    page.getByRole("link", { name: "Explore accommodation →" }),
   ).toBeVisible();
   await expect(
     page.getByText("never a platform safety guarantee", { exact: false }),
   ).toBeVisible();
-  await expect(page.getByRole("button")).toHaveCount(0);
+  const menu = page.getByRole("button", { name: "Menu", exact: true });
+  if (await menu.isVisible()) await menu.click();
+  await expect(
+    page.getByRole("link", { name: "Sign in", exact: true }),
+  ).toBeVisible();
+  await expect(page.locator("header")).toContainText("INDIA");
+  if (await menu.isVisible()) await menu.click();
+  await expect(page.getByRole("main")).toContainText("across India");
   expect(errors).toEqual([]);
   expect(
     await page.evaluate(
@@ -43,6 +50,8 @@ test("navigation and keyboard skip link lead to real content", async ({
       name: "Know a little more. Choose a little better.",
     }),
   ).toBeInViewport();
+  const menu = page.getByRole("button", { name: "Menu", exact: true });
+  if (await menu.isVisible()) await menu.click();
   await page.getByRole("link", { name: "Our principles" }).click();
   await expect(page).toHaveURL(/#our-principles$/);
   await page.getByRole("link", { name: "RentCheck home" }).first().click();

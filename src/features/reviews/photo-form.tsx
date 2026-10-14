@@ -1,0 +1,44 @@
+"use client";
+import { FilePicker } from "@/components/ui/file-picker";
+import { ActionFeedback, ActionIcon } from "@/components/ui/action-feedback";
+import { useActionState } from "react";
+import { addPhoto, removePhoto } from "./photo-actions";
+export function PhotoForm({
+  review,
+  photos,
+  real = false,
+}: {
+  review: string;
+  photos: { id: string }[];
+  real?: boolean;
+}) {
+  const [s, a, p] = useActionState(addPhoto, {});
+  return (
+    <section className="dashboard-card" id="review-photos">
+      <h2>Review photos</h2>
+      <p>
+        Optional. Up to five {real ? "property" : "fictional"} photos, 3 MiB each. Image metadata is removed. Only upload images you have permission to share; avoid faces and private documents. Photos are public.
+      </p>
+      <form action={a} className="auth-form">
+        <input name="review" type="hidden" value={review} />
+        <FilePicker label="Photo" name="photo" accept="image/jpeg,image/png,image/webp" photo />
+        <button disabled={p}><ActionIcon name="plus" />Add photo</button>
+        <ActionFeedback message={s.message} status={s.status} />
+      </form>
+      {photos.map((ph) => (
+        <RemovePhoto key={ph.id} id={ph.id} />
+      ))}
+    </section>
+  );
+}
+function RemovePhoto({ id }: { id: string }) {
+  const [s, a, p] = useActionState(removePhoto, {});
+  return (
+    <form action={a}>
+      <a href={"/api/photos/" + id}>View photo</a>
+      <input type="hidden" name="photo" value={id} />
+      <button className="action-danger" disabled={p}><ActionIcon name="trash" />Remove photo</button>
+      <ActionFeedback message={s.message} status={s.status} />
+    </form>
+  );
+}

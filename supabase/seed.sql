@@ -1,0 +1,2 @@
+-- Phase 1 contains no rental data or privileged seeded accounts.
+-- Isolated tests create and remove their own synthetic users.

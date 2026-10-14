@@ -1,6 +1,6 @@
 # Phase delivery plan
 
-Each phase reads the canonical docs, inspects Git state/prior merge, implements only its scope, records tests, runs relevant prior regression checks and lint/types/tests/build, visually reviews phone/desktop, inspects staged diff/secrets, commits and pushes a phase branch. Verify remote commit, report implementation and push separately, then STOP for user review. Never merge main, force-push, deploy, delete remotes or change visibility without explicit authorization. Split oversized phases into complete documented subphases before implementation.
+Each phase reads the canonical docs, inspects Git state/prior merge, implements only its scope, records tests, runs relevant prior regression checks and lint/types/tests/build, visually reviews phone/desktop, inspects staged diff/secrets, commits and pushes a phase branch. Verify remote commit and report implementation, push and a beginner checklist separately. On 2026-10-06 the user authorized continuing Phases 2–8 sequentially without stopping for routine review; pause only for required user input or a real blocker. Never merge main, force-push, deploy, delete remotes or change visibility without explicit authorization. Split oversized phases into complete documented subphases before implementation.
 
 | Phase | Branch | Scope and exit criteria |
 | --- | --- | --- |
@@ -13,7 +13,11 @@ Each phase reads the canonical docs, inspects Git state/prior merge, implements 
 | 6 | phase-06-claims | Claims/admin decisions/dashboard/detail updates/replies; approved permissions, no tenant review edits |
 | 7 | phase-07-moderation | Reports/decisions/audit/history/merges; pending visibility, historical attribution, atomic conflict resolution |
 | 8 | phase-08-release | All role journeys/security/accessibility/responsiveness/errors, acceptance and deploy instructions; deployable build without deploying |
+| 9 | phase-09-photo-provenance | Tenant/landlord photo source and live verification labels, landlord gallery, photo reporting/moderation, landlord rating preview |
+| 10 | phase-10-account-privacy | Recovery, account deletion, PDF evidence and private activity notifications |
+| 11 | phase-11-messaging-discovery | Opt-in messages, blocking/reporting, map and property comparison |
+| 12 | phase-12-real-data-operations | Real-data/manual verification workflows, backup/restore and health/retention operations; deployment deferred |
 
-If prior phase unmerged, branch from its verified final commit and document dependency. Every phase includes `docs/phases/phase-XX/README.md` and `test-cases.md`: objectives, prerequisites/env without secrets, migrations/seed/reset, commands/manual checks, evidence, limitations/acceptance, branch/commit/push URL. Case IDs/names, automated/manual, prerequisites/data, inputs/steps, expected/actual, PASS/FAIL/BLOCKED/NOT RUN. Never mark unexecuted checks PASS.
+If prior phase unmerged, branch from its verified final commit and document dependency. Every phase includes `docs/phases/phase-XX/README.md`, `test-cases.md` and a plain-language `review-checklist.md`: objectives, prerequisites/env without secrets, migrations/seed/reset, commands/manual checks, evidence, limitations/acceptance, branch/commit/push URL. The user checklist supplies exact pages/clicks, example inputs, expected results, readiness/blockers and how to report issues without technical knowledge. Case IDs/names, automated/manual, prerequisites/data, inputs/steps, expected/actual, PASS/FAIL/BLOCKED/NOT RUN. Never mark unexecuted checks PASS.
 
-Current boundary: Phase 0 only. No authentication, backend schema, live listings or reviews implemented. [Foundation evidence](phases/phase-00/README.md).
+Current boundary: all Phases0–8 complete, tested and pushed sequentially. Final implementation8ce1390 is remote verified; [Actions37446103665](https://github.com/11gurnam/RentCheck/actions/runs/37446103665) passed the complete release on a clean backend, including66 browser cases and3 recovery cases. Main remains at merged Phase0. India-wide scope replaces Jaipur-only scope. User walkthrough and hosted staging acceptance remain separate. No merge/deployment. [Final release evidence](phases/phase-08/README.md), [user review guide](review-guide.md), [remaining-work tracker](remaining-work.md).

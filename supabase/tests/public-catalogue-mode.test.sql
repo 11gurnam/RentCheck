@@ -1,0 +1,20 @@
+begin;
+set search_path to public,extensions;
+select plan(8);
+insert into public.properties(id,name,address,state,city,locality,property_type,rent_min,rent_max,is_demo)
+values('d9000000-0000-4000-8000-000000000001','Rollback-only real-mode fixture','Test address only','Rajasthan','Jaipur','Test locality','Flat',1,2,false);
+set local role anon;
+select throws_ok($$select configure_sample_visibility(false,'Rollback-only catalogue test')$$,'42501',null,'Anonymous callers cannot configure sample visibility');
+set local role authenticated;
+select throws_ok($$select configure_sample_visibility(false,'Rollback-only catalogue test')$$,'42501',null,'Signed-in callers cannot configure sample visibility');
+set local role service_role;
+select lives_ok($$select configure_sample_visibility(false,'Rollback-only catalogue test')$$,'Operator can hide samples');
+reset role;
+select is((select count(*)::integer from public.properties where is_demo and status='published'),0,'Demo properties hidden');
+select is((select count(*)::integer from public.landlords where is_demo and status='published'),0,'Demo landlords hidden');
+select is((select status from public.properties where id='d9000000-0000-4000-8000-000000000001'),'published','Genuine-mode record remains published');
+select throws_ok($$select private.check_record_mode(true,true)$$,'P0001','Demonstration contributions disabled','New demo contributions rejected by database');
+set local role anon;
+select is(get_operation_mode()->>'allows_demo_data','false','Public configuration reports samples disabled');
+select * from finish();
+rollback;

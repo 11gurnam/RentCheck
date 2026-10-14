@@ -1,0 +1,8 @@
+{
+  "provider": "GeoNames",
+  "license": "CC BY 4.0",
+  "source": "https://download.geonames.org/export/dump/",
+  "date": "2026-10-13",
+  "cities1000Sha256": "4f3f82067da1ad3727a7b3e7f7e5bfad36725ee4a5824b1d30c230a6c31498db",
+  "admin1Sha256": "1da92a6323a5fec3176f3f743bf4cf4040fd56a876da55e46fbca23c863aa60a"
+}

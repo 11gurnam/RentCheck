@@ -1,0 +1,15 @@
+[build]
+  command = "npm run deploy:preflight && npm run build"
+  publish = ".next"
+
+[build.environment]
+  NODE_VERSION = "24"
+  AWS_LAMBDA_JS_RUNTIME = "nodejs24.x"
+
+[functions]
+  directory = "netlify/functions"
+  node_bundler = "esbuild"
+
+# Runs only on the published production deployment, at 02:00 UTC daily.
+[functions."media-cleanup"]
+  schedule = "0 2 * * *"
