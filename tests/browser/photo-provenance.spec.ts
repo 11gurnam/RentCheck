@@ -25,6 +25,7 @@ test("landlord photos preserve source, change verification with claims and obey 
   const user = data.user!.id,
     fixtureDocument = crypto.randomUUID();
   let property: string | undefined;
+  let reviewer: string | undefined;
   const client = createClient(c.url, c.publicKey, {
     auth: { persistSession: false },
   });
@@ -130,9 +131,16 @@ test("landlord photos preserve source, change verification with claims and obey 
       fullPage: true,
     });
     fixtureAdmin(user, true);
+    const reviewerEmail = `photo-reviewer-${crypto.randomUUID()}@example.test`;
+    const reviewerUser = await service.auth.admin.createUser({email:reviewerEmail,password,email_confirm:true});
+    expect(reviewerUser.error).toBeNull();
+    reviewer = reviewerUser.data.user!.id;
+    fixtureAdmin(reviewer, true);
+    const reviewerClient = createClient(c.url,c.publicKey,{auth:{persistSession:false}});
+    expect((await reviewerClient.auth.signInWithPassword({email:reviewerEmail,password})).error).toBeNull();
     expect(
       (
-        await client.rpc("decide_claim", {
+        await reviewerClient.rpc("decide_claim", {
           p_claim: claim.data,
           p_decision: "approved",
           p_reason: "Synthetic test evidence approved",
@@ -166,6 +174,7 @@ test("landlord photos preserve source, change verification with claims and obey 
     expect((await page.request.get(url)).status()).toBe(404);
     fixtureAdmin(user, false);
   } finally {
+    if(reviewer) expect((await service.auth.admin.deleteUser(reviewer)).error).toBeNull();
     fixtureAdmin(user, false);
     if (paths.length)
       expect(

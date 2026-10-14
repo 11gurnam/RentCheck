@@ -33,7 +33,7 @@ jobs:
           cache: npm
       - run: npm ci
       - name: Install the verified Next.js hosting adapter
-        run: npm install --no-save --package-lock=false @netlify/plugin-nextjs@5.16.2
+        run: npm install --prefix .netlify/plugins @netlify/plugin-nextjs@5.16.2
       - name: Build Linux deployment package without provider credentials
         run: npx --yes netlify-cli@27.12.0 build --offline --context production
       - name: Record source revision

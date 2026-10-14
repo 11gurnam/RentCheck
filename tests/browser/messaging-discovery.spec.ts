@@ -37,7 +37,7 @@ test("opt-in messaging, block/report moderation and explicit map coordinates wor
   const otherContext = await browser.newContext({ baseURL: "http://127.0.0.1:3000" });
   const tenantPage = await otherContext.newPage();
   try {
-    for (const alias of ["MessagingRepresentative", "MessagingTenant"]) {
+    for (const alias of ["MessagingRepresentative", "MessagingTenant", "MessagingReviewer"]) {
       const email = `messaging-browser-${crypto.randomUUID()}@example.test`;
       const u = await service.auth.admin.createUser({ email, password, email_confirm: true, user_metadata: { public_alias: alias } });
       expect(u.error).toBeNull(); users.push(u.data.user!.id); emails.push(email);
@@ -50,8 +50,10 @@ test("opt-in messaging, block/report moderation and explicit map coordinates wor
     const jpeg = await sharp({ create: { width: 20, height: 20, channels: 3, background: "white" } }).jpeg().toBuffer();
     expect((await service.storage.from("rental-documents").upload(path, jpeg, { contentType: "image/jpeg" })).error).toBeNull();
     const claim = await service.rpc("register_evidence_document", { p_user: users[0], p_document: fixtureDocument, p_extension: "jpg", p_property: property }); expect(claim.error).toBeNull();
+    fixtureAdmin(users[2], true);
+    expect((await clients[2].rpc("decide_claim", { p_claim: claim.data, p_decision: "approved", p_reason: "Independent synthetic messaging approval" })).error).toBeNull();
+    fixtureAdmin(users[2], false);
     fixtureAdmin(users[0], true);
-    expect((await clients[0].rpc("decide_claim", { p_claim: claim.data, p_decision: "approved", p_reason: "Synthetic messaging approval" })).error).toBeNull();
     for (const [i, target] of [page, tenantPage].entries()) {
       await target.goto("/sign-in"); await target.getByLabel("Email address").fill(emails[i]); await target.getByLabel("Password", { exact: true }).fill(password); await target.getByRole("button", { name: "Sign in", exact: true }).click(); await expect(target).toHaveURL(/\/account$/);
     }

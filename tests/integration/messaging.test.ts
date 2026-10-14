@@ -17,7 +17,7 @@ it("live private messaging denies outsiders and serializes concurrent rate limit
     const doc = crypto.randomUUID(); path = `claim/${doc}.jpg`;
     expect((await service.storage.from("rental-documents").upload(path, new Uint8Array([1]), { contentType: "image/jpeg" })).error).toBeNull();
     const claim = await service.rpc("register_evidence_document", { p_user: users[0], p_document: doc, p_extension: "jpg", p_property: property }); expect(claim.error).toBeNull();
-    fixtureAdmin(users[0], true); expect((await clients[0].rpc("decide_claim", { p_claim: claim.data, p_decision: "approved", p_reason: "Synthetic API claim approval" })).error).toBeNull(); fixtureAdmin(users[0], false);
+    fixtureAdmin(users[2], true); expect((await clients[2].rpc("decide_claim", { p_claim: claim.data, p_decision: "approved", p_reason: "Independent synthetic API claim approval" })).error).toBeNull(); fixtureAdmin(users[2], false);
     await clients[0].rpc("set_contact_preference", { p_enabled: true });
     const contacts = await clients[1].rpc("get_contactable_representatives", { p_property: property }); expect(contacts.error).toBeNull();
     const started = await clients[1].rpc("start_conversation", { p_property: property, p_profile: contacts.data[0].profile_id, p_consent: true }); expect(started.error).toBeNull();
