@@ -28,7 +28,10 @@ test("admin dashboard, listing suspension, private notes and responsive navigati
     await page.getByRole("button", { name: "Sign in", exact: true }).click();
     await expect(page).toHaveURL(/\/account$/);
     const mainNavigation = page.getByRole("navigation", { name: "Main navigation" });
+    const menu = page.getByRole("button", { name: "Menu", exact: true });
+    if(await menu.isVisible()) await menu.click();
     await expect(mainNavigation.getByRole("link")).toHaveText(["Explore", "Add a place", "Admin Dashboard"]);
+    if(await menu.isVisible()) await page.keyboard.press("Escape");
     await expect(page.getByRole("heading", { name: "Your admin workspace" })).toBeVisible();
     await expect(page.getByRole("link", { name: "Saved places", exact: true })).toHaveCount(0);
     await page.goto("/admin");

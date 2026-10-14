@@ -310,7 +310,7 @@ test("trusted administrator grant works and revocation takes effect in the same 
     await page.getByLabel("Password", { exact: true }).fill(password);
     await page.getByRole("button", { name: "Sign in", exact: true }).click();
     await expect(
-      page.getByRole("heading", { name: "Administrator access verified." }),
+      page.getByRole("heading", { name: "Platform overview", exact: true }),
     ).toBeVisible();
     await page.screenshot({
       path: testInfo.outputPath("admin-granted.png"),

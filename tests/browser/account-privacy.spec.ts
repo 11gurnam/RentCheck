@@ -177,7 +177,7 @@ test("private PDFs, decision notifications and account deletion remove actual re
     const script = await PDFDocument.create();
     script.addPage();
     script.addJavaScript("bad", "app.alert('fictional')");
-    await page.getByLabel("Fictional rental document image").setInputFiles({
+    await page.getByLabel("Fictional supporting documents").setInputFiles({
       name: "active.pdf",
       mimeType: "application/pdf",
       buffer: Buffer.from(await script.save()),
@@ -189,7 +189,7 @@ test("private PDFs, decision notifications and account deletion remove actual re
     await expect(page.getByRole("main").getByRole("alert")).toContainText(
       "without encryption, scripts",
     );
-    await page.getByLabel("Fictional rental document image").setInputFiles({
+    await page.getByLabel("Fictional supporting documents").setInputFiles({
       name: "fictional.pdf",
       mimeType: "application/pdf",
       buffer: pdfBytes,
@@ -232,7 +232,7 @@ test("private PDFs, decision notifications and account deletion remove actual re
       "http://127.0.0.1:3000/claims/new?kind=property&target=" + property,
     );
     await otherPage
-      .getByLabel("Fictional claim evidence image")
+      .getByLabel("Fictional supporting documents")
       .setInputFiles({
         name: "fictional-claim.pdf",
         mimeType: "application/pdf",

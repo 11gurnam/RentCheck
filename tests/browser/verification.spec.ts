@@ -111,7 +111,7 @@ test("private demonstration documents, trusted approval, recommendation threshol
         "Private demonstration verification requested",
       );
       const docUrl = await page
-        .getByRole("link", { name: "Download your private document" })
+        .getByRole("link", { name: /Download private document 1/ })
         .getAttribute("href");
       documents.push("verification/" + docUrl!.split("/").at(-1) + ".jpg");
       // Retry transport resets only; every HTTP response must satisfy the same checks.
