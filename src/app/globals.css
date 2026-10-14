@@ -1683,3 +1683,31 @@ dialog:modal {position:fixed;inset:0;margin:auto;max-height:calc(100dvh - 32px);
   .rating-category-breakdown {flex-basis:180px;}
   .site-footer {align-items:flex-start; gap:var(--space-4);}
 }
+/* Settings and operations */
+.operations-heading,.operations-section-heading {display:flex;justify-content:space-between;align-items:flex-start;gap:20px;flex-wrap:wrap;}
+.operations-heading .semantic-status {margin-top:8px;white-space:nowrap;}
+.operations-stats {display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin:28px 0;}
+.operations-stat {min-width:0;padding:20px 18px;border:1px solid var(--line);border-radius:12px;background:#fff;}
+.operations-stat dt {display:flex;align-items:center;gap:8px;font-size:12px;font-weight:600;color:var(--muted);}
+.operations-stat dt svg {flex-shrink:0;}
+.operations-stat dd {margin:16px 0 8px;font-size:32px;line-height:1.15;font-weight:700;color:#285641;}
+.operations-stat dd span {font-size:14px;font-weight:400;}
+.operations-stat dd.operations-mode {font-size:18px;line-height:1.4;}
+.operations-stat dd.operations-note {font-size:12px;line-height:1.65;font-weight:400;color:var(--muted);margin:0;}
+.operations-attention {background:#fffcf3;border-color:#e6d5a6;}
+.operations-attention dd {color:#805900;}
+.operations-section-heading h2 {margin-bottom:8px;}
+.operations-section-heading p {font-size:14px;color:var(--muted);margin:0;max-width:58ch;}
+.operations-queue-info {display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;padding:14px 16px;margin:22px 0;background:#f3f6ee;border-radius:9px;font-size:13px;}
+.operations-queue-info time {font-weight:600;}.operations-queue-info small {font-weight:400;color:var(--muted);}
+.operations-notice {display:flex;align-items:flex-start;gap:10px;font-size:13px;color:#795400;background:#fff8e8;border:1px solid #e7d4a4;border-radius:9px;padding:14px 16px;margin:0 0 20px;}
+.operations-notice svg {flex-shrink:0;margin-top:2px;}
+.operations-cleanup-form {max-width:none;padding:0;border:0;margin:0;}
+.operations-cleanup-form .operations-confirmation {display:flex;align-items:flex-start;gap:10px;font-size:13px;font-weight:400;line-height:1.6;}
+.operations-confirmation input {width:18px;min-height:18px;height:18px;flex-shrink:0;margin-top:2px;accent-color:#285641;}
+.operations-cleanup-form button {display:inline-flex;align-items:center;justify-content:center;gap:8px;width:fit-content;min-height:44px;}
+.operations-policy-grid {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px;margin-block:20px;}
+.operations-policy h3 {font-size:14px;margin:0 0 8px;}.operations-policy p {font-size:13px;color:var(--muted);margin:0;}
+.operations-policy details {border-top:1px solid var(--line);padding-top:12px;}.operations-policy summary {font-size:13px;font-weight:600;}
+@media(max-width:1100px){.operations-stats{grid-template-columns:repeat(2,minmax(0,1fr));}}
+@media(max-width:600px){.operations-stats{gap:10px;}.operations-stat{padding:16px 12px;}.operations-stat dt{font-size:11px;}.operations-stat dd{font-size:28px;}.operations-stat dd.operations-mode{font-size:16px;}.operations-policy-grid{grid-template-columns:1fr;gap:20px;}.operations-queue-info{align-items:flex-start;flex-direction:column;}}
