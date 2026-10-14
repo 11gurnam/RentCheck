@@ -1,4 +1,5 @@
 import "server-only";
+import { cache } from "react";
 import { z } from "zod";
 import { createDatabaseClient } from "@/lib/database/server";
 
@@ -35,11 +36,11 @@ export const platformFilters = z.object({
   from: date, to: date, id: z.union([z.literal(""),z.uuid()]).default(""),
 });
 export type PlatformFilters = z.infer<typeof platformFilters>;
-export async function overview() {
+export const overview = cache(async function overview() {
   const { data, error } = await (await createDatabaseClient()).rpc("get_admin_platform_overview");
   if (error) throw new Error("Platform overview is temporarily unavailable.");
   return data as Overview;
-}
+});
 export async function managementList(kind: ManagementKind, f: PlatformFilters) {
   const { data, error } = await (await createDatabaseClient()).rpc("get_admin_platform_list", { p_kind: kind, p_filters: { ...f, query: f.q } });
   if (error) throw new Error("Management records are temporarily unavailable.");

@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { ProfileAvatar } from "./profile-avatar";
 import { createDatabaseClient } from "@/lib/database/server";
 import { getOwnProfile, getVerifiedUser, isAdministrator } from "@/lib/auth/session";
@@ -32,7 +33,7 @@ export async function SiteHeader({ home = false }: { home?: boolean }) {
     <header className="site-header shell">
       <Brand href={home ? "#top" : "/#top"} />
       <SiteNavigation links={links} />
-      {user && <a href="/account" className="header-profile-link" title={`${profile?.public_alias ?? "Your account"} · Signed in`} aria-label={`${profile?.public_alias ?? "Your account"} — Your account, signed in`}><ProfileAvatar name={profile?.public_alias ?? "Your account"} src={photo?.data?.avatar_url ?? null} initials /><span className="signed-in-check" aria-hidden="true">✓</span><span className="sr-only">{profile?.public_alias ?? "Your account"}</span></a>}
+      {user && <Link href="/account" className="header-profile-link" title={`${profile?.public_alias ?? "Your account"} · Signed in`} aria-label={`${profile?.public_alias ?? "Your account"} — Your account, signed in`}><ProfileAvatar name={profile?.public_alias ?? "Your account"} src={photo?.data?.avatar_url ?? null} initials /><span className="signed-in-check" aria-hidden="true">✓</span><span className="sr-only">{profile?.public_alias ?? "Your account"}</span></Link>}
     </header>
   );
 }

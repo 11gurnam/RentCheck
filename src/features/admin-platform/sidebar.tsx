@@ -1,4 +1,5 @@
 "use client";
+import { NavigationPending } from "@/components/ui/navigation-pending";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { ActionIcon } from "@/components/ui/action-feedback";
@@ -15,5 +16,5 @@ export function AdminSidebar({tenantPending,landlordPending,flagged,disputes}:{t
     {label:"Activity & Audit Logs",href:"/admin/audit",active:path==="/admin/audit"},
     {label:"Settings & Operations",href:"/admin/operations",active:path==="/admin/operations"},
   ];
-  return <aside className="admin-sidebar"><p className="eyebrow">PLATFORM MANAGEMENT</p><nav aria-label="Admin navigation">{links.map(link=><Link key={link.label} href={link.href} aria-current={link.active?"page":undefined}><span>{link.label}</span>{!!link.count&&<span className="admin-nav-count">{link.count}</span>}</Link>)}</nav><Link className="admin-return" href="/account"><ActionIcon name="logout"/>Your account</Link></aside>;
+  return <aside className="admin-sidebar"><p className="eyebrow">PLATFORM MANAGEMENT</p><nav aria-label="Admin navigation">{links.map(link=><Link key={link.label} href={link.href} aria-current={link.active?"page":undefined}><span>{link.label}</span>{!!link.count&&<span className="admin-nav-count">{link.count}</span>}<NavigationPending/></Link>)}</nav><Link className="admin-return" href="/account"><ActionIcon name="logout"/>Your account</Link></aside>;
 }
