@@ -42,7 +42,7 @@ set local role authenticated;select lives_ok($$select decide_verification('53000
 select ok(not (select recommended from womens_recommendation_counts('50000000-0000-4000-8000-000000000100')),'Revocation drops below three');
 select ok(not (select verified from get_review_photos('51000000-0000-4000-8000-000000000003')),'Revocation downgrades tenant photo');
 reset role;update public.reviews set status='removed' where id='51000000-0000-4000-8000-000000000003';set local role authenticated;
-select is((select count(*)::int from jsonb_array_elements(get_admin_audit()) e where e->>'entity_id' like '53000000%'),4,'All fixture decisions retained after public removal');
+select is((select count(*)::int from jsonb_array_elements(get_admin_audit()) e where e->>'entity_id' like '53000000%' and e->>'action'='verification_decision'),4,'All fixture decisions retained after public removal');
 reset role;select throws_ok($$update private.audit_events set reason='Tampered reason' where entity_id::text like '53000000%'$$,'P0001','Audit records are immutable','Audit cannot be overwritten');
 delete from private.administrator_grants where user_id='50000000-0000-4000-8000-000000000009';
 set local role authenticated;select throws_ok($$select get_admin_audit()$$,'42501',null,'Admin grant revocation immediate');

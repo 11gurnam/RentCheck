@@ -1,0 +1,46 @@
+name: Build hosted deployment
+on:
+  workflow_dispatch:
+    inputs:
+      api_url:
+        description: Hosted Supabase URL (public)
+        required: true
+        type: string
+      public_key:
+        description: Supabase publishable or anon key; never a server secret
+        required: true
+        type: string
+permissions:
+  contents: read
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: ${{ inputs.api_url }}
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ inputs.public_key }}
+      SITE_URL: https://rentcheck-india.netlify.app
+      GOOGLE_AUTH_ENABLED: 'true'
+      OPERATOR_NAME: RentCheck
+      OPERATOR_CONTACT_EMAIL: rentchecksupport@gmail.com
+      # Build-only placeholder. Real private runtime credentials stay in Netlify.
+      SUPABASE_SERVICE_ROLE_KEY: sb_secret_build_placeholder_not_a_credential
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - name: Install the verified Next.js hosting adapter
+        run: npm install --no-save --package-lock=false @netlify/plugin-nextjs@5.16.2
+      - name: Build Linux deployment package without provider credentials
+        run: npx --yes netlify-cli@27.12.0 build --offline --context production
+      - name: Record source revision
+        run: git rev-parse HEAD > .netlify/source-revision.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: netlify-linux-deployment
+          path: .netlify/
+          include-hidden-files: true
+          retention-days: 3

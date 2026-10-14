@@ -1,6 +1,6 @@
 begin;set search_path to public,extensions;select plan(29);
-insert into auth.users(id,email)values('c0000000-0000-4000-8000-000000000001','operation-owner@example.test'),('c0000000-0000-4000-8000-000000000002','operation-tenant@example.test');
-insert into private.administrator_grants(user_id,reason)values('c0000000-0000-4000-8000-000000000001','Synthetic operation administrator');
+insert into auth.users(id,email)values('c0000000-0000-4000-8000-000000000001','operation-owner@example.test'),('c0000000-0000-4000-8000-000000000002','operation-tenant@example.test'),('c0000000-0000-4000-8000-000000000003','operation-reviewer@example.test');
+insert into private.administrator_grants(user_id,reason)values('c0000000-0000-4000-8000-000000000001','Synthetic operation administrator'),('c0000000-0000-4000-8000-000000000003','Independent synthetic reviewer');
 set local role anon;select is(get_operation_mode()->>'accepts_real_data','false','Intake defaults to demonstration');
 select throws_ok($$select configure_operation_mode(true,90,'Synthetic operation mode')$$,'42501',null,'Anonymous mode configuration denied');
 select throws_ok($$select operations_health()$$,'42501',null,'Anonymous metrics denied');
@@ -27,7 +27,7 @@ reset role;create temp table operation_request as select id from private.verific
 select ok((select expires_at between now()+interval '29 days'and now()+interval '31 days'from private.documents where id='c2000000-0000-4000-8000-000000000001'),'Configured retention applied');
 set local role authenticated;select set_config('request.jwt.claim.sub','c0000000-0000-4000-8000-000000000001',true);
 select throws_ok($$select decide_verification((select id from operation_request),'approved','Synthetic manual review reason')$$,'P0001',null,'Real approval requires checklist');
-select lives_ok($$select decide_verification((select id from operation_request),'approved','Synthetic manual review reason','{"identity":true,"property":true,"period_or_authority":true}')$$,'Complete checklist approval accepted');
+select lives_ok($$select decide_verification((select id from operation_request),'approved','Synthetic manual review reason','{"identity":true,"property":true,"period_or_authority":true,"readable":true,"complete":true,"valid":true}')$$,'Complete checklist approval accepted');
 select is(get_admin_verifications()->0->>'is_demo','false','Administrator sees explicit real status');
 select is(get_review_page((select id from operation_property))->'rows'->0->>'is_demo','false','Public review status explicit');
 reset role;update private.documents set expires_at=now()-interval '1 second'where id='c2000000-0000-4000-8000-000000000001';
@@ -47,9 +47,10 @@ select lives_ok($$select maintain_association((select id from operation_property
 reset role;insert into storage.objects(bucket_id,name,metadata)values('rental-documents','claim/c2000000-0000-4000-8000-000000000002.pdf','{"mimetype":"application/pdf"}');
 set local role service_role;
 select register_evidence_document('c0000000-0000-4000-8000-000000000001','c2000000-0000-4000-8000-000000000002','pdf',null,(select id from operation_property),null,false,true);
-set local role authenticated;
-select throws_ok($$select decide_claim((get_my_claims()->0->>'id')::uuid,'approved','Synthetic real claimant approval')$$,'P0001',null,'Real claim also requires manual checklist');
-select lives_ok($$select decide_claim((get_my_claims()->0->>'id')::uuid,'approved','Synthetic real claimant approval','{"identity":true,"property":true,"period_or_authority":true}')$$,'Complete real claim checklist accepted');
+reset role;create temp table operation_claim as select id from private.claims where document_id='c2000000-0000-4000-8000-000000000002';grant select on operation_claim to authenticated;
+set local role authenticated;select set_config('request.jwt.claim.sub','c0000000-0000-4000-8000-000000000003',true);
+select throws_ok($$select decide_claim((select id from operation_claim),'approved','Synthetic real claimant approval')$$,'P0001',null,'Real claim also requires manual checklist');
+select lives_ok($$select decide_claim((select id from operation_claim),'approved','Synthetic real claimant approval','{"identity":true,"property":true,"period_or_authority":true,"readable":true,"complete":true,"valid":true}')$$,'Complete real claim checklist accepted');
 reset role;
 delete from auth.users where id='c0000000-0000-4000-8000-000000000002';
 select is((select count(*)::int from private.documents where id='c2000000-0000-4000-8000-000000000001'),0,'Account deletion works after evidence expiration');
