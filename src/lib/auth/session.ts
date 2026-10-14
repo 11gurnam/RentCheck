@@ -1,10 +1,11 @@
 import "server-only";
+import { cache } from "react";
 import { redirect } from "next/navigation";
 import { createDatabaseClient } from "@/lib/database/server";
 import { getPublicEnvironment } from "@/lib/environment";
 import { safeDestination } from "@/features/accounts/validation";
 
-export async function getVerifiedUser() {
+export const getVerifiedUser = cache(async function getVerifiedUser() {
   if (!getPublicEnvironment()) return null;
   try {
     const client = await createDatabaseClient();
@@ -13,7 +14,7 @@ export async function getVerifiedUser() {
   } catch {
     return null;
   }
-}
+});
 
 export async function requireUser(destination = "/account") {
   const user = await getVerifiedUser();
@@ -27,7 +28,7 @@ export async function requireUser(destination = "/account") {
   return user;
 }
 
-export async function getOwnProfile() {
+export const getOwnProfile = cache(async function getOwnProfile() {
   try {
     const client = await createDatabaseClient();
     const { data, error } = await client.rpc("get_my_account");
@@ -40,9 +41,9 @@ export async function getOwnProfile() {
   } catch {
     return null;
   }
-}
+});
 
-export async function isAdministrator() {
+export const isAdministrator = cache(async function isAdministrator() {
   try {
     const client = await createDatabaseClient();
     const { data, error } = await client.rpc("is_administrator");
@@ -50,4 +51,4 @@ export async function isAdministrator() {
   } catch {
     return false;
   }
-}
+});
