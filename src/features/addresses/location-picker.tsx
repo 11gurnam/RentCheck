@@ -19,7 +19,7 @@ export function LocationPicker({values,onChange}:{values:Record<string,string>;o
       const response=await fetch("/api/address?"+query,{signal:controller.signal});const data=await response.json();
       if(!response.ok)throw new Error(data.message);if(controller.signal.aborted)return;
       if(!data.results.length){setMessage("No address found. Enter the missing details yourself or move the pin.");return;}
-      if(pin){onChange(addressValues(data.results[0],latest.current,pin));setMessage("Address filled from the pin. Check the details and enter anything missing.");}else setResults(data.results);
+      if(pin){const address=data.results[0] as AddressResult;onChange(addressValues(address,latest.current,pin));setMessage(`Address filled from the pin${address.city||address.state?` · ${[address.city,address.state].filter(Boolean).join(", ")}`:""}. Check the details and enter anything missing.`);}else setResults(data.results);
     }catch(error){if(!controller.signal.aborted)setMessage(error instanceof Error&&error.name==="Error"?error.message:"Address lookup unavailable. Enter the address yourself.");}
     finally{if(!controller.signal.aborted)setBusy(false);}
   }

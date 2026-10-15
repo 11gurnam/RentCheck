@@ -18,11 +18,13 @@ export async function ReviewFeed({
   landlord,
   propertyType = "",
   page = 1,
+  canReview = true,
 }: {
   property?: string;
   landlord?: string;
   propertyType?: string;
   page?: number;
+  canReview?: boolean;
 }) {
   const { rows, total } = await reviewFeed(property, landlord, page);
   const href = (n: number) =>
@@ -95,15 +97,15 @@ export async function ReviewFeed({
   return (
     <section className="history-panel" id="experiences">
       <h2>{landlord ? "Management experiences" : "Tenant experiences"}</h2>
-      <p>
+      {total > 0 && <p>
         {rating != null
           ? Number(rating).toFixed(1) + " / 5 · " + count + " ratings"
           : landlord
             ? "No management ratings yet."
             : "No tenant ratings yet."}
-      </p>
+      </p>}
       <p>
-        {total} {total === 1 ? "review" : "reviews"} · Page {page}
+        {total} {total === 1 ? "review" : "reviews"}{total > 20 ? ` · Page ${page}` : ""}
       </p>
       {property && count > 0 && <section className="rating-summary-compact" aria-label="Average tenant ratings">
         <div className="rating-summary-score"><strong>★ {rating == null ? "N/A" : Number(rating).toFixed(1)} <small>/ 5</small></strong><span>{count} {count === 1 ? "tenant rating" : "tenant ratings"}</span></div>
@@ -120,7 +122,7 @@ export async function ReviewFeed({
             <a href={href(1)}>Return to the first experiences page</a>.
           </p>
         ) : (
-          <p>No reviews yet. Be the first to share your experience.</p>
+          <p>{canReview?"No reviews yet. Be the first to share your experience.":"No tenant reviews yet."}</p>
         ))}
       <PhotoMedia carousel photos={tenantPhotos} title="Photos shared by tenants" />
       {rows.map((r) => (
@@ -152,7 +154,7 @@ export async function ReviewFeed({
             ))}
           <footer className="review-actions review-feed-actions">
             <a className="review-action" href={"/properties/" + r.property_id}><svg className="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" aria-hidden="true"><path d="m3 10 9-7 9 7v11H3Z"/><path d="M9 21v-8h6v8"/></svg>Property profile</a>
-            {r.landlord_id && <a className="review-action" href={"/landlords/" + r.landlord_id}><ActionIcon name="shield"/>Manager for this tenancy</a>}
+            {r.landlord_id && <a className="review-action" href={"/landlords/" + r.landlord_id} title="Opens the profile of the landlord or manager recorded during this tenant’s stay"><ActionIcon name="shield"/>View landlord / manager</a>}
           {user ? (
             <ReportForm review={r.id} />
           ) : (

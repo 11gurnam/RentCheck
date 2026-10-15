@@ -38,8 +38,8 @@ export function PhotoForm({
 function RemovePhoto({ id }: { id: string }) {
   const [s, a, p] = useFeedbackAction(removePhoto, {});
   return (
-    <form action={a}>
-      <a href={"/api/photos/" + id}>View photo</a>
+    <form action={a} className="review-photo-actions">
+      <a className="review-action" href={"/api/photos/" + id}><ActionIcon name="search"/>View photo</a>
       <input type="hidden" name="photo" value={id} />
       <button className="action-danger" disabled={p}><ActionIcon name="trash" />Remove photo</button>
       <ActionFeedback receipt={s} message={s.message} status={s.status} />

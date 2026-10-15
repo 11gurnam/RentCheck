@@ -3,6 +3,8 @@ import { parseFilters, searchHref } from "@/features/discovery/filters";
 import { getLocations, searchProperties } from "@/features/discovery/data";
 import { PropertyCard } from "@/features/discovery/cards";
 import { SearchControls } from "@/features/discovery/search-controls";
+import { Pagination } from "@/components/ui/pagination";
+import { redirect } from "next/navigation";
 export default async function SearchPage({
   searchParams,
 }: {
@@ -33,6 +35,11 @@ export default async function SearchPage({
         </div>
       </AccountShell>
     );
+  }
+  // Recover from stale/out-of-range links after properties or filters change.
+  if(f.page>1&&!rows.length){
+    const first=await searchProperties({...f,page:1});
+    redirect(searchHref(f,Math.max(1,Math.ceil((first[0]?.total_count??0)/12))));
   }
   const states = [...new Set(locations.map((l) => l.state))].sort();
   const cities = [
@@ -183,12 +190,7 @@ export default async function SearchPage({
           <a href="/search">View all examples</a>
         </div>
       )}
-      <nav className="pagination" aria-label="Results pages">
-        {f.page > 1 && <a href={searchHref(f, f.page - 1)}>Previous page</a>}
-        {total > f.page * 12 && (
-          <a href={searchHref(f, f.page + 1)}>Next page</a>
-        )}
-      </nav>
+      <Pagination page={f.page} total={total} pageSize={12} href={page=>searchHref(f,page)}/>
       <p className="field-hint">
         Ratings and women’s recommendations appear when eligible tenant reviews
         are available. No safety guarantee.

@@ -5,6 +5,15 @@ import { redirect } from "next/navigation";
 import { requireUser, isAdministrator } from "@/lib/auth/session";
 import { createDatabaseClient } from "@/lib/database/server";
 type State = { message?: string; status?: "success" | "error" };
+export async function savePhoneContact(_:State,form:FormData):Promise<State>{
+ await requireUser("/account/contact");
+ const phone=String(form.get("phone")??"").trim();
+ if(phone.length>20)return {status:"error",message:"Enter a 10-digit Indian mobile number, optionally prefixed with +91."};
+ const {error}=await (await createDatabaseClient()).rpc("set_property_contact_settings",{p_phone:phone,p_show_publicly:form.get("showPublicly")==="on"});
+ if(error)return {status:"error",message:error.message};
+ revalidatePath("/account/contact");revalidatePath("/properties/[id]","page");
+ return {status:"success",message:"Contact details saved."};
+}
 export async function contactPreference(_: State, form: FormData): Promise<State> {
   await requireUser("/messages");
   const { error } = await (await createDatabaseClient()).rpc("set_contact_preference", { p_enabled: form.get("enabled") === "on" });

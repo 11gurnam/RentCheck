@@ -27,7 +27,7 @@ export function ClaimForm({
     try { return await requestClaim(previous, form); }
     catch { return {status:"error" as const,message:"Your claim could not be submitted. Check your connection and try again. Your selected documents are still available."}; }
   }, {});
-  if(s.status==="success")return <div className="claim-confirmation"><h2><ActionIcon name="check"/>Claim submitted</h2><p>Your documents will be reviewed privately. You can track the decision from Your claims.</p><a className="review-action" href="/claims">View Your claims</a><SuccessNotice message={s.message??"Claim submitted"} receipt={s}/></div>;
+  if(s.status==="success")return <div className="claim-confirmation"><h2><ActionIcon name="check"/>Claim submitted</h2><p>Your documents will be reviewed privately. You can track the decision from Your claims.</p><div className="review-actions"><a className="review-action" href="/claims">View Your claims</a>{kind==="property"&&<a className="review-action" href="/account/contact">Add contact details</a>}</div><SuccessNotice message={s.message??"Claim submitted"} receipt={s}/></div>;
   return (
     <form action={a} onReset={(e) => e.preventDefault()} className="auth-form">
       <input name="target" type="hidden" value={target} />
