@@ -120,7 +120,7 @@ test("private PDFs, decision notifications and account deletion remove actual re
   const paths: { bucket: string; path: string }[] = [];
   const otherContext = await browser.newContext();
   try {
-    for (let n = 0; n < 2; n++) {
+    for (let n = 0; n < 3; n++) {
       const email = "privacy-browser-" + crypto.randomUUID() + "@example.test";
       const u = await service.auth.admin.createUser({
         email,
@@ -256,15 +256,17 @@ test("private PDFs, decision notifications and account deletion remove actual re
       ).headers()["content-type"],
     ).toBe("application/pdf");
     fixtureAdmin(users[1].id, true);
+    fixtureAdmin(users[2].id, true);
     expect(
       (
-        await users[1].client.rpc("decide_claim", {
+        await users[2].client.rpc("decide_claim", {
           p_claim: claim.id,
           p_decision: "approved",
           p_reason: "Synthetic private PDF claim approval",
         })
       ).error,
     ).toBeNull();
+    fixtureAdmin(users[2].id, false);
     expect(
       (
         await users[1].client.rpc("decide_verification", {

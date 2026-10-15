@@ -6,10 +6,10 @@ The hosted site is https://rentcheck-india.netlify.app. Google sign-in and SMTP 
 
 ## Start on a fresh local checkout
 
-Use Node24 LTS, npm11+, Git and Docker Desktop with the Linux engine running. The latest release branch is phase-23-gemini-activation; main retains the earlier merged foundation until a separately authorized merge.
+Use Node24 LTS, npm11+, Git and Docker Desktop with the Linux engine running. The combined source is on main, including GK's merged UI, review, ownership, map and contact changes. See the Phase 29 release note for the current hosting status.
 
 ```sh
-git switch phase-23-gemini-activation
+git switch main
 npm ci
 npm run backend:start
 npm run backend:env
@@ -42,6 +42,8 @@ If Chrome is already installed on Windows, set $env:PLAYWRIGHT_CHANNEL='chrome' 
 
 ## Review and hosting
 
+- [Phase 29 combined release status and hosting block](docs/enhancements/phase-29-release-preparation.md)
+
 - [Phase 22 release and beginner checks](docs/enhancements/phase-22-tested-ui-deployment.md)
 - [Phase 23 Gemini activation and checks](docs/enhancements/phase-23-gemini-activation.md)
 - [Beginner review guide](docs/review-guide.md)
@@ -57,6 +59,6 @@ If Chrome is already installed on Windows, set $env:PLAYWRIGHT_CHANNEL='chrome' 
 - [Deployment preparation](docs/deployment.md)
 - [Google provider setup](docs/phases/phase-01/provider-setup.md)
 
-Phase branches contain the prior work and teammate updates. This release does not merge main. Git pushes do not automatically deploy the site: production publication currently uses a checked Linux Netlify build and manual CLI deployment. Database migrations are applied separately to RentCheck Staging.
+The Netlify project is connected to 11gurnam/RentCheck with main as the production branch. Pushes trigger deployment, but Netlify rejected the latest release because account credits are exhausted. The last verified working release has been restored. The latest source must not be described as live until a successful deployment and hosted checks confirm its commit. Database migrations are applied separately to RentCheck Staging. See [Phase 29 release status](docs/enhancements/phase-29-release-preparation.md).
 
 Hosted preparation and beginner checks: [Phase 13](docs/enhancements/phase-13-hosted-deployment.md) and [deployment guide](docs/deployment.md). New photo/document uploads are limited to 3 MiB to fit free-host request limits.
