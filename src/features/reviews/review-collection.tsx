@@ -33,16 +33,16 @@ export function ReviewCollection({ rows }: { rows: OwnReview[] }) {
     {invalidRange ? <p role="alert">Choose an end date on or after the start date.</p> : <>
       <p className="field-hint" role="status">{filtered.length} of {rows.length} reviews</p>
       {!filtered.length && <section className="dashboard-card"><h2>{rows.length ? "No matching reviews" : "No reviews yet"}</h2><p>{rows.length ? "Try another search or clear your filters." : "Find a place to share your first experience."}</p></section>}
-      {filtered.map(r => <section key={r.id} className="dashboard-card own-review-card">
+      <div className="own-review-list">{filtered.map(r => <section key={r.id} className="dashboard-card own-review-card">
         <div className="own-review-heading"><div className="own-review-name"><span className="review-house" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6"><path d="m3 10 9-7 9 7v11H3V10Z"/><path d="M9 21v-8h6v8"/></svg></span><h2>{r.archived ? r.property_name : <a href={`/properties/${r.property_id}`}>{r.property_name}</a>}</h2></div><span className="review-status"><StatusBadge status={r.status}>{r.status === "visible" ? "Published" : r.status.replaceAll("_", " ")}</StatusBadge></span></div>
-        <div className="review-dates"><span className="review-date-caption">Tenancy</span><div className="review-date-range"><time dateTime={r.start}>{displayDate(r.start)}</time><span className="review-date-arrow" aria-label="to">→</span>{r.end ? <time dateTime={r.end}>{displayDate(r.end)}</time> : <span>Current</span>}</div></div>
+        <div className="own-review-summary"><div className="review-dates"><span className="review-date-caption">Tenancy</span><div className="review-date-range"><time dateTime={r.start}>{displayDate(r.start)}</time><span className="review-date-arrow" aria-label="to">→</span>{r.end ? <time dateTime={r.end}>{displayDate(r.end)}</time> : <span>Current</span>}</div></div>
         <ReviewScoreBadges overall={r.propertyRating} criteria={r.criteria} />
-        <div className="review-highlights review-secondary-highlights">{r.managerRating != null && <span>Management {r.managerRating}/5</span>}{r.recommend != null && <span>{r.recommend ? "Would recommend" : "Would not recommend"}</span>}</div>
+        <div className="review-highlights review-secondary-highlights">{r.managerRating != null && <span>Management {r.managerRating}/5</span>}{r.recommend != null && <span>{r.recommend ? "Would recommend" : "Would not recommend"}</span>}</div></div>
         {!!r.criteria?.length && <details className="review-criterion-details"><summary>All criterion ratings</summary><div className="review-criteria-scores">{r.criteria.map(c => <span key={c.key}>{c.label}<strong>{c.rating} / 5</strong></span>)}</div></details>}
         <section className="review-description"><h4>Description</h4><p className="review-excerpt">{r.body.length > 180 ? r.body.slice(0, 177).trimEnd() + "…" : r.body}</p>
         </section>{r.body.length > 180 && <details className="review-full-text"><summary>Read full review</summary><p>{r.body}</p></details>}
         {r.status === "visible" ? <div className="review-actions"><a className="review-action" href={`/reviews/${r.id}/edit`}><ActionIcon name="edit" />Edit review</a><a className="review-action camera-action" href={`/reviews/${r.id}/edit#review-photos`}><CameraIcon />Photos</a><DeleteReview id={r.id} /></div> : r.archived ? <p>Archived duplicate tenancy retained for audit.</p> : r.status === "hidden" ? <div className="review-actions"><p className="field-hint">Temporarily hidden during moderation.</p><a className="review-action" href="/account/appeals">Appeal this decision</a><DeleteReview id={r.id}/></div> : <CloseTenancy review={r} />}
-      </section>)}
+      </section>)}</div>
     </>}
   </>;
 }

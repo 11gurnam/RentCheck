@@ -1,7 +1,7 @@
 "use client";
 import { useFeedbackAction } from "@/components/ui/use-feedback-action";
 import { ActionFeedback, ActionIcon } from "@/components/ui/action-feedback";
-import { useState, useRef, useId, useTransition } from "react";
+import { useState, useRef, useId, useTransition, useSyncExternalStore } from "react";
 import { submitReview, removeReview, closeTenancy } from "./actions";
 import type { OwnReview } from "./validation";
 import { LandlordPreview } from "./landlord-preview";
@@ -14,6 +14,7 @@ import { addPhoto } from "./photo-actions";
 import { ReviewPhotoPicker } from "./photo-picker";
 import { useRouter } from "next/navigation";
 import { StarRating } from "./star-rating";
+const subscribeToHydration = () => () => {};
 export function ReviewForm({
   property,
   review,
@@ -24,6 +25,7 @@ export function ReviewForm({
   existingPhotoCount?: number;
 }) {
   const router = useRouter();
+  const interactive = useSyncExternalStore(subscribeToHydration, () => true, () => false);
   const [photos, setPhotos] = useState<File[]>([]);
   const selectedPhotos = useRef<File[]>([]);
   const selectPhotos = (files: File[]) => { selectedPhotos.current = files; setPhotos(files); };
@@ -153,9 +155,9 @@ export function ReviewForm({
       <fieldset id="manager-rating" className="landlord-rating-section"><legend>Rate your landlord / management</legend>
       {!review && <LandlordPreview property={property.id} start={start} onAvailable={setLandlordAvailable} />}
       <p className="field-hint">How was communication, maintenance and deposit handling? This score rates management separately from the accommodation.</p>
-      <fieldset disabled={!review&&!landlordAvailable} className="landlord-stars"><legend className="sr-only">Landlord score</legend><StarRating label="Landlord / management" value={managerRating} onChange={setManagerRating} step={1} required={false}/></fieldset>
+      <div className="landlord-rating-controls"><fieldset disabled={!interactive||(!review&&!landlordAvailable)} className="landlord-stars"><legend className="sr-only">Landlord score</legend><StarRating label="Landlord / management" value={managerRating} onChange={setManagerRating} step={1} required={false}/></fieldset>
       <input type="hidden" name="managerRating" value={(review||landlordAvailable)&&managerRating?managerRating:""}/>
-      {managerRating>0&&<button type="button" className="review-action" onClick={()=>setManagerRating(0)}>Leave landlord unrated</button>}
+      {managerRating>0&&<button type="button" className="review-action" disabled={!interactive||pending} onClick={()=>setManagerRating(0)}>Leave landlord unrated</button>}</div>
       <p className="field-hint">Optional. No score is recorded if you leave the stars unanswered.</p>
       </fieldset>
       <div className="review-short-fields">

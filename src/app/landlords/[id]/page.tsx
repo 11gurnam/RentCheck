@@ -48,17 +48,8 @@ export default async function LandlordPage({
         </a>
       </p>
       <section className="dashboard-card" id="review-landlord">
-        <div className="section-title"><h2>How to review this landlord</h2><InfoPopover label="About landlord ratings">Share your landlord experience to help other tenants make informed rental decisions.</InfoPopover></div>
-        <p>
-          Choose the accommodation you rented from the list below, then rate
-          Landlord / management in your tenancy review. Your tenancy dates
-          determine which recorded landlord receives the management rating.
-          Check the listed management period before submitting.
-        </p>
-        <p>
-          Management ratings stay with the manager responsible for the reviewed
-          tenancy, even after a place changes hands.
-        </p>
+        <div className="section-title"><h2>Rate your landlord</h2><InfoPopover label="About landlord ratings">Your tenancy dates determine which recorded landlord receives the rating. Check the management period before submitting. Ratings stay with that manager even after a property changes hands.</InfoPopover></div>
+        <p>Choose a property below and rate the landlord in your tenancy review.</p>
       </section>
       <ReviewFeed
         landlord={id}

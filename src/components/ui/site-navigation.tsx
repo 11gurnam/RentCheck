@@ -72,8 +72,9 @@ export function SiteNavigation({ links }: {
         {links.map(({ href, label }) => (
           <Link key={href} href={href} aria-current={pathname === href || (href === "/admin" && pathname.startsWith("/admin/")) ? "page" : undefined}
             className={href === "/sign-in" ? "navigation-sign-in" : undefined}
+            onNavigate={(event)=>{if(pathname===href&&!window.location.search)event.preventDefault();}}
             onClick={() => setOpen(false)}>
-            <NavigationIcon href={href} /><span>{label}</span><NavigationPending/>
+            <NavigationIcon href={href} /><span>{label}</span>{pathname!==href&&<NavigationPending/>}
           </Link>
         ))}
       </nav>

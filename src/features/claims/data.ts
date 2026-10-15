@@ -16,6 +16,18 @@ export type Claim = {
   reason: string | null;
   alias?: string;
 };
+/** Current account only; approval always comes from the stored claim decision. */
+export async function myProfileClaim(target:string,kind:"property"|"landlord"="property"):Promise<Claim|null> {
+  const db=await createDatabaseClient();
+  const {data,error}=await db.rpc("get_my_claims");
+  if(error)throw new Error("Claim status unavailable");
+  const matching=(data as Claim[]).filter(c=>kind==="property"?c.property_id===target:c.landlord_id===target);
+  const claim=matching.find(c=>c.status==="approved")??matching.find(c=>["pending","disputed"].includes(c.status))??matching[0];
+  if(!claim)return null;
+  const stage=await db.rpc("get_my_verification_stage",{p_kind:"landlord",p_application:claim.id});
+  if(stage.error)throw new Error("Claim progress unavailable");
+  return {...claim,stage:stage.data};
+}
 export async function myClaims(): Promise<Claim[]> {
   const { data, error } = await (
     await createDatabaseClient()

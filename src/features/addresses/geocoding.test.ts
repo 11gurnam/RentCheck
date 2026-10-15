@@ -1,5 +1,5 @@
 import {it,expect} from "vitest";
-import {photonAddress} from "./geocoding";
+import {photonAddress,completeReverseAddress} from "./geocoding";
 import {indianStates} from "./india";
 it("includes all 36 states and union territories and useful city choices",()=>{
   expect(indianStates).toHaveLength(36);
@@ -16,4 +16,11 @@ it("rejects foreign, missing and invalid coordinates",()=>{
   expect(photonAddress({geometry:{coordinates:[75,27]},properties:{countrycode:"US"}})).toBeNull();
   expect(photonAddress({geometry:{coordinates:[]},properties:{countrycode:"IN"}})).toBeNull();
   expect(photonAddress({geometry:{coordinates:[0,0]},properties:{countrycode:"IN"}})).toBeNull();
+});
+it("fills missing administrative fields from nearby reverse results without copying a distant city or PIN",()=>{
+ const first={address:"Selected street",state:"",city:"",locality:"",postalCode:"",latitude:26.918,longitude:75.787};
+ const nearby={...first,address:"Neighbouring street",state:"Rajasthan",city:"Jaipur",postalCode:"302006",latitude:26.919};
+ expect(completeReverseAddress([first,nearby])[0]).toEqual({...first,state:"Rajasthan",city:"Jaipur"});
+ expect(completeReverseAddress([first,{...nearby,latitude:28.6}])[0]).toEqual(first);
+ expect(completeReverseAddress([{...first,state:"Delhi"},nearby])[0]).toEqual({...first,state:"Delhi"});
 });
