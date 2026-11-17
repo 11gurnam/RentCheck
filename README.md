@@ -16,7 +16,7 @@ npm run backend:env
 npm run dev
 ```
 
-Open http://127.0.0.1:3000. On Rudraksh's existing computer, the configured backend and Google provider are already present; do not reset it. A supplied production preview can be used directly without terminal commands.
+Open http://127.0.0.1:3000. On  existing computer, the configured backend and Google provider are already present; do not reset it. A supplied production preview can be used directly without terminal commands.
 
 backend:start applies versioned migrations to the dedicated local project rentcheck-accounts-test. backend:env writes ignored local/test configuration and provisions private photo and JPEG/PDF evidence buckets. Never run database reset on the existing user backend. These helpers refuse hosted test targets; unrelated Docker containers stay independent. Local email confirmations and password recovery messages appear at http://127.0.0.1:54324.
 
