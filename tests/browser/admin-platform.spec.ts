@@ -38,6 +38,21 @@ test("admin dashboard, listing suspension, private notes and responsive navigati
     await expect(page.getByRole("heading", { name: "Platform overview" })).toBeVisible();
     const navigation = page.getByRole("navigation", { name: "Admin navigation" });
     await expect(navigation.getByRole("link")).toHaveCount(9);
+    const activity = page.getByRole("region", { name: "Monthly activity data" });
+    const activityLabels = activity.getByRole("columnheader").or(activity.getByRole("rowheader"));
+    const activityLabelLineCounts = () => activityLabels.evaluateAll(labels => labels.map(label => {
+      const range = document.createRange();
+      range.selectNodeContents(label);
+      return range.getClientRects().length;
+    }));
+    const tableHeaders = ["Month", "Properties", "Tenants", "Landlords", "Reviews", "Reports"];
+    await expect(activity.getByRole("columnheader")).toHaveText(tableHeaders);
+    expect(await activityLabelLineCounts()).toEqual(Array(12).fill(1));
+    const activityControls = page.getByRole("group", { name: "Activity metric" });
+    await activityControls.getByRole("button", { name: "Landlords" }).click();
+    await expect(activityControls.getByRole("button", { name: "Landlords" })).toHaveAttribute("aria-pressed", "true");
+    await expect(activity.getByRole("columnheader", { name: "Landlords" })).toHaveAttribute("data-highlighted", "true");
+    await expect(page.getByRole("link", { name: "Review and photo reports" })).toHaveAttribute("href", "/admin/reports");
     expect((await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21aa"]).analyze()).violations).toEqual([]);
     await page.screenshot({ path: info.outputPath("admin-overview.png"), fullPage: true });
     await navigation.getByRole("link", { name: "Properties", exact: true }).click();
@@ -77,6 +92,8 @@ test("admin dashboard, listing suspension, private notes and responsive navigati
     await page.goto("/admin/disputes"); await expect(page.getByRole("heading", { name: "Disputes & Reports", exact: true })).toBeVisible();
     await page.goto("/admin/audit"); await expect(page.getByRole("heading", { name: /Audit/i })).toBeVisible();
     await page.goto("/admin"); await page.setViewportSize({ width: 390, height: 844 });
+    await expect(activity.getByRole("columnheader")).toHaveText(tableHeaders);
+    expect(await activityLabelLineCounts()).toEqual(Array(12).fill(1));
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
     expect((await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21aa"]).analyze()).violations).toEqual([]);
     await page.screenshot({ path: info.outputPath("admin-mobile.png"), fullPage: true });

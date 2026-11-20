@@ -1,0 +1,349 @@
+.overview {
+  --accent: #286451;
+  --tint: #edf5ef;
+  --accent-border: #cfdfd2;
+  container-type: inline-size;
+  display: grid;
+  gap: var(--spacing-md);
+}
+
+.overview [data-tone="blue"] {
+  --accent: #285b87;
+  --tint: #eaf2fa;
+  --accent-border: #cbdced;
+}
+
+.overview [data-tone="teal"] {
+  --accent: #235f63;
+  --tint: #e8f4f2;
+  --accent-border: #c6e0dc;
+}
+
+.overview [data-tone="green"] {
+  --accent: #2b6245;
+  --tint: #ecf5ec;
+  --accent-border: #cee1ce;
+}
+
+.overview [data-tone="violet"] {
+  --accent: #614783;
+  --tint: #f2edf8;
+  --accent-border: #ded2ed;
+}
+
+.overview [data-tone="amber"] {
+  --accent: #805414;
+  --tint: #fbf2df;
+  --accent-border: #e9d9af;
+}
+
+.heading {
+  padding: clamp(20px, 4cqi, 36px);
+  border: 1px solid #c9ddca;
+  border-radius: var(--radius-card);
+  background: linear-gradient(115deg, #e6f0e6, #f0f5e9 54%, #e8f2f3);
+}
+
+.heading > p:first-child {
+  margin: 0 0 var(--spacing-xs);
+  color: #386353;
+}
+
+.heading > p:last-child {
+  margin: 0;
+  color: var(--muted);
+}
+
+.overview .metrics {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 10rem), 1fr));
+}
+
+.overview .metric {
+  border-color: var(--accent-border);
+  border-block-start: 3px solid var(--accent);
+  background: linear-gradient(145deg, var(--tint), #fff 85%);
+}
+
+.overview .metric:hover {
+  border-color: var(--accent);
+  background: var(--tint);
+}
+
+.overview .metric > strong {
+  color: var(--accent);
+}
+
+.overview > section {
+  margin: 0;
+}
+
+.workload {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--spacing-md);
+  border-inline-start: 3px solid #a47832;
+  background: linear-gradient(110deg, #fbf5e7, #fff 82%);
+}
+
+.workload > div:first-child {
+  flex: 1 1 26rem;
+}
+
+.workload h2,
+.workload p {
+  margin: 0;
+}
+
+.workload p {
+  margin-block-start: var(--spacing-xs);
+}
+
+.verificationGrid,
+.activityGrid {
+  display: grid;
+  gap: var(--spacing-md);
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.chartCard,
+.activityCard {
+  margin: 0;
+}
+
+.chartCard h2 {
+  color: var(--accent);
+}
+
+.activityCard h2 {
+  color: #285b87;
+}
+
+.activityCard > p {
+  margin: 0;
+}
+
+.distribution {
+  display: grid;
+  gap: 13px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.barRow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 4px 10px;
+  font-size: var(--font-size-description);
+}
+
+.barRow > strong,
+.monthColumn > strong {
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
+}
+
+.distributionTrack {
+  grid-column: 1 / -1;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--tint);
+  overflow: hidden;
+}
+
+.distributionTrack > span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--accent);
+}
+
+.chartControls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-block: var(--spacing-md) var(--spacing-sm);
+}
+
+.chartControls > button {
+  min-height: 36px;
+  padding: 5px 10px;
+  border: 1px solid var(--accent-border);
+  border-radius: 7px;
+  background: #fff;
+  color: var(--accent);
+  font-size: var(--font-size-small);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.chartControls > button:hover {
+  background: var(--tint);
+}
+
+.chartControls > button[aria-pressed="true"] {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: #fff;
+}
+
+.monthBars {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: clamp(3px, 1cqi, 10px);
+  margin: 0 0 var(--spacing-md);
+  padding: 12px;
+  border: 1px solid var(--accent-border);
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--tint) 48%, #fff);
+  list-style: none;
+}
+
+.monthColumn {
+  display: grid;
+  grid-template-rows: auto clamp(54px, 9cqi, 92px) auto;
+  gap: 5px;
+  text-align: center;
+  font-size: var(--font-size-small);
+}
+
+.monthColumn > small {
+  color: var(--muted);
+  line-height: 1.3;
+}
+
+.monthTrack {
+  display: flex;
+  align-items: flex-end;
+  width: 100%;
+  max-width: 72px;
+  margin-inline: auto;
+  border-radius: 5px;
+  overflow: hidden;
+  background: var(--tint);
+}
+
+.monthTrack > span {
+  width: 100%;
+  border-radius: inherit;
+  background: var(--accent);
+}
+
+.tableRegion {
+  max-width: 100%;
+  overflow-x: auto;
+  overscroll-behavior-inline: contain;
+  border: 1px solid #d7e2e8;
+  border-radius: 10px;
+}
+
+.activityTable {
+  width: 100%;
+  min-width: max-content;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: var(--font-size-small);
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+
+.activityTable :is(th, td) {
+  padding: 8px clamp(6px, 1.1cqi, 14px);
+  white-space: nowrap;
+  overflow-wrap: normal;
+}
+
+.activityTable thead {
+  color: #27485f;
+}
+
+.activityTable thead th {
+  background: #eef4f8;
+}
+
+.activityTable tbody tr {
+  --row-bg: #fff;
+}
+
+.activityTable tbody tr:nth-child(even) {
+  --row-bg: #f8fafb;
+}
+
+.activityTable tbody :is(th, td) {
+  border-top: 1px solid #e2e9ee;
+  background: var(--row-bg);
+}
+
+.activityTable tr > :first-child {
+  position: sticky;
+  inset-inline-start: 0;
+  z-index: 1;
+  text-align: start;
+}
+
+.activityTable [data-highlighted] {
+  color: var(--accent);
+  background: var(--tint);
+  font-weight: 700;
+}
+
+.toolGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr));
+  gap: var(--spacing-sm);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.toolLink {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  height: 100%;
+  min-height: 46px;
+  padding: 8px 12px;
+  border: 1px solid var(--accent-border);
+  border-radius: 8px;
+  background: var(--tint);
+  color: var(--accent);
+  font-size: var(--font-size-description);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.toolLink > span:last-child {
+  flex-shrink: 0;
+}
+
+.toolLink:hover {
+  border-color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.tableRegion:focus-visible,
+.toolLink:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 3px;
+}
+
+@container (min-width: 36rem) {
+  .verificationGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@container (min-width: 50rem) {
+  .activityGrid {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+    align-items: start;
+  }
+
+  .overview .metrics {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+}
