@@ -36,27 +36,24 @@ export default async function PropertyPage({
 }) {
   const { id } = await params;
   if (!z.uuid().safeParse(id).success) notFound();
-  const p = await getProperty(id);
+  const [p, user] = await Promise.all([getProperty(id), getVerifiedUser()]);
   if (!p) notFound();
-  const user = await getVerifiedUser();
-  const ownReview = user ? (await ownReviews()).find((r) => r.property_id === id && r.status === "visible") : null;
-  const allowed = user
-    ? await (
-        await createDatabaseClient()
-      ).rpc("can_review_property", { p_property: id })
-    : null;
+  const db = await createDatabaseClient();
+  const [reviews, allowed, claim, saved, women, associations] = await Promise.all([
+    user ? ownReviews() : [],
+    user ? db.rpc("can_review_property", { p_property: id }) : null,
+    user ? myProfileClaim(id) : null,
+    user ? db.rpc("get_saved_properties") : null,
+    womensCounts(id),
+    getAssociations(id),
+  ]);
+  const ownReview = reviews.find((r) => r.property_id === id && r.status === "visible");
   if (allowed?.error) throw new Error("Review access unavailable");
-  const claim=user?await myProfileClaim(id):null;
   const representsProperty=allowed?.data===false||!!(claim&&["pending","approved","disputed"].includes(claim.status));
-  const saved = user
-    ? await (await createDatabaseClient()).rpc("get_saved_properties")
-    : null;
   const isSaved = !!saved?.data?.some(
     (row: { property_id: string }) => row.property_id === id,
   );
-  const women = await womensCounts(id);
   const contacts = user && !representsProperty ? await (await createDatabaseClient()).rpc("get_contactable_representatives", { p_property: id }) : null;
-  const associations = await getAssociations(id);
   const history = await Promise.all(
     associations.map(async (a) => ({
       ...a,

@@ -26,18 +26,17 @@ export async function ReviewFeed({
   page?: number;
   canReview?: boolean;
 }) {
-  const { rows, total } = await reviewFeed(property, landlord, page);
+  const [{ rows, total }, user, db] = await Promise.all([
+    reviewFeed(property, landlord, page), getVerifiedUser(), createDatabaseClient(),
+  ]);
   const href = (n: number) =>
     (landlord ? "/landlords/" + landlord : "/properties/" + property) +
     "?reviews=" +
     n +
     "#experiences";
-  const db = await createDatabaseClient();
-  const user = await getVerifiedUser();
-  const claims = user
-    ? (await myClaims()).filter((c) => c.status === "approved")
-    : [];
-  const replies = await Promise.all(
+  const [claimRows, replies, profiles, score, summary, verified, photos, allGallery] = await Promise.all([
+    user ? myClaims() : [],
+    Promise.all(
     rows.map(async (r) => {
       const { data, error } = await db.rpc("get_claimant_replies", {
         p_review: r.id,
@@ -53,27 +52,15 @@ export async function ReviewFeed({
         }[],
       };
     }),
-  );
-  const profiles = rows.length ? await db.rpc("get_review_avatars", { p_reviews: rows.map(r => r.id) }) : null;
-  if (profiles?.error) throw new Error("Public profiles unavailable");
-  const avatars = (profiles?.data ?? {}) as Record<string, string | null>;
-  const score = await db
+    ),
+    rows.length ? db.rpc("get_review_avatars", { p_reviews: rows.map(r => r.id) }) : null,
+    db
     .from(landlord ? "landlord_scores" : "property_scores")
     .select("*")
     .eq(landlord ? "landlord_id" : "property_id", landlord ?? property)
-    .maybeSingle();
-  if (score.error) throw new Error("Ratings unavailable");
-  const rating = score.data?.[landlord ? "landlord_rating" : "property_rating"];
-  const count = score.data?.review_count ?? 0;
-  const summary = property ? await db.from("property_criterion_scores").select("*").eq("property_id", property).order("criterion_key") : null;
-  if (summary?.error) throw new Error("Criterion scores unavailable");
-  const averages = summary?.data ?? [];
-  const categories = criteriaFor(propertyType);
-  const categorySummary = [...categories.map(c => {
-    const average = averages.find(a => a.criterion_key === c.key);
-    return { criterion_key: c.key, label: c.label, rating: average?.rating ?? null, review_count: average?.review_count ?? 0 };
-  }), ...averages.filter(a => !categories.some(c => c.key === a.criterion_key))];
-  const verified = await Promise.all(
+    .maybeSingle(),
+    property ? db.from("property_criterion_scores").select("*").eq("property_id", property).order("criterion_key") : null,
+    Promise.all(
     rows.map(async (r) => {
       const { data, error } = await db.rpc("review_is_verified", {
         p_review: r.id,
@@ -81,8 +68,8 @@ export async function ReviewFeed({
       if (error) throw new Error("Verification unavailable");
       return { id: r.id, verified: data === true };
     }),
-  );
-  const photos = await Promise.all(
+    ),
+    Promise.all(
     rows.map(async (r) => {
       const { data, error } = await db.rpc("get_review_photos", {
         p_review: r.id,
@@ -90,8 +77,22 @@ export async function ReviewFeed({
       if (error) throw new Error("Photos unavailable");
       return { review: r.id, photos: data as PhotoSource[] };
     }),
-  );
-  const allGallery = property ? await db.rpc("get_property_gallery", { p_property: property }) : null;
+    ),
+    property ? db.rpc("get_property_gallery", { p_property: property }) : null,
+  ]);
+  const claims = claimRows.filter((c) => c.status === "approved");
+  if (profiles?.error) throw new Error("Public profiles unavailable");
+  const avatars = (profiles?.data ?? {}) as Record<string, string | null>;
+  if (score.error) throw new Error("Ratings unavailable");
+  const rating = score.data?.[landlord ? "landlord_rating" : "property_rating"];
+  const count = score.data?.review_count ?? 0;
+  if (summary?.error) throw new Error("Criterion scores unavailable");
+  const averages = summary?.data ?? [];
+  const categories = criteriaFor(propertyType);
+  const categorySummary = [...categories.map(c => {
+    const average = averages.find(a => a.criterion_key === c.key);
+    return { criterion_key: c.key, label: c.label, rating: average?.rating ?? null, review_count: average?.review_count ?? 0 };
+  }), ...averages.filter(a => !categories.some(c => c.key === a.criterion_key))];
   if (allGallery?.error) throw new Error("Tenant photos unavailable");
   const tenantPhotos = property ? ((allGallery?.data ?? []) as PhotoSource[]).filter(p => p.role === "tenant").map(p => { const review = photos.find(r => r.photos.some(photo => photo.id === p.id)); return { ...p, review_href: review ? `#review-${review.review}` : undefined }; }) : photos.flatMap(r => r.photos.map(p => ({ ...p, avatar_url: avatars[r.review], review_href: `#review-${r.review}` })));
   return (

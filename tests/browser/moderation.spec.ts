@@ -241,7 +241,7 @@ test("reports stay visible, history preserves snapshots, and merge requires expl
     await expect(page.getByText(body, { exact: true })).toHaveCount(0);
     expect((await page.request.get(photoUrl!)).status()).toBe(404);
     await admin.goto("/admin/audit?action=property_merge");
-    await expect(admin.getByRole("heading", { name: "property merge", exact: true }).first()).toBeVisible();
+    await expect(admin.getByRole("heading", { name: "Property merge", exact: true }).first()).toBeVisible();
   } finally {
     await adminContext.close();
     if (photoPaths.length)

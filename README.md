@@ -18,6 +18,8 @@ npm run dev
 
 Open http://127.0.0.1:3000. On  existing computer, the configured backend and Google provider are already present; do not reset it. A supplied production preview can be used directly without terminal commands.
 
+For local development, use `npm run dev` (Turbopack). Avoid adding `--webpack` unless troubleshooting a bundler compatibility issue: it can introduce long first-navigation compilation delays. Keep the development server running so its compilation cache stays warm. Development still compiles new routes on demand; a production deployment uses precompiled pages.
+
 backend:start applies versioned migrations to the dedicated local project rentcheck-accounts-test. backend:env writes ignored local/test configuration and provisions private photo and JPEG/PDF evidence buckets. Never run database reset on the existing user backend. These helpers refuse hosted test targets; unrelated Docker containers stay independent. Local email confirmations and password recovery messages appear at http://127.0.0.1:54324.
 
 .env.example lists the configuration. Public URL/publishable key identify the project. SUPABASE_SERVICE_ROLE_KEY is server-only for carefully authorized media upload/download registration; never prefix it NEXT_PUBLIC_. Account identity/admin/review mutations use the verified request-scoped client and database authorization. Real Google credentials remain private; provider setup is separate from fictional email test accounts.

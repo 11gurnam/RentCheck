@@ -60,10 +60,12 @@ export async function searchProperties(filters: Filters) {
   if (error) throw new Error("Discovery unavailable");
   const properties = data as Property[];
   if (!properties.length) return properties;
-  const scores = await db.from("property_criterion_scores").select("*").in("property_id", properties.map(p => p.id));
-  const locations=await db.from("property_locations").select("property_id,latitude,longitude,precision").in("property_id",properties.map(p=>p.id));
   const managers=properties.map(p=>p.landlord_id).filter((id):id is string=>!!id);
-  const landlordScores=managers.length?await db.from("landlord_scores").select("landlord_id,landlord_rating,review_count").in("landlord_id",managers):{data:[],error:null};
+  const [scores, locations, landlordScores] = await Promise.all([
+    db.from("property_criterion_scores").select("*").in("property_id", properties.map(p => p.id)),
+    db.from("property_locations").select("property_id,latitude,longitude,precision").in("property_id", properties.map(p => p.id)),
+    managers.length ? db.from("landlord_scores").select("landlord_id,landlord_rating,review_count").in("landlord_id", managers) : {data: [], error: null},
+  ]);
   if (scores.error||locations.error||landlordScores.error) throw new Error("Property details unavailable");
   return properties.map(p => {const location=locations.data?.find(l=>l.property_id===p.id),manager=landlordScores.data?.find(s=>s.landlord_id===p.landlord_id);return { ...p, ...location, landlord_rating:manager?.landlord_rating??null,landlord_review_count:manager?.review_count??0,criterion_scores: (scores.data ?? []).filter(s => s.property_id === p.id) as CriterionScore[] };});
 }
@@ -85,17 +87,19 @@ export async function getProperty(id: string) {
     .maybeSingle();
   if (error) throw new Error("Property unavailable");
   if (!data) return null;
-  const scores = await db
+  const [scores, counts, location, postal, manager] = await Promise.all([
+    db
     .from("property_scores")
     .select("property_rating,review_count")
     .eq("property_id", id)
-    .maybeSingle();
-  const counts = await db.rpc("womens_recommendation_counts", {
+    .maybeSingle(),
+    db.rpc("womens_recommendation_counts", {
     p_property: id,
-  });
-  const location=await db.from("property_locations").select("latitude,longitude,precision").eq("property_id",id).maybeSingle();
-  const postal=await db.from("properties").select("postal_code").eq("id",id).maybeSingle();
-  const manager=data.landlord_id?await db.from("landlord_scores").select("landlord_rating,review_count").eq("landlord_id",data.landlord_id).maybeSingle():{data:null,error:null};
+    }),
+    db.from("property_locations").select("latitude,longitude,precision").eq("property_id",id).maybeSingle(),
+    db.from("properties").select("postal_code").eq("id",id).maybeSingle(),
+    data.landlord_id ? db.from("landlord_scores").select("landlord_rating,review_count").eq("landlord_id",data.landlord_id).maybeSingle() : {data:null,error:null},
+  ]);
   if (scores.error || counts.error || location.error || postal.error || manager.error)
     throw new Error("Property scores unavailable");
   return {

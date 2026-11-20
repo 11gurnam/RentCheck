@@ -1,6 +1,6 @@
 /* Shared compact controls retain a 44px touch target and visible keyboard focus. */
 .auth-form.auth-form > button, .dashboard-card.dashboard-card form > button, .contribution-form.contribution-form > button,
-.button.button, .primary-button.primary-button, .primary-link.primary-link {font-size:14px; min-height:44px; padding:10px 16px; line-height:1.3; width:fit-content; max-width:100%; border-radius:10px;}
+.button.button, .primary-button.primary-button, .primary-link.primary-link {font-size:var(--font-size-button); min-height:var(--control-height); padding:var(--control-padding); line-height:1.3; width:fit-content; max-width:100%; border-radius:var(--radius-control);}
 .auth-form.auth-form, .contribution-form.contribution-form {font-size:14px;}
 .auth-form.auth-form label, .file-picker > label {font-size:13px; font-weight:600;}
 .auth-form.auth-form input:not([type=checkbox]), .auth-form.auth-form select, .auth-form.auth-form textarea,
@@ -17,7 +17,7 @@
 .contribution-form.contribution-form {gap:18px; padding:24px;}
 .contribution-form .form-field {margin:0;}
 .location-picker {padding:18px; border:1px solid #d5dfd7; border-radius:12px; background:#fafcf8;}
-.location-picker h2 {font-size:20px; margin:0 0 8px;}
+.location-picker h2 {font-size:var(--font-size-h2); margin:0 0 8px;}
 .location-toolbar {display:flex; gap:8px; flex-wrap:wrap; margin:14px 0;}
 .location-toolbar button, .location-picker > button {font-size:13px; min-height:44px;}
 .pin-map {width:100%; height:320px; border-radius:12px; margin:12px 0; isolation:isolate; z-index:0;}
@@ -26,7 +26,7 @@
 .address-results {display:grid; gap:8px; margin:12px 0;}
 .address-result {text-align:left; border:1px solid #b9c9bd; background:white; border-radius:8px; padding:12px; font-size:13px;}
 .property-location {margin:18px 0; font-size:14px;}
-.property-location h3 {font-size:20px;}
+.property-location h3 {font-size:var(--font-size-h3);}
 .landlord-rating-section {padding:18px; border:1px solid #cddbd0; border-radius:12px; background:#f7faf4;}
 .landlord-rating-section legend {font-size:17px; font-weight:700; padding:0 6px;}
 .landlord-stars {border:0; padding:12px 0; margin:0;}

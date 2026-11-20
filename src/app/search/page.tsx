@@ -41,21 +41,6 @@ export default async function SearchPage({
     const first=await searchProperties({...f,page:1});
     redirect(searchHref(f,Math.max(1,Math.ceil((first[0]?.total_count??0)/12))));
   }
-  const states = [...new Set(locations.map((l) => l.state))].sort();
-  const cities = [
-    ...new Set(
-      locations
-        .filter((l) => !f.state || l.state === f.state)
-        .map((l) => l.city),
-    ),
-  ].sort();
-  const localities = [
-    ...new Set(
-      locations
-        .filter((l) => l.city === f.city && (!f.state || l.state === f.state))
-        .map((l) => l.locality),
-    ),
-  ].sort();
   const total = rows[0]?.total_count ?? 0;
   return (
     <AccountShell>
@@ -66,63 +51,8 @@ export default async function SearchPage({
           Explore accommodation research across India. Fictional examples carry demonstration labels. Profiles are research records, not available rental listings.
         </p>
       </div>
-      <SearchControls activeCount={[f.state, f.city, f.locality, f.type, f.min > 0, f.max < 10000000, f.rating > 0, f.women].filter(Boolean).length} search={
-        <div className="search-field">
-          <label htmlFor="q">Property, address or manager</label>
-          <div className="discovery-search-input"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/></svg>
-          <input
-            id="q"
-            name="q"
-            type="search"
-            defaultValue={f.q}
-            placeholder="Search property, address or manager…"
-            maxLength={120}
-          />
-          </div>
-        </div>
-      }>
-        <div>
-          <label htmlFor="state">State / union territory</label>
-          <select id="state" name="state" defaultValue={f.state}>
-            <option value="">All states</option>
-            {states.map((v) => (
-              <option key={v}>{v}</option>
-            ))}
-          </select>
-        </div>
-        <div>
-          <label htmlFor="city">City</label>
-          <select id="city" name="city" defaultValue={f.city}>
-            <option value="">All cities</option>
-            {cities.map((v) => (
-              <option key={v}>{v}</option>
-            ))}
-          </select>
-        </div>
-        <div>
-          <label htmlFor="locality">Locality</label>
-          <select
-            id="locality"
-            name="locality"
-            defaultValue={f.locality}
-            disabled={!f.city}
-          >
-            <option value="">All localities</option>
-            {localities.map((v) => (
-              <option key={v}>{v}</option>
-            ))}
-          </select>
-          <small>Apply a city first to choose its locality.</small>
-        </div>
-        <div>
-          <label htmlFor="type">Accommodation type</label>
-          <select id="type" name="type" defaultValue={f.type}>
-            <option value="">All types</option>
-            {["Flat", "House", "PG", "Hostel", "Homestay"].map((v) => (
-              <option key={v}>{v}</option>
-            ))}
-          </select>
-        </div>
+      <SearchControls key={searchHref(f, f.page)} initial={{ q: f.q, state: f.state, city: f.city, locality: f.locality, type: f.type }}
+        locations={locations} otherFilterCount={[f.min > 0, f.max < 10000000, f.rating > 0, f.women].filter(Boolean).length}>
         <div>
           <label htmlFor="min">Minimum rent (₹)</label>
           <input

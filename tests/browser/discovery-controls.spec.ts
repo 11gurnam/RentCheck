@@ -25,3 +25,58 @@ test("filters overlay results and retain selections when searching", async ({ pa
  expect(new URL(page.url()).searchParams.get("type")).toBe("House");
  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
 });
+
+test("voice search populates the existing form and leaves submission to the user", async ({ page }) => {
+  await page.addInitScript(() => {
+    class TestRecognition {
+      lang = "";
+      onstart?: () => void;
+      onend?: () => void;
+      onerror?: (event: { error: string }) => void;
+      onresult?: (event: { results: unknown[] }) => void;
+      start() {
+        const root = document.documentElement;
+        root.dataset.voiceStarts = String(Number(root.dataset.voiceStarts ?? "0") + 1);
+        root.dataset.voiceLanguage = this.lang;
+        if (root.dataset.voiceError) this.onerror?.({ error: root.dataset.voiceError });
+        else this.onstart?.();
+      }
+      stop() {
+        this.onresult?.({ results: [{ isFinal: true, 0: { transcript: "Find properties in Jaipur, Rajasthan." } }] });
+        this.onend?.();
+      }
+      abort() {}
+    }
+    Object.defineProperty(window, "SpeechRecognition", { value: TestRecognition });
+  });
+  await page.goto("/search?type=House&max=15000");
+  const root = page.locator("html");
+  await expect(root).not.toHaveAttribute("data-voice-starts", /./);
+  await page.getByRole("button", { name: "Search using voice", exact: true }).click();
+  await expect(root).toHaveAttribute("data-voice-language", "en-IN");
+  await expect(page.getByRole("status")).toContainText("Listening");
+  await page.getByRole("button", { name: "Stop listening", exact: true }).click();
+  await expect(page.getByLabel("Property, address or manager")).toHaveValue("Jaipur");
+  expect(new URL(page.url()).searchParams.has("q")).toBe(false);
+  await page.getByRole("button", { name: "Filters", exact: true }).click();
+  const filters = page.getByRole("dialog", { name: "Filter places" });
+  await expect(filters.getByLabel("City", { exact: true })).toHaveValue("Jaipur");
+  await expect(filters.getByLabel("State / union territory")).toHaveValue("Rajasthan");
+  await expect(filters.getByLabel("Accommodation type")).toHaveValue("House");
+  await expect(filters.getByLabel("Maximum rent")).toHaveValue("15000");
+  await page.keyboard.press("Escape");
+
+  await root.evaluate(element => { element.dataset.voiceError = "language-not-supported"; });
+  await page.getByRole("button", { name: "Search using voice", exact: true }).click();
+  await expect(page.getByRole("status")).toContainText("Try again to use another English");
+  await root.evaluate(element => { element.dataset.voiceError = "no-speech"; });
+  await page.getByRole("button", { name: "Search using voice", exact: true }).click();
+  await expect(root).toHaveAttribute("data-voice-language", "en-US");
+  await expect(page.getByRole("status")).toContainText("didn’t hear any words");
+  await root.evaluate(element => { element.dataset.voiceError = "not-allowed"; });
+  await page.getByRole("button", { name: "Search using voice", exact: true }).click();
+  await expect(page.getByRole("status")).toContainText("Microphone access is required");
+  await page.getByLabel("Property, address or manager").fill("Jaipur Garden");
+  await page.getByRole("button", { name: "Search", exact: true }).click();
+  await expect(page).toHaveURL(url => url.searchParams.get("q") === "Jaipur Garden" && url.searchParams.get("city") === "Jaipur");
+});

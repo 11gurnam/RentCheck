@@ -7,8 +7,9 @@ import { SiteNavigation } from "./site-navigation";
 
 export async function SiteHeader({ home = false }: { home?: boolean }) {
   const user = await getVerifiedUser();
-  const profile = user ? await getOwnProfile() : null;
-  const admin = user ? await isAdministrator() : false;
+  const [profile, admin] = user
+    ? await Promise.all([getOwnProfile(), isAdministrator()])
+    : [null, false];
   const photo = profile ? await (await createDatabaseClient()).from("public_profiles").select("avatar_url").eq("id",profile.profile_id).maybeSingle() : null;
   const links = admin ? [
     { href: "/search", label: "Explore" },

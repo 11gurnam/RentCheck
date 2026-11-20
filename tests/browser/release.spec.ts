@@ -166,10 +166,11 @@ test("older experiences, escaped tenant text, admin boundaries and filtered mana
       .selectOption("manager_created");
     await page.getByRole("button", { name: "Apply filters" }).click();
     await expect(page.getByRole("main")).toContainText("1 matching records");
-    await page
-      .getByText("Inspect previous and new values", { exact: true })
-      .click();
-    await expect(page.getByRole("main")).toContainText(name);
+    await page.getByRole("button", { name: "View Audit", exact: true }).click();
+    const audit = page.getByRole("dialog", { name: "Administrator audit history" });
+    await expect(audit.getByRole("heading", { name: "Manager created" })).toBeVisible();
+    await expect(audit).toContainText(name);
+    await expect(audit.locator("pre")).toHaveCount(0);
     expect(
       (
         await new AxeBuilder({ page })
@@ -181,6 +182,8 @@ test("older experiences, escaped tenant text, admin boundaries and filtered mana
       path: info.outputPath("filtered-audit.png"),
       fullPage: true,
     });
+    await page.keyboard.press("Escape");
+    await expect(audit).not.toBeVisible();
     fixtureAdmin(user, false);
     await page.reload();
     await expect(
