@@ -86,7 +86,7 @@ export function ReportForm({ review }: { review: string }) {
 export function ReportCard({ r }: { r: Report }) {
   const [s, a, p] = useFeedbackAction(decideReport, {});
   return (
-    <section className="dashboard-card">
+    <section className="dashboard-card" id={"review-report-" + r.id}>
       <h2>{r.property}</h2>
       <p>{r.body}</p>
       <p>Report: {r.reason}</p>

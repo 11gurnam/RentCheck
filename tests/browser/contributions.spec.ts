@@ -43,11 +43,21 @@ test("shortlists persist privately and property contribution checks duplicates",
     ).toBeVisible();
     await page.goto("/saved");
     await expect(
-      page.getByRole("link", { name: "Demo Neem Courtyard" }),
+      page.getByRole("link", { name: "Demo Neem Courtyard", exact: true }),
     ).toBeVisible();
+    const shortlistTools = page.getByRole("navigation", { name: "Shortlist tools" });
+    await expect(shortlistTools.getByRole("link", { name: "Compare saved places" })).toHaveAttribute("href", "/compare");
+    const savedCard = page.getByRole("article").filter({ hasText: "Demo Neem Courtyard" });
+    await expect(savedCard.getByRole("link", { name: "Compare property" })).toBeVisible();
+    await expect(savedCard.getByRole("button", { name: "Remove from shortlist" })).toHaveCount(0);
+    const actionMenu = savedCard.getByLabel("More actions for Demo Neem Courtyard");
+    await actionMenu.click();
+    await expect(savedCard.getByRole("button", { name: "Remove from shortlist" })).toBeVisible();
+    await actionMenu.press("Escape");
+    await expect(savedCard.getByRole("button", { name: "Remove from shortlist" })).toHaveCount(0);
     await page.reload();
     await expect(
-      page.getByRole("link", { name: "Demo Neem Courtyard" }),
+      page.getByRole("link", { name: "Demo Neem Courtyard", exact: true }),
     ).toBeVisible();
     await page.screenshot({
       path: info.outputPath("shortlist.png"),
@@ -97,6 +107,7 @@ test("shortlists persist privately and property contribution checks duplicates",
     await expect(page.getByRole("heading", { level: 1 })).toHaveText(name);
     property = page.url().split("/").at(-1);
     await page.goto("/saved");
+    await page.getByLabel("More actions for Demo Neem Courtyard").click();
     await page.getByRole("button", { name: "Remove from shortlist" }).click();
     await expect(page.getByText("No places saved yet.")).toBeVisible();
     await page.goto("/properties/new");

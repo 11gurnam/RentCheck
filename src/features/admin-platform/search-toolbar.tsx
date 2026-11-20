@@ -3,7 +3,8 @@ import type { ReactNode } from "react";
 import { ActionModal } from "@/components/ui/action-modal";
 
 export function activeFilterCount(values: Record<string, unknown>) {
-  return Object.entries(values).filter(([key, value]) => !["q", "page", "id"].includes(key) && value != null && value !== "" && !(key === "sort" && value === "newest")).length;
+  return Object.entries(values).filter(([key, value]) => !["q", "page", "id"].includes(key) && value != null && value !== "" &&
+    !(key === "sort" && value === "newest") && !(key === "older_days" && value === 0)).length;
 }
 
 export function AdminSearchToolbar({ action, query, title, count, children, placeholder, searchLabel = "Search" }: {

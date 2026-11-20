@@ -142,6 +142,7 @@ test("author creates, edits, uploads and deletes a review without exposing priva
     await page.getByRole("button", { name: "Save to shortlist", exact: true }).click();
     await expect(page.getByRole("button", { name: "Remove from shortlist", exact: true })).toBeVisible();
     await page.goto("/saved");
+    await page.getByLabel("More actions for Demo Neem Courtyard").click();
     await page.getByRole("button", { name: "Add photos", exact: true }).click();
     const upload = page.getByRole("dialog", { name: "Add photos", exact: true });
     await expect(upload).toBeVisible();

@@ -2,9 +2,7 @@ import Image from "next/image";
 import { createDatabaseClient } from "@/lib/database/server";
 import type { PhotoSource } from "@/features/photos/caption";
 import { rentalLabels } from "@/features/property-information/preferences";
-import { CardPhotoUpload } from "@/features/reviews/card-photo-upload";
-import { SaveForm } from "@/features/contributions/forms";
-import { ActionIcon } from "@/components/ui/action-feedback";
+import { ShortlistCardMenu } from "./shortlist-card-menu";
 import type { Property } from "./data";
 import { money } from "./filters";
 import { googleMapsAddressUrl } from "./map-url";
@@ -37,15 +35,7 @@ export async function PropertyCard({ property: p, shortlisted = false }: { prope
         <Image className="search-property-cover" src={`/api/photos/${cover.id}`}
           width={560} height={300} alt={`${p.name} · photo shared by a ${cover.role}`} unoptimized/>
       ) : <PropertyArt/>}
-      {!shortlisted && <details className="search-property-tools">
-        <summary aria-label={`Tools for ${p.name}`}><span aria-hidden="true">⋯</span></summary>
-        <div className="search-property-tools-menu">
-          <CardPhotoUpload property={p.id} name={p.name}/>
-          <nav className="property-card-secondary-links" aria-label={`${p.name} discovery tools`}>
-            <a href="/compare">Compare properties</a>
-          </nav>
-        </div>
-      </details>}
+      {shortlisted && <ShortlistCardMenu property={p.id} name={p.name} />}
       <div className="property-card-body">
         <div className="search-property-heading">
           <h2><a className="property-card-link" href={`/properties/${p.id}`}>{p.name}</a></h2>
@@ -74,11 +64,8 @@ export async function PropertyCard({ property: p, shortlisted = false }: { prope
         )}
         {shortlisted ? (
           <div className="property-card-actions shortlist-card-actions" role="group" aria-label={`Shortlist actions for ${p.name}`}>
-            <CardPhotoUpload property={p.id} name={p.name}/>
-            <a className="review-action" href={`/reviews/new?property=${p.id}`}><ActionIcon name="edit"/>Write a review</a>
-            <a className="review-action" href={`/compare?property=${p.id}`}>Compare property</a>
+            <a className="review-action shortlist-compare-link" href={`/compare?property=${p.id}`}>Compare property</a>
             {mapLink}
-            <SaveForm property={p.id} saved/>
           </div>
         ) : mapLink}
       </div>

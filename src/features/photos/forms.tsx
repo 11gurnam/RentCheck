@@ -76,7 +76,7 @@ export type PhotoReportRecord = {
 export function PhotoReportCard({ report: r }: { report: PhotoReportRecord }) {
   const [s, a, p] = useFeedbackAction(decidePhotoReport, {});
   return (
-    <section className="dashboard-card">
+    <section className="dashboard-card" id={"photo-report-" + r.id}>
       <h3>{r.property} · photo report</h3>
       <p>{r.reason}</p>
       <p>

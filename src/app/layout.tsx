@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { ToastHost } from "@/components/ui/toast-host";
+import { RentCheckAssistant } from "@/features/assistant/widget";
 import "leaflet/dist/leaflet.css";
 
 export const metadata: Metadata = {
@@ -14,7 +15,7 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en">
-      <body>{children}<ToastHost /></body>
+      <body>{children}<RentCheckAssistant /><ToastHost /></body>
     </html>
   );
 }

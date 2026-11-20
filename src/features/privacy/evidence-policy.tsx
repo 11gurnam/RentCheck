@@ -67,6 +67,7 @@ export async function EvidencePolicyPanel({ embedded = false }: { embedded?: boo
         <>
           <p>Encrypted local backups may retain older information for up to 30 days. If a backup is restored, deletion and expiry requests still apply. Authentication uses Supabase and optional Google.</p>
           <p>OpenStreetMap receives your IP address and map area only when you choose to load its map. Photon receives the address or coordinates when you request an address lookup.</p>
+          <p>When AI chat is enabled, its provider processes your questions and the filters from your conversation. Leave personal details and documents out of chat. When you choose to share your location, RentCheck uses an approximate location to find nearby properties.</p>
           <p>Your device location is requested only after you click “Use my location”; a property pin becomes public only if you confirm sharing it. City choices use GeoNames data under CC BY 4.0; they may not include every settlement.</p>
         </>
       ),

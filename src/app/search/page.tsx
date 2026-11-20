@@ -1,5 +1,5 @@
 import { AccountShell } from "@/components/ui/account-shell";
-import { parseFilters, searchHref } from "@/features/discovery/filters";
+import { money, parseFilters, searchHref } from "@/features/discovery/filters";
 import { getLocations, searchProperties } from "@/features/discovery/data";
 import { PropertyCard } from "@/features/discovery/cards";
 import { SearchControls } from "@/features/discovery/search-controls";
@@ -21,11 +21,12 @@ export default async function SearchPage({
       </AccountShell>
     );
   const f = parsed.data;
-  let rows, locations;
+  let rows, locations, nearBudget;
   try {
-    [rows, locations] = await Promise.all([
+    [rows, locations, nearBudget] = await Promise.all([
       searchProperties(f),
       getLocations(),
+      f.page === 1 ? searchProperties(f, { nearBudget: true }).catch(() => []) : [],
     ]);
   } catch {
     return (
@@ -119,7 +120,8 @@ export default async function SearchPage({
             ? <><strong>{total}</strong><span>{total === 1 ? "place found" : "places found"}</span></>
             : "No matching places"}
         </h2>
-        <span className="budget-notice"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m12 3 10 18H2Z" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" /><path d="M12 9v5m0 3v1" stroke="currentColor" strokeWidth="2" strokeLinecap="round" /></svg>{f.min > 0 || f.max < 10000000 ? "Monthly rent ranges overlap your budget" : "Monthly rent ranges · check the full range before choosing"}</span>
+        <a className="button search-compare-link" href="/compare">Compare properties</a>
+        {rows.length > 0 && <span className="budget-notice"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m12 3 10 18H2Z" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" /><path d="M12 9v5m0 3v1" stroke="currentColor" strokeWidth="2" strokeLinecap="round" /></svg>{f.min > 0 || f.max < 10000000 ? "Monthly rent ranges overlap your budget" : "Monthly rent ranges · check the full range before choosing"}</span>}
       </div>
       {rows.length ? (
         <div className="property-grid">
@@ -129,11 +131,20 @@ export default async function SearchPage({
         </div>
       ) : (
         <div className="empty-state">
-          <p>Try another city, a wider budget or fewer filters.</p>
+          <p>{nearBudget.length ? "See places with slightly higher starting rents below." : "Try another city, a wider budget or fewer filters."}</p>
           <a href="/search">View all examples</a>
         </div>
       )}
       <Pagination page={f.page} total={total} pageSize={12} href={page=>searchHref(f,page)}/>
+      {nearBudget.length > 0 && (
+        <section className="near-budget-results" aria-labelledby="near-budget-title">
+          <h2 id="near-budget-title">Near your budget</h2>
+          <p>These places start slightly above your {money(f.max)} monthly limit.</p>
+          <div className="property-grid">
+            {nearBudget.map(property => <PropertyCard key={property.id} property={property} />)}
+          </div>
+        </section>
+      )}
     </AccountShell>
   );
 }

@@ -1,4 +1,30 @@
 import { test, expect } from "@playwright/test";
+
+test("rent caps keep above-budget alternatives separate from matches", async ({ page }) => {
+  await page.goto("/search?city=Chennai&q=Demo+Lotus+Hostel");
+  const dialog = page.getByRole("dialog", { name: "Filter places" });
+  const alternatives = page.getByRole("region", { name: "Near your budget" });
+  const lotus = page.getByRole("link", { name: "Demo Lotus Hostel", exact: true });
+
+  async function applyBudget(value: string) {
+    await page.getByRole("button", { name: "Filters", exact: true }).click();
+    await dialog.getByLabel("Maximum rent").fill(value);
+    await dialog.getByRole("button", { name: "Apply filters" }).click();
+    await expect(page).toHaveURL(url => url.searchParams.get("max") === value);
+  }
+
+  await applyBudget("6000");
+  await expect(page.getByRole("heading", { name: "No matching places" })).toBeVisible();
+  await expect(alternatives).toContainText("₹6,000");
+  await expect(alternatives.getByRole("link", { name: "Demo Lotus Hostel", exact: true })).toBeVisible();
+  await expect(lotus).toHaveCount(1);
+
+  await applyBudget("7000");
+  await expect(page.getByText("place found", { exact: true })).toBeVisible();
+  await expect(lotus).toBeVisible();
+  await expect(alternatives).toHaveCount(0);
+});
+
 test("filters overlay results and retain selections when searching", async ({ page }, info) => {
  await page.goto("/search");
  const dialog = page.getByRole("dialog", { name: "Filter places" });
@@ -116,9 +142,11 @@ test("search keeps property summaries compact and the detail page retains the so
   await expect(card.locator("section")).toHaveCount(0);
   await expect(card).not.toContainText(/Not enough|No verified tenant reviews|No landlord-stated preferences/);
   await expect(card.getByRole("button", { name: "Add photos" })).toHaveCount(0);
-  await card.getByLabel("Tools for Demo Rose Studio").click();
-  await expect(card.getByRole("button", { name: "Add photos" })).toBeVisible();
-  await expect(card.getByRole("link", { name: "Compare properties" })).toBeVisible();
+  await expect(page.locator(".search-property-card summary")).toHaveCount(0);
+  await expect(card.getByRole("link", { name: "Compare properties" })).toHaveCount(0);
+  await page.locator(".results-heading").getByRole("link", { name: "Compare properties" }).click();
+  await expect(page.getByRole("heading", { name: "Compare accommodation" })).toBeVisible();
+  await page.goBack();
   await card.getByRole("link", { name: "Demo Rose Studio", exact: true }).click();
   const detail = page.locator(".property-detail-page");
   await expect(detail.getByRole("heading", { level: 1 })).toHaveCSS("font-size", "32px");

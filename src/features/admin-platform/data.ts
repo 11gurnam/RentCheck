@@ -30,10 +30,13 @@ const date = z.union([z.literal(""), z.iso.date()]).default("");
 export const platformFilters = z.object({
   q: z.string().trim().max(120).default(""), page: z.coerce.number().int().min(1).max(100000).default(1),
   status: z.string().max(40).default(""), city: z.string().max(80).default(""),
-  sort: z.enum(["newest", "oldest", "name", "rating"]).default("newest"), role: z.enum(["", "tenant", "landlord"]).default(""),
+  sort: z.enum(["newest", "oldest", "name", "rating", "reported"]).default("newest"), role: z.enum(["", "tenant", "landlord"]).default(""),
   verified: z.enum(["", "true", "false"]).default(""), landlord_verified: z.enum(["", "true", "false"]).default(""),
   flagged: z.enum(["", "true"]).default(""), rating: z.union([z.literal(""),z.coerce.number().min(0).max(5)]).default(""),
+  reported: z.enum(["", "true"]).default(""),
   from: date, to: date, id: z.union([z.literal(""),z.uuid()]).default(""),
+  property: z.union([z.literal(""), z.uuid()]).default(""),
+  older_days: z.coerce.number().int().min(0).max(3650).default(0),
 });
 export type PlatformFilters = z.infer<typeof platformFilters>;
 export const overview = cache(async function overview() {

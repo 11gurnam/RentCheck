@@ -21,7 +21,10 @@ export default async function SavedPage() {
   return (
     <AccountShell>
       <CollectionHeading kind="saved" eyebrow="YOUR PRIVATE SHORTLIST" title="Places to come back to." description="Your saved places stay with your account. Only you can see or change your shortlist." />
-      <p><a href="/compare">Compare saved places</a> · <a href="/map">View map</a></p>
+      <nav className="shortlist-toolbar" aria-label="Shortlist tools">
+        <a className="button" href="/compare">Compare saved places</a>
+        <a className="review-action" href="/map">View map</a>
+      </nav>
       {rows.length ? (
         <div className="property-grid">
           {rows.map(property => <PropertyCard key={property.id} property={property} shortlisted/>)}

@@ -44,9 +44,8 @@ export type Landlord = {
   description: string;
   is_demo: boolean;
 };
-export async function searchProperties(filters: Filters) {
-  const db = await createDatabaseClient();
-  const { data, error } = await db.rpc("search_properties_facets", {
+export function propertySearchParameters(filters: Filters) {
+  return {
     p_query: filters.q,
     p_state: filters.state,
     p_city: filters.city,
@@ -54,12 +53,20 @@ export async function searchProperties(filters: Filters) {
     p_type: filters.type,
     p_min: filters.min,
     p_max: filters.max,
-    p_page: filters.page,
     p_rating: filters.rating,
     p_women: filters.women,
     p_verification: filters.verification,
     p_preferences: filters.eligibility,
-  });
+  };
+}
+
+export async function searchProperties(filters: Filters, { nearBudget = false } = {}) {
+  if (nearBudget && (filters.max <= 0 || filters.max === 10000000)) return [];
+  const db = await createDatabaseClient();
+  const parameters = propertySearchParameters(filters);
+  const { data, error } = nearBudget
+    ? await db.rpc("search_near_budget_properties", parameters)
+    : await db.rpc("search_properties_facets", { ...parameters, p_page: filters.page });
   if (error) throw new Error("Discovery unavailable");
   const properties = data as Property[];
   if (!properties.length) return properties;
