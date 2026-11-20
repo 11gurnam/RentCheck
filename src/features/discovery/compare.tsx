@@ -4,12 +4,13 @@ import { ActionIcon } from "@/components/ui/action-feedback";
 import type { Property } from "./data";
 import { money } from "./filters";
 import { googleMapsUrl } from "./map-url";
-import { recommendationText } from "./women-recommendation";
-import { InfoPopover } from "@/components/ui/info-popover";
+import { womenRatingText } from "./women-recommendation";
 
-export function PropertyComparison({ properties, initialSelected=[] }: { properties: Property[]; initialSelected?:string[] }) {
+export function PropertyComparison({ properties, initialSelected=[], preferredProperty }: { properties: Property[]; initialSelected?:string[]; preferredProperty?: string }) {
   const availableSaved=initialSelected.filter(id=>properties.some(p=>p.id===id));
-  const [selected, setSelected] = useState<string[]>(initialSelected.filter(id=>properties.some(p=>p.id===id)).slice(0,3));
+  const [selected, setSelected] = useState<string[]>(() =>
+    (preferredProperty ? [...new Set([preferredProperty, ...availableSaved])] : availableSaved).slice(0,3)
+  );
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState(false);
   const rows = selected.map(id => properties.find(p => p.id === id)).filter(p => p !== undefined);
@@ -23,7 +24,7 @@ export function PropertyComparison({ properties, initialSelected=[] }: { propert
     { label: "Current manager", value: (p: Property) => p.landlord_name ?? "Not recorded" },
     { label: "Landlord / management rating", value: (p: Property) => p.landlord_rating == null ? "No landlord ratings yet" : `${Number(p.landlord_rating).toFixed(1)} / 5 · ${p.landlord_review_count??0} rated reviews` },
     { label: "Map location", value: (p: Property) => p.latitude==null||p.longitude==null?"No map pin supplied":<a target="_blank" rel="noreferrer" href={googleMapsUrl(p.latitude,p.longitude)} aria-label={`Open ${p.name} in Google Maps`} title={p.precision==="approximate"?"Approximate area":"Shared property pin"}>Open in Google Maps ↗</a> },
-    { label: "Women’s tenant recommendations", value: (p: Property) => recommendationText(p.positive_count??0,p.eligible_count??0,p.recommended) },
+    ...(rows.some(p => p.information?.women) ? [{ label: "Women Tenant Rating", value: (p: Property) => p.information?.women ? womenRatingText(p.information.women) : "—" }] : []),
     { label: "Profile", value: (p: Property) => p.is_demo ? "Demonstration example" : "User-contributed" },
   ];
   return <div className="compare-workspace">
@@ -39,6 +40,6 @@ export function PropertyComparison({ properties, initialSelected=[] }: { propert
       <div className="compare-selected-places">{rows.map(p => <article key={p.id} className="compare-selected-place"><div><span className="eyebrow">{p.property_type}</span><h3>{p.name}</h3><p>{p.locality}, {p.city}</p></div><button type="button" className="compare-remove" aria-label={`Remove ${p.name}`} onClick={() => remove(p.id)}><ActionIcon name="close"/></button></article>)}{Array.from({length: 3 - rows.length}, (_, i) => <div key={i} className="compare-empty-slot"><span aria-hidden="true">＋</span><span>Place {rows.length + i + 1}</span><small>{properties.length ? "Choose a place above" : "No places available yet"}</small></div>)}</div>
       <div className="compare-picker-footer"><p>{rows.length === 0 ? "Add two places to start comparing." : rows.length === 1 ? "Add one more place for a side-by-side comparison." : "Your comparison updates as you add or remove places."}</p>{rows.length > 0 && <button type="button" className="compare-clear" onClick={() => { setSelected([]); setQuery(""); }}>Clear selection</button>}</div>
     </section>
-    {rows.length >= 2 && <section className="compare-table-wrap" tabIndex={0} role="region" aria-label="Property comparison"><table className="compare-table"><caption><span className="section-title">Compare side by side<InfoPopover label="About comparison ratings">Landlord scores belong to each property’s current recorded manager, across their reviewed properties. Older management ratings stay with the manager responsible for that tenancy.</InfoPopover></span></caption><thead><tr><th scope="col">Details</th>{rows.map(p => <th key={p.id} scope="col">{p.name}</th>)}</tr></thead><tbody>{facts.map(f => <tr key={f.label}><th scope="row">{f.label}</th>{rows.map(p => <td key={p.id}>{f.value(p)}</td>)}</tr>)}</tbody></table></section>}
+    {rows.length >= 2 && <section className="compare-table-wrap" tabIndex={0} role="region" aria-label="Property comparison"><table className="compare-table"><caption>Compare side by side</caption><thead><tr><th scope="col">Details</th>{rows.map(p => <th key={p.id} scope="col">{p.name}</th>)}</tr></thead><tbody>{facts.map(f => <tr key={f.label}><th scope="row">{f.label}</th>{rows.map(p => <td key={p.id}>{f.value(p)}</td>)}</tr>)}</tbody></table></section>}
   </div>;
 }

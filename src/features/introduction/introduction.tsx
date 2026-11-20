@@ -195,17 +195,8 @@ export function Introduction({ samples = true }: { samples?: boolean }) {
               Reviews will use public aliases. Account identities, emails and
               rental documents will stay private.
             </p>
-            <p>
-              Women’s recommendations will reflect eligible verified tenant
-              responses, with visible counts. They are tenant recommendations,
-              never a platform safety guarantee.
-            </p>
-            <div className="demo-notice">
-              <strong>About RentCheck</strong>
-              <p>
-                  {samples && "Fictional properties, reviews and approvals carry demonstration labels. Real contributions, when intake is enabled, are labelled separately. "}Verification records manual evidence review, not independent identity certification.
-              </p>
-            </div>
+            <p>Read what women tenants say about living in a property.</p>
+            {samples && <p className="demo-notice">Fictional listings and reviews are marked as examples.</p>}
           </div>
         </section>
       </main>

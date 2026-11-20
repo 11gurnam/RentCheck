@@ -21,10 +21,10 @@ export function VerificationForm({
   );
   return (
     <section className="dashboard-card">
-      <h2>{real ? "Manual tenancy evidence review" : "Demonstration tenant verification"}</h2>
+      <h2>{real ? "Verify your stay" : "Demonstration tenant verification"}</h2>
       <p>Read the <a href="/privacy">privacy and evidence retention policy</a> before uploading.</p>
       <p>
-        {real ? "Upload redacted utility bills, internet bills, a rent agreement or other evidence supporting this property and tenancy period. Remove bank details, identity numbers and unrelated people's information. Only you and authorized reviewers can access it. Manual review is not independent identity certification." : "Use fictional utility bills, internet bills, rent agreements or other supporting documents only. Demo approval is separate from real tenancy verification."}
+        {real ? "Upload a redacted lease, utility bill, PG or hostel receipt, or other residence evidence for this property and tenancy period. Remove bank details, identity numbers and unrelated people’s information. Only you and authorized reviewers can access it." : "Use fictional utility bills, internet bills, rent agreements or other supporting documents only."}
       </p>
       {requests.map((r) => (
         <div key={r.id}>
@@ -41,7 +41,7 @@ export function VerificationForm({
           onReset={(e) => e.preventDefault()}
         >
           <input name="review" type="hidden" value={review} />
-          {requests.some(r => r.stage === "awaiting_information") && <p className="action-feedback feedback-warning">Upload a complete updated evidence set addressing the administrator’s request. This replaces the current documents for this application; previous evidence remains private until its retention deadline.</p>}
+          {requests.some(r => r.stage === "awaiting_information") && <p className="action-feedback feedback-warning">Upload a complete updated evidence set addressing the administrator’s request. Your new documents replace the current set. Earlier documents stay private until they expire.</p>}
           <EvidenceUpload demo={!real} />
           <label>
             <input type="checkbox" name="synthetic" required /> {real ? "I have permission to submit this redacted document and consent to private review and the evidence retention policy." : "This document contains only invented demonstration information."}

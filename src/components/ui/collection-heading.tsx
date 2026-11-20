@@ -1,8 +1,10 @@
-export function CollectionHeading({ title, eyebrow, description, kind }: {
-  title: string; eyebrow: string; description: string; kind: "saved" | "reviews" | "claims";
+import type { ReactNode } from "react";
+
+export function CollectionHeading({ title, eyebrow, description, kind, children }: {
+  title: string; eyebrow?: string; description: string; kind: "saved" | "reviews" | "claims"; children?: ReactNode;
 }) {
   return <div className="collection-heading">
-    <div><p className="eyebrow">{eyebrow}</p><h1>{title}</h1><p>{description}</p></div>
+    <div>{eyebrow && <p className="eyebrow">{eyebrow}</p>}<h1>{title}</h1><p>{description}</p>{children}</div>
     <svg className="collection-illustration" viewBox="0 0 260 180" fill="none" aria-hidden="true">
       <ellipse cx="130" cy="158" rx="100" ry="12" fill="#dce5d8" />
       <circle cx="130" cy="83" r="72" fill="#e8eee3" />

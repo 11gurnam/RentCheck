@@ -34,9 +34,7 @@ export function ClaimForm({
       <input name="kind" type="hidden" value={kind} />
       <p>Read the <a href="/privacy">privacy and evidence retention policy</a> before uploading.</p>
       <p>
-        Request {real ? "manual representative review" : "demonstration representative access"} for {name}. Private evidence
-        is visible only to you and trusted administrators. Approval grants
-        permitted detail controls. Only an approved claim for this specific property permits official replies; a manager-profile claim alone does not.
+        Submit {real ? "documents for" : "fictional documents for"} {name}. Only you and authorized reviewers can see your documents. Claim the property if you want to reply to its reviews.
       </p>
       <EvidenceUpload claim demo={!real} />
       <label>

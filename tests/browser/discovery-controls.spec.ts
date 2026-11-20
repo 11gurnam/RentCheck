@@ -80,3 +80,51 @@ test("voice search populates the existing form and leaves submission to the user
   await page.getByRole("button", { name: "Search", exact: true }).click();
   await expect(page).toHaveURL(url => url.searchParams.get("q") === "Jaipur Garden" && url.searchParams.get("city") === "Jaipur");
 });
+
+test("property information filters submit independently and Anyone clears other groups", async ({ page }) => {
+  await page.goto("/search?city=Jaipur");
+  await page.getByRole("button", { name: "Filters", exact: true }).click();
+  const dialog = page.getByRole("dialog", { name: "Filter places" });
+  const groups = dialog.getByRole("group", { name: "Landlord-stated rental preferences" });
+  const women = groups.getByRole("checkbox", { name: "Women tenants", exact: true });
+  const couples = groups.getByRole("checkbox", { name: "Couples", exact: true });
+  const anyone = groups.getByRole("checkbox", { name: "Anyone", exact: true });
+  await women.check();
+  await couples.check();
+  await anyone.check();
+  await expect(women).not.toBeChecked();
+  await expect(couples).not.toBeChecked();
+  await women.check();
+  await couples.check();
+  await expect(anyone).not.toBeChecked();
+  await dialog.getByLabel("RentCheck tenant verification").selectOption("former");
+  await dialog.getByLabel("Women’s tenant recommendations").selectOption("safety");
+  await dialog.getByRole("button", { name: "Apply filters" }).click();
+  await expect(page).toHaveURL(url => url.searchParams.getAll("eligibility").length === 2);
+  const params = new URL(page.url()).searchParams;
+  expect(params.getAll("eligibility")).toEqual(expect.arrayContaining(["women","couples"]));
+  expect(params.get("city")).toBe("Jaipur");
+  expect(params.get("verification")).toBe("former");
+  expect(params.get("women")).toBe("safety");
+  await expect(page.getByRole("heading", { name: "Check your filters." })).toHaveCount(0);
+});
+
+test("search keeps property summaries compact and the detail page retains the source sections", async ({ page }) => {
+  await page.goto("/search?city=Jaipur");
+  const card = page.locator(".search-property-card").filter({ has: page.getByRole("link", { name: "Demo Rose Studio", exact: true }) });
+  await expect(card).toBeVisible();
+  await expect(card.locator("section")).toHaveCount(0);
+  await expect(card).not.toContainText(/Not enough|No verified tenant reviews|No landlord-stated preferences/);
+  await expect(card.getByRole("button", { name: "Add photos" })).toHaveCount(0);
+  await card.getByLabel("Tools for Demo Rose Studio").click();
+  await expect(card.getByRole("button", { name: "Add photos" })).toBeVisible();
+  await expect(card.getByRole("link", { name: "Compare properties" })).toBeVisible();
+  await card.getByRole("link", { name: "Demo Rose Studio", exact: true }).click();
+  const detail = page.locator(".property-detail-page");
+  await expect(detail.getByRole("heading", { level: 1 })).toHaveCSS("font-size", "32px");
+  for (const name of ["Landlord-stated rental preferences", "RentCheck tenant verification"]) {
+    await expect(detail.getByRole("heading", { name, exact: true })).toBeVisible();
+  }
+  await expect(detail.locator("#women-experiences")).toHaveCount(0);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+});

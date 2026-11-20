@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { rentalPreferencesSchema } from "../property-information/preferences";
 
 export const accommodationTypes = ["Flat", "House", "PG", "Hostel", "Homestay"] as const;
 export const filtersSchema = z
@@ -10,7 +11,9 @@ export const filtersSchema = z
     type: z.enum(["", ...accommodationTypes]).default(""),
     min: z.coerce.number().int().min(0).max(10000000).default(0),
     max: z.coerce.number().int().min(0).max(10000000).default(10000000),
-    women: z.enum(["", "recommended"]).default(""),
+    women: z.enum(["", "recommended", "reviews", "safety"]).default(""),
+    verification: z.enum(["", "reviews", "current", "former"]).default(""),
+    eligibility: rentalPreferencesSchema.default([]),
     rating: z.coerce.number().min(0).max(5).default(0),
     page: z.coerce.number().int().min(1).max(10000).default(1),
   })
@@ -26,7 +29,7 @@ export function parseFilters(
 ) {
   const input = Object.fromEntries(
     Object.entries(raw)
-      .map(([k, v]) => [k, Array.isArray(v) ? v[0] : v])
+      .map(([k, v]) => [k, k === "eligibility" ? (Array.isArray(v) ? v : v ? [v] : []) : Array.isArray(v) ? v[0] : v])
       .filter(
         ([k, v]) =>
           !(["min", "max", "page", "rating"].includes(k as string) && v === ""),
@@ -36,7 +39,11 @@ export function parseFilters(
 }
 export function searchHref(filters: Filters, page: number) {
   const params = new URLSearchParams();
-  for (const [k, v] of Object.entries({ ...filters, page }))
+  for (const [k, v] of Object.entries({ ...filters, page })) {
+    if (Array.isArray(v)) {
+      for (const value of v) params.append(k, value);
+      continue;
+    }
     if (
       v !== "" &&
       !(k === "rating" && v === 0) &&
@@ -45,6 +52,7 @@ export function searchHref(filters: Filters, page: number) {
       !(k === "page" && v === 1)
     )
       params.set(k, String(v));
+  }
   return `/search?${params}`;
 }
 export const money = (value: number) =>

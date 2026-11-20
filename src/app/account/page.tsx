@@ -1,3 +1,6 @@
+import Link from "next/link";
+import { EvidencePolicyPanel } from "@/features/privacy/evidence-policy";
+import { AccountPrivacyPanel, ContactSettingsPanel, MessagesPanel, NotificationsPanel, PasswordPanel } from "@/features/accounts/settings-panels";
 import { TenantVerificationStatus } from "@/features/verification/account-status";
 import { AccountShell } from "@/components/ui/account-shell";
 import { AliasForm, SignOutForm } from "@/features/accounts/forms";
@@ -7,21 +10,26 @@ import { displayDate } from "@/lib/display-date";
 import { ProfilePhotoForm } from "@/features/accounts/photo-form";
 import { PasswordForm } from "@/features/accounts/password-form";
 import { ActionIcon } from "@/components/ui/action-feedback";
+import { WomenProgramPreferences } from "@/features/women-program/forms";
+import { myWomenProgram } from "@/features/women-program/data";
 
-export default async function AccountPage() {
-  const user = await requireUser();
-  const profile = await getOwnProfile();
+const tabs = [
+  ["overview", "Overview"], ["messages", "Your messages"], ["contact", "Contact settings"],
+  ["notifications", "Notifications"], ["password", "Change password"], ["privacy", "Privacy and deletion"],
+  ["tenant-profile", "Private tenant profile"], ["evidence-policy", "Evidence retention policy"],
+] as const;
+
+const panels = { messages: MessagesPanel, contact: ContactSettingsPanel, notifications: NotificationsPanel,
+  password: PasswordPanel, privacy: AccountPrivacyPanel, "evidence-policy": EvidencePolicyPanel };
+
+export default async function AccountPage({ searchParams }: { searchParams: Promise<{ tab?: string | string[] }> }) {
+  const { tab } = await searchParams;
+  const requestedTab = Array.isArray(tab) ? tab[0] : tab;
+  const user = await requireUser(requestedTab ? `/account?${new URLSearchParams({ tab: requestedTab })}` : "/account");
   const admin = await isAdministrator();
-  const db = await createDatabaseClient();
-  const results = profile ? await Promise.allSettled([
-    db.rpc("get_my_reviews"),
-    db.rpc("get_saved_properties"),
-    db.from("public_profiles").select("avatar_url").eq("id",profile.profile_id).maybeSingle(),
-
-  ]) : [];
-  const reviews = results[0]?.status === "fulfilled" && !results[0].value.error ? results[0].value.data as { status: string }[] : null;
-  const saved = results[1]?.status === "fulfilled" && !results[1].value.error ? results[1].value.data as { property_id: string }[] : null;
-  const avatar = results[2]?.status === "fulfilled" && !results[2].value.error ? results[2].value.data?.avatar_url : null;
+  const availableTabs = tabs.filter(([value]) => !admin || value !== "messages");
+  const selectedTab = availableTabs.find(([value]) => value === requestedTab)?.[0] ?? "overview";
+  const Panel = selectedTab === "overview" || selectedTab === "tenant-profile" ? null : panels[selectedTab];
   return (
     <AccountShell>
       <div className="dashboard-heading account-page-heading">
@@ -32,14 +40,31 @@ export default async function AccountPage() {
         </div>
         <SignOutForm />
       </div>
-      <nav className="pagination" aria-label="Account settings">
-        {!admin && <a href="/messages">Your messages</a>}
-        <a href="/account/contact">Contact settings</a>
-        <a href="/account/notifications">Notifications</a>
-        <a href="/account/password">Change password</a>
-        <a href="/account/privacy">Privacy and deletion</a>
-        <a href="/privacy">Evidence retention policy</a>
+      <nav className="pagination account-settings-tabs" aria-label="Account settings">
+        {availableTabs.map(([value, label]) => (
+          <Link key={value} href={value === "overview" ? "/account" : `/account?tab=${value}`} scroll={false} prefetch={false} aria-current={value === selectedTab ? "page" : undefined}>{label}</Link>
+        ))}
       </nav>
+      <div className="account-tab-content" key={selectedTab}>
+        {Panel ? <Panel embedded/> : selectedTab === "tenant-profile" ? <PrivateTenantPanel/> : <AccountOverview user={user} admin={admin}/>}
+      </div>
+    </AccountShell>
+  );
+}
+
+async function AccountOverview({ user, admin }: { user: Awaited<ReturnType<typeof requireUser>>; admin: boolean }) {
+  const profile = await getOwnProfile();
+  const db = await createDatabaseClient();
+  const results = profile ? await Promise.allSettled([
+    db.rpc("get_my_reviews"),
+    db.rpc("get_saved_properties"),
+    db.from("public_profiles").select("avatar_url").eq("id",profile.profile_id).maybeSingle(),
+  ]) : [];
+  const reviews = results[0]?.status === "fulfilled" && !results[0].value.error ? results[0].value.data as { status: string }[] : null;
+  const saved = results[1]?.status === "fulfilled" && !results[1].value.error ? results[1].value.data as { property_id: string }[] : null;
+  const avatar = results[2]?.status === "fulfilled" && !results[2].value.error ? results[2].value.data?.avatar_url : null;
+  return (
+    <>
       {profile ? (
         <div className="dashboard-grid account-panels">
           <section className="dashboard-card">
@@ -93,11 +118,15 @@ export default async function AccountPage() {
         <div className="setup-notice" role="alert">
           <strong>We couldn’t load your account profile.</strong>
           <p>
-            Refresh to try again. If this continues, the account database setup
-            needs attention.
+            Refresh to try again.
           </p>
         </div>
       )}
-    </AccountShell>
+    </>
   );
+}
+
+async function PrivateTenantPanel() {
+  const preferences = await myWomenProgram();
+  return preferences ? <WomenProgramPreferences preferences={preferences}/> : <p>Private tenant profile is unavailable.</p>;
 }

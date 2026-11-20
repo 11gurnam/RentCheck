@@ -126,7 +126,7 @@ it("private uploaded document authorization and administrator decisions work thr
     const counts = await clients[0].rpc("womens_recommendation_counts", {
       p_property: input.property,
     });
-    expect(counts.data[0].positive_count).toBeGreaterThanOrEqual(1);
+    expect(counts.data[0]).toMatchObject({ eligible_count: 0, recommended: false });
     expect(
       (
         await clients[1].rpc("decide_verification", {

@@ -7,7 +7,7 @@ import { fixtureAdmin } from "../helpers/admin-fixture";
 import { cleanupReviewUser } from "../helpers/review-cleanup";
 const c = localBackendConfiguration();
 if (!c) throw new Error("Isolated backend required");
-test("private demonstration documents, trusted approval, recommendation threshold and revocation", async ({
+test("private demonstration documents, trusted approval, small-cohort privacy and revocation", async ({
   page,
   browser,
 }, info) => {
@@ -96,6 +96,14 @@ test("private demonstration documents, trusted approval, recommendation threshol
       });
       expect(r.error).toBeNull();
       identities[n].review = r.data.id;
+      expect((await clients[n].rpc("set_my_women_program", {
+        p_gender: "woman", p_tenancy: "current", p_description: null, p_opted_in: true,
+      })).error).toBeNull();
+      expect((await clients[n].rpc("set_my_women_feedback", {
+        p_review: r.data.id, p_ratings: { neighbourhood: 5, security: 5, landlord: 5,
+          privacy: 5, conditions: 5, fair_treatment: 5, overall: 5, recommendation: 5 },
+        p_comment: null, p_consent: true,
+      })).error).toBeNull();
       await login(page, n);
       await page.goto("/reviews/" + r.data.id + "/edit");
       await page.getByLabel("Fictional supporting documents").setInputFiles({
@@ -166,12 +174,9 @@ test("private demonstration documents, trusted approval, recommendation threshol
         .click();
       await expect(card).toContainText("approved");
       await page.goto("/properties/" + property);
-      await expect(page.getByRole("main")).toContainText(n + 1 + "/" + (n + 1));
+      await expect(page.locator("#women-experiences")).toHaveCount(0);
     }
     await page.goto("/properties/" + property);
-    await expect(page.getByRole("main")).toContainText(
-      "Recommended by eligible women tenants.",
-    );
     await expect(
       page.getByText("Demonstration verified tenant · synthetic example", {
         exact: false,
@@ -192,7 +197,7 @@ test("private demonstration documents, trusted approval, recommendation threshol
     await page.goto(
       "/search?q=" + encodeURIComponent(name) + "&women=recommended",
     );
-    await expect(page.locator(".property-card")).toHaveCount(1);
+    await expect(page.locator(".property-card")).toHaveCount(0);
     const firstCard = adminPage.locator("section.dashboard-card").filter({
       has: adminPage.getByRole("heading", {
         name:

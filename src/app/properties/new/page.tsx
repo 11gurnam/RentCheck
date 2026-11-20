@@ -14,7 +14,7 @@ export default async function AddPropertyPage() {
         <p className="eyebrow">CONTRIBUTE TO RENTCHECK</p>
         <h1>Add a place to research.</h1>
         <p>
-          {real ? "Contribute accurate property details. Do not include personal contact information or private documents in public descriptions." : "Use fictional demo details only."} We’ll show likely existing profiles before adding a distinct place. Contributions grant no management permissions.
+          {real ? "Contribute accurate property details. Do not include personal contact information or private documents in public descriptions." : "Use fictional demo details only."} To manage the property, submit a claim after adding it.
         </p>
       </div>
       <ContributionForm real={real} />

@@ -39,7 +39,7 @@ export async function submitReview(
     criteria: rated.data,
     propertyRating: overallRating(rated.data),
     current: v.current === "true",
-    woman: v.woman === "on",
+    woman: existing?.woman ?? false,
     recommend: v.recommend === "" ? null : v.recommend === "true",
     synthetic: existing ? existing.is_demo !== false : property.is_demo,
     consent: true,

@@ -1,6 +1,7 @@
 import "server-only";
 import { createDatabaseClient } from "@/lib/database/server";
 import type { Filters } from "./filters";
+import { propertyInformation, type PropertyInformation } from "@/features/property-information/data";
 export type Property = {
   latitude?: number | null;
   longitude?: number | null;
@@ -25,7 +26,7 @@ export type Property = {
   total_count: number;
   property_rating: number | null;
   review_count: number;
-  positive_count: number;
+  information?: PropertyInformation;
   eligible_count: number;
   recommended: boolean;
 };
@@ -45,7 +46,7 @@ export type Landlord = {
 };
 export async function searchProperties(filters: Filters) {
   const db = await createDatabaseClient();
-  const { data, error } = await db.rpc("search_properties_verified", {
+  const { data, error } = await db.rpc("search_properties_facets", {
     p_query: filters.q,
     p_state: filters.state,
     p_city: filters.city,
@@ -55,19 +56,22 @@ export async function searchProperties(filters: Filters) {
     p_max: filters.max,
     p_page: filters.page,
     p_rating: filters.rating,
-    p_women: filters.women === "recommended",
+    p_women: filters.women,
+    p_verification: filters.verification,
+    p_preferences: filters.eligibility,
   });
   if (error) throw new Error("Discovery unavailable");
   const properties = data as Property[];
   if (!properties.length) return properties;
   const managers=properties.map(p=>p.landlord_id).filter((id):id is string=>!!id);
-  const [scores, locations, landlordScores] = await Promise.all([
+  const [scores, locations, landlordScores, information] = await Promise.all([
     db.from("property_criterion_scores").select("*").in("property_id", properties.map(p => p.id)),
     db.from("property_locations").select("property_id,latitude,longitude,precision").in("property_id", properties.map(p => p.id)),
     managers.length ? db.from("landlord_scores").select("landlord_id,landlord_rating,review_count").in("landlord_id", managers) : {data: [], error: null},
+    propertyInformation(properties.map(p => p.id)),
   ]);
   if (scores.error||locations.error||landlordScores.error) throw new Error("Property details unavailable");
-  return properties.map(p => {const location=locations.data?.find(l=>l.property_id===p.id),manager=landlordScores.data?.find(s=>s.landlord_id===p.landlord_id);return { ...p, ...location, landlord_rating:manager?.landlord_rating??null,landlord_review_count:manager?.review_count??0,criterion_scores: (scores.data ?? []).filter(s => s.property_id === p.id) as CriterionScore[] };});
+  return properties.map(p => {const location=locations.data?.find(l=>l.property_id===p.id),manager=landlordScores.data?.find(s=>s.landlord_id===p.landlord_id);return { ...p, ...location, information:information.get(p.id), landlord_rating:manager?.landlord_rating??null,landlord_review_count:manager?.review_count??0,criterion_scores: (scores.data ?? []).filter(s => s.property_id === p.id) as CriterionScore[] };});
 }
 export async function getLocations() {
   const db = await createDatabaseClient();
@@ -78,7 +82,7 @@ export async function getLocations() {
   if (error) throw new Error("Locations unavailable");
   return data as { state: string; city: string; locality: string }[];
 }
-export async function getProperty(id: string) {
+export async function getProperty(id: string, { includeCriterionScores = false }: { includeCriterionScores?: boolean } = {}) {
   const db = await createDatabaseClient();
   const { data, error } = await db
     .from("property_discovery")
@@ -87,26 +91,28 @@ export async function getProperty(id: string) {
     .maybeSingle();
   if (error) throw new Error("Property unavailable");
   if (!data) return null;
-  const [scores, counts, location, postal, manager] = await Promise.all([
+  const [scores, information, location, postal, manager, criteria] = await Promise.all([
     db
     .from("property_scores")
     .select("property_rating,review_count")
     .eq("property_id", id)
     .maybeSingle(),
-    db.rpc("womens_recommendation_counts", {
-    p_property: id,
-    }),
+    propertyInformation([id]).then(rows => rows.get(id)),
     db.from("property_locations").select("latitude,longitude,precision").eq("property_id",id).maybeSingle(),
     db.from("properties").select("postal_code").eq("id",id).maybeSingle(),
     data.landlord_id ? db.from("landlord_scores").select("landlord_rating,review_count").eq("landlord_id",data.landlord_id).maybeSingle() : {data:null,error:null},
+    includeCriterionScores ? db.from("property_criterion_scores").select("criterion_key,label,rating,review_count").eq("property_id", id) : {data:[],error:null},
   ]);
-  if (scores.error || counts.error || location.error || postal.error || manager.error)
+  if (scores.error || location.error || postal.error || manager.error || criteria.error)
     throw new Error("Property scores unavailable");
   return {
     ...data,
     property_rating: scores.data?.property_rating ?? null,
     review_count: scores.data?.review_count ?? 0,
-    ...counts.data?.[0],
+    criterion_scores: (criteria.data ?? []) as CriterionScore[],
+    information,
+    eligible_count: information?.women?.count ?? 0,
+    recommended: information?.women_recommended ?? false,
     ...location.data,
     postal_code:postal.data?.postal_code??null,
     landlord_rating:manager.data?.landlord_rating??null,

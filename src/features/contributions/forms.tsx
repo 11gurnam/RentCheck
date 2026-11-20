@@ -6,6 +6,7 @@ import { contribute, saveProperty } from "./actions";
 import type { ContributionState } from "./validation";
 import { AddressFields } from "@/features/addresses/fields";
 import { LocationPicker } from "@/features/addresses/location-picker";
+import { RentalPreferenceFields } from "@/features/property-information/fields";
 export function SaveForm({
   property,
   saved,
@@ -94,6 +95,10 @@ export function ContributionForm({ real = false }: { real?: boolean }) {
         <input type="checkbox" name="declaredOwner" checked={checks.owner} onChange={e=>setChecks({...checks,owner:e.target.checked})}/>{real ? "I own this property" : "I own this fictional example"} (this prevents reviewing my own place; it grants no management
         permissions).
       </label>
+      {checks.owner && <>
+        <RentalPreferenceFields/>
+        <p className="field-hint wide">These preferences become public after RentCheck approves your property representative claim.</p>
+      </>}
       <label className="checkbox-row wide">
         <input type="checkbox" name="synthetic" required checked={checks.synthetic} onChange={e=>setChecks({...checks,synthetic:e.target.checked})}/>
         {real ? "These details are accurate to my knowledge and I consent to their public display." : "All details are fictional demonstration data."}

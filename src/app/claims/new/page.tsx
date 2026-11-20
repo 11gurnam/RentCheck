@@ -23,21 +23,27 @@ export default async function NewClaim({
     : null;
   const existing=v.success?await myProfileClaim(v.data.target,v.data.kind):null;
   const active=existing&&["pending","approved","disputed"].includes(existing.status);
+  if (!v.success || !profile) {
+    return (
+      <AccountShell>
+        <ClaimPropertySearch initialResult={await findClaimProperties("")} />
+      </AccountShell>
+    );
+  }
+
   return (
     <AccountShell>
       <section className="dashboard-card">
         <h1>{profile?.is_demo === false ? "Claim your property" : "Property claims"}</h1>
-        {v.success && profile && active ? (
+        {active ? (
           <div className="existing-claim-notice"><h2>{profile.name}</h2><p>{existing.status==="approved"?"Your claim is approved. Manage your property from Your claims.":existing.status==="disputed"?"Your claim is under dispute. Review its status and any requested information in Your claims.":"Your claim has already been submitted. Follow its progress or provide requested information in Your claims."}</p>{v.data.kind==="property"?<div className="property-actions"><PropertyClaimActions property={v.data.target} claim={existing} owner/></div>:<a className="button" href={`/claims#claim-${existing.id}`}>View your claim</a>}</div>
-        ) : v.success && profile ? (
+        ) : (
           <ClaimForm
             target={v.data.target}
             kind={v.data.kind}
             name={profile.name}
             real={profile.is_demo === false}
           />
-        ) : (
-          <ClaimPropertySearch initialResult={await findClaimProperties("")} />
         )}
       </section>
     </AccountShell>

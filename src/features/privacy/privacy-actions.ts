@@ -109,5 +109,6 @@ export async function markNotificationRead(
   ).rpc("mark_notification_read", { p_notification: id.data });
   if (error) return { message: "Notification unavailable." };
   revalidatePath("/account/notifications");
+  revalidatePath("/account");
   return { status:"success", message: "Marked as read." };
 }

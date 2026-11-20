@@ -177,6 +177,9 @@ export function AccountForm({
             state={fieldState}
           />
         )}
+        {mode === "register" && (
+          <p className="field-hint">After signing in, you can optionally set up your private tenant profile.</p>
+        )}
         <Feedback state={state} />
         <button
           className="primary-link form-submit"

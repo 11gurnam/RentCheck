@@ -23,8 +23,8 @@ export function ExplorerMap({properties,selected,onSelect,fitRequest}:{propertie
    if(cancelled||!map.current||!layers.current)return;
    layers.current.clearLayers();
    for(const property of properties){
-    const label=document.createElement("span");label.textContent=property.name;
-    const marker=L.circleMarker([property.latitude,property.longitude],{radius:property.id===selected?11:8,color:"#fff",weight:3,fillColor:property.id===selected?"#ba6847":"#214f42",fillOpacity:1}).bindTooltip(label);
+    const label=document.createElement("span");label.textContent=property.precision==="city"?`${property.name} · approximate city pin`:property.name;
+    const marker=L.circleMarker([property.latitude,property.longitude],{radius:property.id===selected?11:8,color:"#fff",weight:3,fillColor:property.id===selected?"#ba6847":property.precision==="city"?"#4f6f93":"#214f42",fillOpacity:1}).bindTooltip(label);
     marker.on("click",()=>callback.current(property.id));marker.addTo(layers.current);
    }
   });return()=>{cancelled=true;};
@@ -32,13 +32,13 @@ export function ExplorerMap({properties,selected,onSelect,fitRequest}:{propertie
  useEffect(()=>{
   if(!ready||!map.current)return;
   const property=properties.find(p=>p.id===selected);
-  if(property)map.current.setView([property.latitude,property.longitude],15);
+  if(property)map.current.setView([property.latitude,property.longitude],property.precision==="city"?11:15);
   else map.current.setView([22.8,79],5);
  },[selected,properties,ready]);
  useEffect(()=>{
   if(!ready||!map.current||!fitRequest||!properties.length)return;
   let cancelled=false;
-  void import("leaflet").then(L=>{if(!cancelled&&map.current)map.current.fitBounds(L.latLngBounds(properties.map(p=>[p.latitude,p.longitude])),{padding:[35,35],maxZoom:15});});
+  void import("leaflet").then(L=>{if(!cancelled&&map.current)map.current.fitBounds(L.latLngBounds(properties.map(p=>[p.latitude,p.longitude])),{padding:[35,35],maxZoom:properties.every(p=>p.precision==="city")?11:15});});
   return()=>{cancelled=true;};
  },[fitRequest,properties,ready]);
  return <div className="explorer-map-frame">{!ready&&!error&&<p className="explorer-map-loading" role="status">Loading map…</p>}{error&&<p className="explorer-map-loading" role="alert">Map unavailable. You can still browse places or open them in Google Maps.</p>}<div ref={element} className="explorer-live-map" role="region" aria-label="Property location map"/></div>;

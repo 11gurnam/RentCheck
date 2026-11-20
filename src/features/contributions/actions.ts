@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { requireUser } from "@/lib/auth/session";
 import { createDatabaseClient } from "@/lib/database/server";
 import { operationMode } from "@/features/operations/data";
+import { rentalPreferencesSchema } from "@/features/property-information/preferences";
 import {
   contributionSchema,
   type ContributionState,
@@ -23,6 +24,9 @@ export async function contribute(
         .join(" "),
     };
   const input = parsed.data;
+  const preferences = rentalPreferencesSchema.safeParse(form.getAll("eligibility"));
+  if (!preferences.success || (preferences.data.length && input.declaredOwner !== "on"))
+    return { status: "error", message: "Choose valid rental preferences only when listing a property you own." };
   const recordMode = form.get("recordMode");
   if (recordMode !== "demo" && recordMode !== "real") return { status: "error", message: "Reload the contribution form to confirm the record type." };
   if (recordMode === "real" && !(await operationMode()).accepts_real_data) return { status: "error", message: "Real-data intake is currently disabled." };
@@ -57,6 +61,7 @@ export async function contribute(
         synthetic: recordMode === "demo",
         consent: true,
         declaredOwner: input.declaredOwner === "on",
+        tenantPreferences: preferences.data,
         latitude: input.shareLocation === "on" ? input.latitude : null,
         longitude: input.shareLocation === "on" ? input.longitude : null,
         shareLocation: input.shareLocation === "on",

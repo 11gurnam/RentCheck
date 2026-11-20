@@ -18,7 +18,7 @@ test("account pages are accessible, responsive and honest about connection state
     await expect(page.getByRole("heading", { level: 2 })).toBeVisible();
     if (!configured)
       await expect(
-        page.getByText("Accounts aren’t connected yet."),
+        page.getByText("Accounts are temporarily unavailable."),
       ).toBeVisible();
     else await expect(page.getByLabel("Email address")).toBeVisible();
     expect(

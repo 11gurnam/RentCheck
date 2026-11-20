@@ -14,6 +14,8 @@ export type Claim = {
   document_id: string;
   status: string;
   reason: string | null;
+  created_at?: string;
+  decided_at?: string | null;
   alias?: string;
 };
 /** Current account only; approval always comes from the stored claim decision. */

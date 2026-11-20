@@ -3,6 +3,7 @@ import { parseFilters, searchHref } from "@/features/discovery/filters";
 import { getLocations, searchProperties } from "@/features/discovery/data";
 import { PropertyCard } from "@/features/discovery/cards";
 import { SearchControls } from "@/features/discovery/search-controls";
+import { RentalPreferenceFields } from "@/features/property-information/fields";
 import { Pagination } from "@/components/ui/pagination";
 import { redirect } from "next/navigation";
 export default async function SearchPage({
@@ -44,15 +45,15 @@ export default async function SearchPage({
   const total = rows[0]?.total_count ?? 0;
   return (
     <AccountShell>
-      <div className="discovery-heading">
+      <header className="discovery-heading discovery-subheader">
         <p className="eyebrow">A MORE INFORMED MOVE · INDIA</p>
         <h1>Find a place. Know its story.</h1>
         <p>
-          Explore accommodation research across India. Fictional examples carry demonstration labels. Profiles are research records, not available rental listings.
+          Compare rent, neighbourhoods, and tenant experiences across India. Property profiles are for research.
         </p>
-      </div>
+      </header>
       <SearchControls key={searchHref(f, f.page)} initial={{ q: f.q, state: f.state, city: f.city, locality: f.locality, type: f.type }}
-        locations={locations} otherFilterCount={[f.min > 0, f.max < 10000000, f.rating > 0, f.women].filter(Boolean).length}>
+        locations={locations} otherFilterCount={[f.min > 0, f.max < 10000000, f.rating > 0, f.women, f.verification, f.eligibility.length].filter(Boolean).length}>
         <div>
           <label htmlFor="min">Minimum rent (₹)</label>
           <input
@@ -87,12 +88,24 @@ export default async function SearchPage({
           </select>
         </div>
         <div>
-          <label htmlFor="women">Women’s tenant recommendations</label>
-          <select id="women" name="women" defaultValue={f.women}>
-            <option value="">Any status</option>
-            <option value="recommended">Threshold reached</option>
+          <label htmlFor="verification">RentCheck tenant verification</label>
+          <select id="verification" name="verification" defaultValue={f.verification}>
+            <option value="">Any verification status</option>
+            <option value="reviews">Has verified tenant reviews</option>
+            <option value="current">Has verified current tenants</option>
+            <option value="former">Has verified previous tenants</option>
           </select>
         </div>
+        <div>
+          <label htmlFor="women">Women’s tenant recommendations</label>
+          <select id="women" name="women" defaultValue={f.women}>
+            <option value="">Any recommendation status</option>
+            <option value="recommended">Recommended by verified women tenants</option>
+            <option value="reviews">Has verified women tenant reviews</option>
+            <option value="safety">Has women-specific safety ratings</option>
+          </select>
+        </div>
+        <RentalPreferenceFields initial={f.eligibility} search/>
         <div className="filter-actions">
           <button className="button" type="submit">
             Apply filters
@@ -121,10 +134,6 @@ export default async function SearchPage({
         </div>
       )}
       <Pagination page={f.page} total={total} pageSize={12} href={page=>searchHref(f,page)}/>
-      <p className="field-hint">
-        Ratings and women’s recommendations appear when eligible tenant reviews
-        are available. No safety guarantee.
-      </p>
     </AccountShell>
   );
 }

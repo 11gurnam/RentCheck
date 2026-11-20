@@ -187,10 +187,6 @@ export function ReviewForm({
         <p className="field-hint">AI language checks send this comment to Google Gemini. Free-tier text may be used to improve Google’s products. Check suggested wording before accepting it.</p>
       </div>
       <label>
-        <input name="woman" type="checkbox" defaultChecked={review?.woman} /> I
-        explicitly self-identify as a woman (optional, private answer).
-      </label>
-      <label>
         <input name="synthetic" type="checkbox" required /> {real ? "This is my own tenancy experience and I consent to publication under my alias." : "This is a fictional tenancy and review."}
       </label>
       <ActionFeedback receipt={state} message={state.message} status={state.status} />

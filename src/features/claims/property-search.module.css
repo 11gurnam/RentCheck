@@ -1,0 +1,200 @@
+.backLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  margin-bottom: 8px;
+  color: #285744;
+  font-weight: 600;
+  text-underline-offset: 4px;
+}
+
+.hero :global(.collection-heading) {
+  padding: clamp(20px, 4vw, 40px);
+  margin: 0 0 24px;
+}
+
+.hero :global(.collection-heading) > div {
+  flex: 1;
+}
+
+.hero h1 {
+  margin: 0 0 8px;
+  text-wrap: initial;
+}
+
+.hero p {
+  margin: 0;
+  color: var(--muted);
+}
+
+.hero :global(.collection-illustration) {
+  width: clamp(160px, 20vw, 240px);
+}
+
+.search {
+  display: flex;
+  gap: 8px;
+  margin-top: 20px;
+}
+
+.search label {
+  flex: 1;
+  min-width: 0;
+}
+
+.search input {
+  width: 100%;
+  height: 48px;
+  padding: 10px 14px;
+  border: 1px solid #82998a;
+  border-radius: var(--radius-control);
+  background: #fff;
+  color: var(--ink);
+}
+
+.search input::placeholder {
+  color: #586c62;
+}
+
+.search button {
+  min-height: 48px;
+  gap: 8px;
+}
+
+.resultsHeader,
+.resultsTools,
+.cardFooter {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+}
+
+.resultsHeader {
+  justify-content: space-between;
+  min-height: 44px;
+  margin-bottom: 12px;
+}
+
+.resultsHeader h2,
+.resultsTools p {
+  margin: 0;
+}
+
+.resultsTools p {
+  color: var(--muted);
+  font-size: var(--font-size-description);
+}
+
+.clear {
+  padding-inline: 8px;
+  color: #285744;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  padding: 16px 18px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
+  background: #fff;
+}
+
+.card:is(:hover, :focus-within) {
+  border-color: #9db3a0;
+}
+
+.card h3 {
+  margin: 0;
+  color: var(--ink);
+}
+
+.location {
+  display: flex;
+  align-items: flex-start;
+  gap: 7px;
+  margin: 5px 0 10px;
+  color: var(--muted);
+  font-size: var(--font-size-description);
+  overflow-wrap: anywhere;
+}
+
+.location svg {
+  flex: none;
+  margin-top: 2px;
+  color: #507163;
+}
+
+.cardFooter {
+  margin-top: auto;
+  padding-top: 10px;
+}
+
+.demo {
+  padding: 3px 8px;
+  border-radius: 6px;
+  background: #f4eee4;
+  color: #654b30;
+}
+
+.claimLink {
+  margin-inline-start: auto;
+  text-align: center;
+}
+
+.empty {
+  margin: 0;
+  padding: 22px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
+  background: #fff;
+  color: var(--muted);
+}
+
+.empty strong {
+  color: var(--ink);
+}
+
+.empty p + p {
+  margin-top: 4px;
+}
+
+@media (max-width: 700px) {
+  .grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .hero h1 {
+    font-size: clamp(27px, 7.7vw, 32px);
+    text-wrap: balance;
+  }
+
+  .hero :global(.collection-heading) > div {
+    width: 100%;
+  }
+
+  .hero :global(.collection-illustration) {
+    display: none;
+  }
+}
+
+@media (max-width: 360px) {
+  .search {
+    flex-direction: column;
+  }
+}

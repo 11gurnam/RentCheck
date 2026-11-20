@@ -1,5 +1,4 @@
 import { PhotoMedia } from "./media";
-import { InfoPopover } from "@/components/ui/info-popover";
 import { createDatabaseClient } from "@/lib/database/server";
 import { getVerifiedUser } from "@/lib/auth/session";
 import { type PhotoSource } from "./caption";
@@ -21,7 +20,7 @@ export async function PropertyGallery({ property, representing=false, claimHref 
   const propertyPhotos = ((photos ?? []) as PhotoSource[]).filter(photo => photo.role !== "tenant");
   return (
     <section className="history-panel property-top-gallery" id="property-photos">
-      <div className="section-title"><h2>Photos of this place</h2><InfoPopover label="About property photos">Property photos show the original uploader. Photos attached to tenant reviews appear separately with tenant experiences below.</InfoPopover></div>
+      <div className="section-title"><h2>Photos of this place</h2></div>
       {propertyPhotos.length ? <PhotoMedia photos={propertyPhotos} title="Property photos" /> : <div className="property-media-empty"><strong>No property photos yet</strong></div>}
       {user && !representing && propertyPhotos.length > 0 && <details className="gallery-photo-tools"><summary>Report a property photo</summary>{propertyPhotos.map((photo, i) => <div key={photo.id}><p>Photo {i + 1} · {photo.alias}</p><PhotoReport photo={photo.id} /></div>)}</details>}
       {access?.data?.allowed ? (

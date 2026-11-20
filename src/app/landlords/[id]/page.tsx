@@ -1,4 +1,3 @@
-import { InfoPopover } from "@/components/ui/info-popover";
 import { displayDate } from "@/lib/display-date";
 import { notFound } from "next/navigation";
 import { z } from "zod";
@@ -48,7 +47,7 @@ export default async function LandlordPage({
         </a>
       </p>
       <section className="dashboard-card" id="review-landlord">
-        <div className="section-title"><h2>Rate your landlord</h2><InfoPopover label="About landlord ratings">Your tenancy dates determine which recorded landlord receives the rating. Check the management period before submitting. Ratings stay with that manager even after a property changes hands.</InfoPopover></div>
+        <div className="section-title"><h2>Rate your landlord</h2></div>
         <p>Choose a property below and rate the landlord in your tenancy review.</p>
       </section>
       <ReviewFeed

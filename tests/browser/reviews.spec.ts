@@ -64,7 +64,6 @@ test("author creates, edits, uploads and deletes a review without exposing priva
       );
     await page.getByLabel("Your experience").press("Tab");
     await expect(page.getByText("AI language checking is not configured.", { exact: false })).toBeVisible();
-    await page.getByLabel("I explicitly self-identify").check();
     await page.getByLabel("Would you recommend").selectOption("true");
     await page.getByLabel("This is a fictional").check();
     expect(

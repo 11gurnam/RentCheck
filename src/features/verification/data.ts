@@ -1,6 +1,5 @@
 import "server-only";
 import { createDatabaseClient } from "@/lib/database/server";
-import { womenRecommended } from "./rules";
 import type { EvidenceDocument } from "@/features/privacy/evidence-upload";
 export type Verification = {
   stage?: string | null;
@@ -41,20 +40,4 @@ export async function adminVerifications(): Promise<Verification[]> {
     if (docs.error || context.error) throw new Error("Evidence details unavailable");
     return {...row, ...context.data, documents: docs.data as EvidenceDocument[]};
   }));
-}
-export async function womensCounts(property: string) {
-  const { data, error } = await (
-    await createDatabaseClient()
-  ).rpc("womens_recommendation_counts", { p_property: property });
-  if (error) throw new Error("Recommendations unavailable");
-  const result = data?.[0] as
-    | { positive_count: number; eligible_count: number; recommended: boolean }
-    | undefined;
-  if (
-    result &&
-    result.recommended !==
-      womenRecommended(result.positive_count, result.eligible_count)
-  )
-    throw new Error("Recommendation summary inconsistent");
-  return result;
 }

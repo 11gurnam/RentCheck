@@ -2,12 +2,13 @@ import { AccountShell } from "@/components/ui/account-shell";
 import { createDatabaseClient } from "@/lib/database/server";
 import { RecordedMap, type MappedProperty } from "@/features/discovery/map";
 import { ActionIcon } from "@/components/ui/action-feedback";
+import { resolveMapPoint } from "@/features/addresses/city-map-point";
 export default async function MapPage() {
   const db = await createDatabaseClient();
   const rows:MappedProperty[]=[];
   // Include public profiles without coordinates so every available city is searchable.
   for(let offset=0;;offset+=1000){
-    const profiles=await db.from("property_discovery").select("id,name,is_demo,city,locality,address,property_type,rent_min,rent_max").order("name").order("id").range(offset,offset+999);
+    const profiles=await db.from("property_discovery").select("id,name,is_demo,state,city,locality,address,property_type,rent_min,rent_max").order("name").order("id").range(offset,offset+999);
     if(profiles.error)throw new Error("Map profiles unavailable");
     if(!profiles.data.length)break;
     const locations=await db.from("property_locations").select("property_id,latitude,longitude,precision").in("property_id",profiles.data.map(p=>p.id));
@@ -15,7 +16,9 @@ export default async function MapPage() {
     const pins=new Map(locations.data.map(location=>[location.property_id,location]));
     rows.push(...profiles.data.map(profile=>{
       const location=pins.get(profile.id);
-      return {...profile,latitude:location?Number(location.latitude):null,longitude:location?Number(location.longitude):null,precision:location?.precision??""};
+      const point=resolveMapPoint({...profile,latitude:location?Number(location.latitude):null,
+        longitude:location?Number(location.longitude):null,precision:location?.precision});
+      return {...profile,...(point??{latitude:null,longitude:null,precision:""})};
     }));
     if(profiles.data.length<1000)break;
   }

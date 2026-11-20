@@ -90,9 +90,15 @@ test("claim upload, trusted approval, details, separate reply and revocation", a
     await page
       .getByRole("button", { name: "Submit demonstration claim" })
       .click();
-    await expect(page.getByRole("status")).toContainText("claim submitted");
+    await expect(page.locator(".success-toast")).toContainText("claim submitted");
     await page.goto("/claims");
-    await expect(page.getByRole("main")).toContainText("pending");
+    const claimCard = page.locator(".claim-card").filter({ hasText: name });
+    const title = claimCard.getByRole("button", { name, exact: true });
+    await expect(claimCard.locator(".semantic-status")).toHaveText("Awaiting review");
+    await expect(claimCard.getByText("Claimed on")).toBeVisible();
+    await expect(claimCard.locator("time")).toHaveCount(1);
+    await expect(title).toHaveAttribute("aria-expanded", "false");
+    await title.click();
     await expect(
       page.getByRole("button", { name: "Save claimed details" }),
     ).toHaveCount(0);
@@ -113,12 +119,20 @@ test("claim upload, trusted approval, details, separate reply and revocation", a
     await card.getByRole("button", { name: "Save claim decision" }).click();
     await expect(card).toContainText("approved");
     await page.goto("/claims");
+    await expect(claimCard.getByText("Approved on")).toBeVisible();
+    await expect(claimCard.locator("time")).toHaveCount(2);
+    await expect(claimCard.getByLabel("Profile name")).toHaveCount(0);
+    await title.click();
+    await expect(claimCard.getByLabel("Profile name")).toBeVisible();
+    await title.click();
+    await claimCard.getByRole("button", { name: `Actions for ${name}` }).click();
+    await claimCard.getByRole("button", { name: "Edit details" }).click();
     await page.getByLabel("Profile name").fill(name + " Updated");
     await page
       .getByLabel("Change reason")
       .fill("Correcting this fictional demonstration name.");
     await page.getByRole("button", { name: "Save claimed details" }).click();
-    await expect(page.getByRole("status")).toContainText("updated and audited");
+    await expect(page.locator(".success-toast")).toContainText("updated and audited");
     await page.goto("/properties/" + property);
     await expect(
       page.getByRole("heading", { name: name + " Updated", exact: true }),

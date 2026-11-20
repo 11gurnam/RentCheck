@@ -113,7 +113,6 @@ export async function ReviewFeed({
         <details className="rating-category-breakdown"><summary>Ratings by category <span>View breakdown</span></summary>
           <div className="rating-category-rows">{categorySummary.filter(c => c.rating != null).map(c => <div className="rating-category-row" key={c.criterion_key}><span>{c.label}</span><div className={`rating-meter rating-${ratingTone(Number(c.rating))}`} role="meter" aria-valuemin={0} aria-valuemax={5} aria-valuenow={Number(c.rating)} aria-label={`${c.label} average rating`}><span style={{ width: `${Number(c.rating) / 5 * 100}%` }} /></div><strong>{Number(c.rating).toFixed(1)} <small>/ 5</small></strong><small>{c.review_count} {c.review_count === 1 ? "rating" : "ratings"}</small></div>)}</div>
           {categorySummary.some(c => c.rating == null) && <p className="rating-category-unrated"><strong>Not rated yet:</strong> {categorySummary.filter(c => c.rating == null).map(c => c.label).join(" · ")}</p>}
-          <p className="field-hint">Category scores average published tenant ratings. Overall averages the reviews’ scores; older reviews may only have an overall score.</p>
         </details>
       </section>}
       {!rows.length &&
@@ -132,7 +131,7 @@ export async function ReviewFeed({
           <div className="review-stay-facts"><div><span className="review-date-caption">Tenancy</span><div className="review-date-range"><time dateTime={r.start_date}>{displayDate(r.start_date)}</time><span aria-label="to">→</span>{r.end_date ? <time dateTime={r.end_date}>{displayDate(r.end_date)}</time> : <strong>Current</strong>}</div></div><div className="review-rent"><span className="review-date-caption">Monthly rent paid</span><strong>{money(r.rent_paid)} <small>/ month</small></strong></div></div>
           <div className="review-meta-row"><p className={verified.find((v) => v.id === r.id)?.verified && !r.is_demo ? "semantic-status status-success" : "demo-tag"}>
             {verified.find((v) => v.id === r.id)?.verified
-              ? (r.is_demo ? "Demonstration verified tenant" : "Verified Tenant · this property and tenancy")
+              ? (r.is_demo ? "Demonstration verified tenant" : "Tenant verified by RentCheck · this property and tenancy")
               : "Unverified Tenant"}{" "}
             {r.is_demo ? "· synthetic example" : "· User experience"} {r.was_edited ? "· Updated" : ""}
           </p>

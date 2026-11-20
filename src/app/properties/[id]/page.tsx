@@ -1,3 +1,4 @@
+import { PropertySectionHeading } from "@/features/property-information/section-heading";
 import { WomenRecommendation } from "@/features/discovery/women-recommendation";
 import { InfoPopover } from "@/components/ui/info-popover";
 import { PropertyClaimStatus } from "@/features/claims/property-status";
@@ -14,7 +15,8 @@ import { money } from "@/features/discovery/filters";
 import { getVerifiedUser } from "@/lib/auth/session";
 import { createDatabaseClient } from "@/lib/database/server";
 import { SaveForm } from "@/features/contributions/forms";
-import { womensCounts } from "@/features/verification/data";
+import { RentalPreferences, TenantVerificationSummary } from "@/features/property-information/public-sections";
+import { RentalPreferencesEditor } from "@/features/property-information/editor";
 import { ReviewFeed } from "@/features/reviews/feed";
 import { reviewPage } from "@/features/reviews/pagination";
 import { PropertyGallery } from "@/features/photos/gallery";
@@ -23,6 +25,7 @@ import { ownReviews } from "@/features/reviews/data";
 import { CameraIcon } from "@/components/ui/camera-icon";
 import { ActionIcon } from "@/components/ui/action-feedback";
 import { PropertyLocation } from "@/features/discovery/property-location";
+import { resolveMapPoint } from "@/features/addresses/city-map-point";
 import { AppealForm } from "@/features/admin-platform/forms";
 import { myProfileClaim } from "@/features/claims/data";
 import { PropertyPhoneContact } from "@/features/messaging/property-phone";
@@ -38,13 +41,13 @@ export default async function PropertyPage({
   if (!z.uuid().safeParse(id).success) notFound();
   const [p, user] = await Promise.all([getProperty(id), getVerifiedUser()]);
   if (!p) notFound();
+  const mapPoint = resolveMapPoint(p);
   const db = await createDatabaseClient();
-  const [reviews, allowed, claim, saved, women, associations] = await Promise.all([
+  const [reviews, allowed, claim, saved, associations] = await Promise.all([
     user ? ownReviews() : [],
     user ? db.rpc("can_review_property", { p_property: id }) : null,
     user ? myProfileClaim(id) : null,
     user ? db.rpc("get_saved_properties") : null,
-    womensCounts(id),
     getAssociations(id),
   ]);
   const ownReview = reviews.find((r) => r.property_id === id && r.status === "visible");
@@ -73,7 +76,7 @@ export default async function PropertyPage({
         </p>
         <h1>{p.name}</h1>
         <p>{p.address}{p.postal_code ? ` · PIN ${p.postal_code}` : ""}</p>
-        <a className="property-review-link" href="#experiences">{p.property_rating == null ? "No tenant ratings yet" : `★ ${Number(p.property_rating).toFixed(1)} · ${p.review_count} ${p.review_count === 1 ? "review" : "reviews"}`}</a>
+        <a className="property-review-link" href="#experiences">{p.property_rating == null ? "No tenant ratings yet" : `Overall Tenant Rating · ★ ${Number(p.property_rating).toFixed(1)} / 5 · ${p.review_count} ${p.review_count === 1 ? "review" : "reviews"}`}</a>
         {p.is_demo && (
           <span className="demo-tag">
             Synthetic example · not a rental offer
@@ -82,7 +85,7 @@ export default async function PropertyPage({
         </div>
         <div className="property-price-summary"><span>Monthly rent range</span><p className="rent">{money(p.rent_min)}–{money(p.rent_max)}</p><small>per month</small></div>
       </div>
-      <nav className="property-section-nav" aria-label="On this property page"><a href="#property-photos">Photos</a><a href="#property-overview">Overview</a>{p.latitude != null && p.longitude != null && <a href="#place-location">Location</a>}<a href="#experiences">Tenant reviews</a><a href="#representative-contact">Contact</a></nav>
+      <nav className="property-section-nav" aria-label="On this property page"><a href="#property-photos">Photos</a><a href="#property-overview">Overview</a>{mapPoint && <a href="#place-location">Location</a>}<a href="#experiences">Tenant reviews</a>{p.information?.women && <a href="#women-experiences">Women Tenant Rating</a>}<a href="#representative-contact">Contact</a></nav>
       <PropertyGallery property={id} representing={representsProperty} claimHref={claim?`/claims#claim-${claim.id}`:undefined} />
       <div className="property-actions" aria-label="Property actions">
         {!representsProperty && <SaveForm property={id} saved={isSaved} />}
@@ -106,15 +109,16 @@ export default async function PropertyPage({
           ) : (
             <p>Manager not recorded</p>
           )}
-          <p className="manager-score">Landlord / management rating: <strong>{p.landlord_rating==null?"No ratings yet":`${Number(p.landlord_rating).toFixed(1)} / 5 · ${p.landlord_review_count??0} rated reviews`}</strong></p>{!representsProperty && <div className="landlord-rating-actions"><div className="landlord-rating-button"><a className="review-action" href={`/reviews/new?property=${id}#manager-rating`}>★ Leave Landlord Rating</a><InfoPopover label="About landlord ratings">Share your experience with a landlord. Your feedback helps other tenants make informed rental decisions.</InfoPopover></div></div>}
+          <p className="manager-score">Landlord / management rating: <strong>{p.landlord_rating==null?"No ratings yet":`${Number(p.landlord_rating).toFixed(1)} / 5 · ${p.landlord_review_count??0} rated reviews`}</strong></p>{!representsProperty && <div className="landlord-rating-actions"><div className="landlord-rating-button"><a className="review-action" href={`/reviews/new?property=${id}#manager-rating`}>★ Leave Landlord Rating</a><InfoPopover label="About landlord ratings">Rate the landlord who managed the property during your stay.</InfoPopover></div></div>}
         </section>
         <aside className="property-sidebar" aria-label="Tenant recommendations and contact">
-        <section className="dashboard-card recommendation-panel">
-          <WomenRecommendation positive={women?.positive_count??0} eligible={women?.eligible_count??0} recommended={women?.recommended??false} demo={p.is_demo}/>
-        </section>
-      <section className="dashboard-card" id="representative-contact"><div className="section-title"><h2>Landlord &amp; contact</h2><InfoPopover label="About landlord verification and contact">Ownership or authority evidence is manually reviewed for this property. Tenant opinions are not independently fact-checked. Only approved representatives who accept messages can be contacted.</InfoPopover></div><PropertyClaimStatus property={id} /><PropertyPhoneContact property={id}/>{representsProperty ? <p className="field-hint">{claim?.status==="approved"?"Choose your public phone visibility and tenant messaging preferences in Contact settings.":"Property contact controls become available after claim approval."}</p> : contacts?.error ? <p role="status">Representative contact is temporarily unavailable.</p> : contacts?.data?.length ? contacts.data.map((c: { profile_id: string; alias: string }) => <StartConversation key={c.profile_id} property={id} profile={c.profile_id} alias={c.alias} />) : <p className="field-hint">Contact is currently unavailable.</p>}<a className="review-action" href={representsProperty?"/account/contact":"/messages"}>{representsProperty?"Contact settings":"Your messages"}</a></section>
+        <RentalPreferences preferences={p.information?.preferences ?? []}
+          editor={claim?.status === "approved" && <RentalPreferencesEditor property={id} preferences={p.information?.preferences ?? []}/>}/>
+        <TenantVerificationSummary information={p.information} demo={p.is_demo}/>
+        {p.information?.women && <WomenRecommendation summary={p.information.women}/>}
+      <section className="dashboard-card" id="representative-contact"><PropertySectionHeading icon="contact" help={<InfoPopover label="About landlord verification and contact">Contact a verified representative when they accept messages.</InfoPopover>}>Landlord &amp; contact</PropertySectionHeading><PropertyClaimStatus property={id} /><PropertyPhoneContact property={id}/>{representsProperty ? <p className="field-hint">{claim?.status==="approved"?"Choose your public phone visibility and tenant messaging preferences in Contact settings.":"Property contact controls become available after claim approval."}</p> : contacts?.error ? <p role="status">Representative contact is temporarily unavailable.</p> : contacts?.data?.length ? contacts.data.map((c: { profile_id: string; alias: string }) => <StartConversation key={c.profile_id} property={id} profile={c.profile_id} alias={c.alias} />) : <p className="field-hint">Contact is currently unavailable.</p>}<a className="review-action" href={representsProperty?"/account/contact":"/messages"}>{representsProperty?"Contact settings":"Your messages"}</a></section>
         </aside>
-      {p.latitude != null && p.longitude != null && <div className="property-location-panel"><PropertyLocation name={p.name} latitude={p.latitude} longitude={p.longitude} precision={p.precision}/></div>}
+      {mapPoint && <div className="property-location-panel"><PropertyLocation name={p.name} city={p.city} state={p.state} {...mapPoint}/></div>}
       <ReviewFeed
         property={id}
         canReview={!representsProperty}
@@ -122,7 +126,7 @@ export default async function PropertyPage({
         page={reviewPage((await searchParams).reviews)}
       />
       <section className="history-panel">
-        <div className="section-title"><h2>Management history</h2><InfoPopover label="About management history">Dates show who managed the property during each tenancy. End dates are exclusive; a past tenant’s management rating stays with the manager responsible for that stay.</InfoPopover></div>
+        <div className="section-title"><h2>Management history</h2><InfoPopover label="About management history">See who managed the property during your stay.</InfoPopover></div>
         {history.length ? (
           <ul>
             {history.map((a) => (

@@ -16,7 +16,13 @@ test("claim catalogue appears immediately and reviews retain compact controls",a
   await page.goto("/sign-in");await page.getByLabel("Email address").fill(email);await page.getByLabel("Password",{exact:true}).fill(password);await page.getByRole("button",{name:"Sign in",exact:true}).click();await expect(page).toHaveURL(/\/account$/,{timeout:30000});
   await page.goto("/claims/new");await expect(page.locator(".claim-search-result")).toHaveCount(catalogue.data!.length);
   await page.getByRole("textbox",{name:"Property name or address"}).fill("Garden");await page.getByRole("button",{name:"Search",exact:true}).click();await expect(page.locator(".claim-search-result")).toHaveCount(catalogue.data!.filter(p=>p.name.includes("Garden")).length);
-  await page.getByRole("textbox",{name:"Property name or address"}).fill("");await page.getByRole("button",{name:"Search",exact:true}).click();await expect(page.locator(".claim-search-result")).toHaveCount(catalogue.data!.length);
+  const search=page.getByRole("textbox",{name:"Property name or address"});
+  await search.fill(crypto.randomUUID());await search.press("Enter");
+  await expect(page.getByText("No matching properties",{exact:true})).toBeVisible();
+  await page.getByRole("button",{name:"Clear search",exact:true}).click();
+  await expect(search).toHaveValue("");
+  await expect(page.locator(".claim-search-result")).toHaveCount(catalogue.data!.length);
+  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
   await page.screenshot({path:info.outputPath("claim-catalogue.png"),fullPage:true});
   await page.goto("/account/reviews");const card=page.locator(".own-review-card");await expect(card).toHaveCount(1);
   expect(await card.locator(".review-description h4").evaluate(el=>parseFloat(getComputedStyle(el).fontSize))).toBeLessThanOrEqual(13);

@@ -60,10 +60,10 @@ export function AuthScreen({
           {(notice === "account-deleted" ||
             notice === "account-deleted-purge-pending") && (
             <p role="status">
-              Your account and content access have been deleted.{" "}
+              Your account has been deleted.{" "}
               {notice === "account-deleted-purge-pending"
-                ? "Stored-file cleanup is queued for retry."
-                : "Registered uploaded files have been deleted."}
+                ? "Your uploads are unavailable and may take longer to delete."
+                : "Your uploads have been deleted."}
             </p>
           )}
           {configured ? (
@@ -74,10 +74,9 @@ export function AuthScreen({
             />
           ) : (
             <div className="setup-notice" role="status">
-              <strong>Accounts aren’t connected yet.</strong>
+              <strong>Accounts are temporarily unavailable.</strong>
               <p>
-                The account service is being set up. Please return shortly; the
-                public introduction is available now.
+                Try again later or <a href="/search">explore properties</a>.
               </p>
             </div>
           )}

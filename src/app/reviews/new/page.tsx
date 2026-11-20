@@ -41,7 +41,10 @@ export default async function NewReviewPage({
       <section className="dashboard-card review-form-card">
         <h1>Share your tenancy experience</h1>
         {p ? (
-          <ReviewForm property={p} />
+          <>
+            <p className="field-hint">After publishing, open the review from <a href="/account/reviews">Your reviews</a> to add optional women’s experience feedback for this stay.</p>
+            <ReviewForm property={p} />
+          </>
         ) : (
           <p>
             <a href="/search">Find a property</a>, open its profile and choose

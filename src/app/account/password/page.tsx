@@ -1,15 +1,8 @@
 import { AccountShell } from "@/components/ui/account-shell";
-import { PasswordForm } from "@/features/privacy/privacy-forms";
+import { PasswordPanel } from "@/features/accounts/settings-panels";
 import { requireUser } from "@/lib/auth/session";
-export default async function PasswordPage() {
+
+export default async function Page() {
   await requireUser("/account/password");
-  return (
-    <AccountShell>
-      <h1>Choose a new password</h1>
-      <PasswordForm />
-      <p>
-        <a href="/account">Back to your account</a>
-      </p>
-    </AccountShell>
-  );
+  return <AccountShell><PasswordPanel/></AccountShell>;
 }

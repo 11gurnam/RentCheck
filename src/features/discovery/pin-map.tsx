@@ -2,7 +2,7 @@
 import {useEffect,useRef} from "react";
 import type {Map as LeafletMap,CircleMarker} from "leaflet";
 export type MapPoint={latitude:number;longitude:number};
-export function PinMap({point,onChange}:{point:MapPoint|null;onChange?:(point:MapPoint)=>void}){
+export function PinMap({point,onChange,zoom=15}:{point:MapPoint|null;onChange?:(point:MapPoint)=>void;zoom?:number}){
   const node=useRef<HTMLDivElement>(null),map=useRef<LeafletMap|null>(null),marker=useRef<CircleMarker|null>(null);
   const callback=useRef(onChange);useEffect(()=>{callback.current=onChange;},[onChange]);
   useEffect(()=>{let cancelled=false;void import("leaflet").then(L=>{
@@ -13,6 +13,6 @@ export function PinMap({point,onChange}:{point:MapPoint|null;onChange?:(point:Ma
     view.on("click",event=>{if(callback.current)callback.current({latitude:event.latlng.lat,longitude:event.latlng.lng});});
     view.invalidateSize();
   });return()=>{cancelled=true;map.current?.remove();map.current=null;};},[]);
-  useEffect(()=>{let cancelled=false;void import("leaflet").then(()=>{if(cancelled||!map.current||!marker.current)return;if(point){marker.current.setLatLng([point.latitude,point.longitude]).addTo(map.current);map.current.setView([point.latitude,point.longitude],Math.max(map.current.getZoom(),15));}else marker.current.remove();});return()=>{cancelled=true;};},[point]);
+  useEffect(()=>{let cancelled=false;void import("leaflet").then(()=>{if(cancelled||!map.current||!marker.current)return;if(point){marker.current.setLatLng([point.latitude,point.longitude]).addTo(map.current);map.current.setView([point.latitude,point.longitude],Math.max(map.current.getZoom(),zoom));}else marker.current.remove();});return()=>{cancelled=true;};},[point,zoom]);
   return <div ref={node} className="pin-map" role="region" aria-label={onChange?"Choose property location on map":"Property location map"}/>;
 }

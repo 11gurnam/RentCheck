@@ -11,7 +11,7 @@ export async function savePhoneContact(_:State,form:FormData):Promise<State>{
  if(phone.length>20)return {status:"error",message:"Enter a 10-digit Indian mobile number, optionally prefixed with +91."};
  const {error}=await (await createDatabaseClient()).rpc("set_property_contact_settings",{p_phone:phone,p_show_publicly:form.get("showPublicly")==="on"});
  if(error)return {status:"error",message:error.message};
- revalidatePath("/account/contact");revalidatePath("/properties/[id]","page");
+ revalidatePath("/account");revalidatePath("/account/contact");revalidatePath("/properties/[id]","page");
  return {status:"success",message:"Contact details saved."};
 }
 export async function contactPreference(_: State, form: FormData): Promise<State> {
@@ -19,6 +19,7 @@ export async function contactPreference(_: State, form: FormData): Promise<State
   const { error } = await (await createDatabaseClient()).rpc("set_contact_preference", { p_enabled: form.get("enabled") === "on" });
   if (error) return { message: "Could not save contact preference." };
   revalidatePath("/messages");
+  revalidatePath("/account");
   return { status:"success", message: "Contact preference saved." };
 }
 export async function startConversation(_: State, form: FormData): Promise<State> {

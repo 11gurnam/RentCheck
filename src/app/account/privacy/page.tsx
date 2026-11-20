@@ -1,15 +1,8 @@
 import { AccountShell } from "@/components/ui/account-shell";
-import { DeleteAccountForm } from "@/features/privacy/privacy-forms";
+import { AccountPrivacyPanel } from "@/features/accounts/settings-panels";
 import { requireUser } from "@/lib/auth/session";
-export default async function PrivacyPage() {
+
+export default async function Page() {
   await requireUser("/account/privacy");
-  return (
-    <AccountShell>
-      <h1>Account privacy and deletion</h1>
-      <DeleteAccountForm />
-      <p>
-        <a href="/account">Keep my account</a>
-      </p>
-    </AccountShell>
-  );
+  return <AccountShell><AccountPrivacyPanel/></AccountShell>;
 }
