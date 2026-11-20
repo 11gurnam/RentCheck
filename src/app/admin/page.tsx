@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { AdminActionMenu } from "@/features/admin-platform/action-menu";
 import { ActivityChart } from "@/features/admin-platform/activity-chart";
 import { overview } from "@/features/admin-platform/data";
 import styles from "@/features/admin-platform/overview.module.css";
@@ -83,10 +84,10 @@ export default async function AdminPage() {
           <p><strong>{data.overdue}</strong> pending applications are older than 7 days. This is an age indicator, not a promised processing deadline.</p>
           {data.oldest && <p className="field-hint">Oldest pending submission: {displayDate(data.oldest.slice(0, 10))}</p>}
         </div>
-        <div className="review-actions">
-          <Link className="review-action" href="/admin/verification-management?status=pending&sort=oldest">Review oldest applications</Link>
-          <Link className="review-action warning-action" href="/admin/reviews?flagged=true">Moderation queue</Link>
-        </div>
+        <AdminActionMenu label="Review workload actions">
+          <Link href="/admin/verification-management?status=pending&sort=oldest">Review oldest applications</Link>
+          <Link className="warning-action" href="/admin/reviews?flagged=true">Moderation queue</Link>
+        </AdminActionMenu>
       </section>
 
       <div className={styles.verificationGrid}>

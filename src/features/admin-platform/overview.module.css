@@ -291,7 +291,7 @@
 
 .toolGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr));
   gap: var(--spacing-sm);
   margin: 0;
   padding: 0;
@@ -345,5 +345,19 @@
 
   .overview .metrics {
     grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+}
+
+@container (min-width: 56rem) {
+  .toolGrid {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+  }
+
+  .toolGrid > li {
+    grid-column: span 3;
+  }
+
+  .toolGrid > li:nth-child(n + 5) {
+    grid-column: span 4;
   }
 }

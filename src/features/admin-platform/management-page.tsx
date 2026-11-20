@@ -1,3 +1,5 @@
+import type { ReactNode } from "react";
+import { AdminActionMenu } from "./action-menu";
 import { AuditHistory } from "./audit-history";
 import { AdminSearchToolbar, activeFilterCount } from "./search-toolbar";
 import Link from "next/link";
@@ -26,25 +28,115 @@ function caseLink(row:RecordRow) {
 function TableRow({row,kind}:{row:RecordRow;kind:ManagementKind}) {
   return <tr><td><strong>{row.name}</strong><small>{kind==="properties"?`${row.address}, ${row.city}`:kind==="users"?row.email:row.kind}</small><small className="admin-record-id">{row.id}</small></td>
     {kind==="properties"?<><td><strong>{money(row.rent_min??0)}–{money(row.rent_max??0)}</strong><small>{row.rating==null?"No ratings":`${Number(row.rating).toFixed(1)} / 5`} · {row.reviews} reviews</small><small>{row.verified_reviews} verified tenant reviews</small></td><td>{row.landlord??"No approved property claimant"}<small>{row.verified?"Real property claim approved":row.is_demo?"Demonstration / no real claim":"Unverified property authority"}</small></td></>:kind==="users"?<><td>{row.admin?"Administrator · ":""}{row.roles?.join(" · ")}<small>Tenant: {row.tenant_verified?"verified":"unverified"}</small><small>Landlord: {row.landlord_verified?"verified":"unverified"}</small></td><td>{row.reviews} reviews · {typeof row.claims==="number"?row.claims:0} claims<small>{row.report_count} review reports</small></td></>:<><td><p>{row.reason}</p>{row.resolution&&<small>Resolution: {row.resolution}</small>}</td><td>{row.assigned??"Unassigned"}</td></>}
-    <td><time>{displayDate(row.created_at.slice(0,10))}</time><p><StatusBadge status={row.status}/></p></td><td><div className="admin-table-actions"><Link href={`${route[kind]}?id=${row.id}`}>Inspect record</Link>{kind==="properties"&&<Link href={`/properties/${row.id}`}>Public property</Link>}{kind==="cases"&&<Link href={caseLink(row)}>Related record / evidence</Link>}<RecordActions row={row} kind={kind}/></div></td></tr>;
+    <td><time>{displayDate(row.created_at.slice(0, 10))}</time><p><StatusBadge status={row.status} /></p></td>
+    <td className="admin-action-cell">
+      <AdminActionMenu label={"Actions for " + row.name + (kind === "cases" ? " " + row.id.slice(0, 8) : "")}>
+        <Link href={route[kind] + "?id=" + row.id}>Inspect record</Link>
+        {kind === "properties" && <Link href={"/properties/" + row.id}>Public property</Link>}
+        {kind === "cases" && <Link href={caseLink(row)}>Related record / evidence</Link>}
+        <RecordActions row={row} kind={kind} />
+      </AdminActionMenu>
+    </td>
+  </tr>;
 }
-function ReviewCard({row}:{row:RecordRow}) {
-  return <article className="dashboard-card"><header className="admin-record-heading"><div><h2>{row.name}</h2><Link href={`/properties/${row.property_id}`}>{row.property}</Link><p className="field-hint">{displayDate(row.created_at.slice(0,10))} · {row.verified?"Residence evidence approved":row.is_demo?"Demonstration review":"Unverified tenant"} · {row.reports} reports ({row.pending_reports} pending)</p></div><strong>{Number(row.rating).toFixed(1)} / 5</strong></header><StatusBadge status={row.status}/><p className="admin-review-body">{row.body}</p><div className="review-actions"><AdminMedia photos={row.photos??[]} kind="review"/><RecordActions row={row} kind="reviews"/><Link className="review-action" href={`${route.reviews}?id=${row.id}`}>History and notes</Link></div>{!!row.replies?.length&&<details><summary>Landlord responses ({row.replies.length})</summary>{row.replies.map((reply,index)=><blockquote key={index}><strong>{reply.name}</strong><p>{reply.body}</p><AdminAction kind="reply" id={reply.id} label="Remove landlord response" options={[["removed","Permanently remove response"]]}/></blockquote>)}</details>}</article>;
+function ReviewCard({ row }: { row: RecordRow }) {
+  const photos = row.photos ?? [];
+  return (
+    <article className="dashboard-card">
+      <header className="admin-record-heading">
+        <div>
+          <h2>{row.name}</h2>
+          <Link href={"/properties/" + row.property_id}>{row.property}</Link>
+          <p className="field-hint">
+            {displayDate(row.created_at.slice(0, 10))} · {row.verified ? "Residence evidence approved" : row.is_demo ? "Demonstration review" : "Unverified tenant"} · {row.reports} reports ({row.pending_reports} pending)
+          </p>
+        </div>
+        <div className="admin-record-controls">
+          <strong>{Number(row.rating).toFixed(1)} / 5</strong>
+          <AdminActionMenu label={"Actions for " + row.name}>
+            {photos.length > 0 && <AdminMedia photos={photos} kind="review" />}
+            <RecordActions row={row} kind="reviews" />
+            <Link href={route.reviews + "?id=" + row.id}>History and notes</Link>
+          </AdminActionMenu>
+        </div>
+      </header>
+      <StatusBadge status={row.status} />
+      <p className="admin-review-body">{row.body}</p>
+      {!photos.length && <p className="field-hint">No attached photos.</p>}
+      {!!row.replies?.length && (
+        <details>
+          <summary>Landlord responses ({row.replies.length})</summary>
+          {row.replies.map((reply, index) => (
+            <blockquote key={index}>
+              <strong>{reply.name}</strong>
+              <p>{reply.body}</p>
+              <AdminAction kind="reply" id={reply.id} label="Remove landlord response" options={[["removed", "Permanently remove response"]]} />
+            </blockquote>
+          ))}
+        </details>
+      )}
+    </article>
+  );
 }
-export async function ManagementPage({kind,params}:{kind:ManagementKind;params:Record<string,string|string[]|undefined>}) {
+export async function ManagementPage({kind,params,headerActions}:{kind:ManagementKind;params:Record<string,string|string[]|undefined>;headerActions?:ReactNode}) {
   const parsed=platformFilters.safeParse(params),f=parsed.success?parsed.data:platformFilters.parse({});
   const data=await managementList(kind,f);
   const statuses=kind==="properties"?["published","hidden","merged"]:kind==="users"?["active","suspended"]:kind==="reviews"?["visible","hidden","removed","deleted"]:["unresolved","open","under_review","awaiting_information","escalated","resolved"];
   const href=(page:number)=>`${route[kind]}?`+new URLSearchParams(Object.entries({...f,page}).filter(([name,value])=>value!==""&&(name!=="older_days"||value!==0)).map(([key,value])=>[key,String(value)]));
   const detail=f.id&&data.rows[0]?await recordDetails(kind,f.id):null;
   const headers=kind==="properties"?["Property","Rent / ratings","Landlord claim","Created / status","Actions"]:kind==="users"?["Account","Roles / verification","Activity","Created / status","Actions"]:["Investigation","Issue / resolution","Assigned","Created / status","Actions"];
-  return <><header className="admin-page-heading"><h1>{titles[kind]}</h1><p>{kind==="reviews"?"Keep genuine criticism visible. Temporary hiding is reversible; author-deleted and permanently removed reviews stay closed.":kind==="cases"?"Investigate conflicting claims, residence disputes, listing reports and appeals. Evidence remains in its restricted verification workflow.":"Inspect actual platform records. Sensitive changes require a reason and are audited."}</p></header>
+  return <><header className="admin-page-heading"><div className="admin-section-heading"><h1>{titles[kind]}</h1>{headerActions}</div><p>{kind==="reviews"?"Keep genuine criticism visible. Temporary hiding is reversible; author-deleted and permanently removed reviews stay closed.":kind==="cases"?"Investigate conflicting claims, residence disputes, listing reports and appeals. Evidence remains in its restricted verification workflow.":"Inspect actual platform records. Sensitive changes require a reason and are audited."}</p></header>
     {!parsed.success&&<p role="alert" className="action-feedback feedback-warning">Some filters were invalid; showing all records.</p>}
     <AdminSearchToolbar action={route[kind]} query={f.q} title={`Filter ${titles[kind].toLowerCase()}`} count={activeFilterCount(f)} placeholder={kind==="users"?"Search by name, email or account ID…":"Search by name, property, location or content…"}><label>Status<select name="status" defaultValue={f.status}><option value="">All statuses</option>{statuses.map(status=><option key={status} value={status}>{status.replaceAll("_"," ")}</option>)}</select></label><label>Sort<select name="sort" defaultValue={f.sort}><option value="newest">Newest first</option><option value="oldest">Oldest first</option><option value="name">Name</option>{kind==="reviews"&&<option value="reported">Latest report</option>}{kind==="properties"&&<option value="rating">Highest rating</option>}</select></label>
     {kind==="properties"&&<><label>City<select name="city" defaultValue={f.city}><option value="">All cities</option>{data.cities.map(city=><option key={city}>{city}</option>)}</select></label><label>Property claim<select name="verified" defaultValue={f.verified}><option value="">Any verification</option><option value="true">Real claim approved</option><option value="false">No real claim approved</option></select></label><label>Minimum rating<select name="rating" defaultValue={f.rating}><option value="">Any rating</option>{[1,2,3,4,5].map(value=><option key={value} value={value}>{value}+</option>)}</select></label></>}
     {kind==="users"&&<><label>Account role<select name="role" defaultValue={f.role}><option value="">All roles</option><option value="tenant">Tenant</option><option value="landlord">Landlord</option></select></label><label>Residence verification<select name="verified" defaultValue={f.verified}><option value="">All tenants</option><option value="true">Real residence approved</option><option value="false">Not yet verified</option></select></label><label>Landlord verification<select name="landlord_verified" defaultValue={f.landlord_verified}><option value="">All landlords</option><option value="true">Real property claim approved</option><option value="false">Not yet verified</option></select></label></>}
     {kind==="reviews"&&<><label>Reports<select name="flagged" defaultValue={f.flagged}><option value="">All reviews</option><option value="true">Unresolved reports</option></select></label><label>Report history<select name="reported" defaultValue={f.reported}><option value="">Any history</option><option value="true">Has a report</option></select></label></>}{(kind==="cases"||kind==="reviews")&&<label>Property ID<input name="property" defaultValue={f.property} maxLength={36}/></label>}{kind==="cases"&&<label>Older than (days)<input name="older_days" type="number" min={1} max={3650} defaultValue={f.older_days||""}/></label>}<label>Created from<input type="date" name="from" defaultValue={f.from}/></label><label>Created to<input type="date" name="to" defaultValue={f.to}/></label></AdminSearchToolbar>
-    <p className="admin-results-summary" role="status"><strong>{data.total}</strong> matching {kind} · Page {f.page}</p>{!data.rows.length?<section className="empty-state"><h2>No matching records</h2><p>Clear filters or return when new records are submitted.</p></section>:kind==="reviews"?<div className="admin-review-list">{data.rows.map(row=><ReviewCard row={row} key={row.id}/>)}</div>:<div className="admin-table-wrap" tabIndex={0} role="region" aria-label={`${titles[kind]} table`}><table className="admin-table"><caption className="sr-only">{titles[kind]} records</caption><thead><tr>{headers.map(label=><th key={label} scope="col">{label}</th>)}</tr></thead><tbody>{data.rows.map(row=><TableRow row={row} kind={kind} key={row.id}/>)}</tbody></table></div>}
-    {detail&&<section className="dashboard-card"><h2>Record details · {detail.name}</h2>{detail.description&&<p>{detail.description}</p>}{kind==="properties"&&<AdminMedia photos={detail.photos??[]} kind="property"/>}{detail.properties?.map(property=><p key={property.claim}><Link href={`/admin/properties?id=${property.id}`}>{property.name}</Link> · <Link href={`/admin/verification-management/landlord/${property.claim}`}>{property.status} claim</Link></p>)}{!!detail.applications?.length&&<><h3>Verification records</h3>{detail.applications.map(app=><p key={app.id}><Link href={`/admin/verification-management/${app.kind}/${app.id}`}>{app.property} · {app.kind} · {app.status}</Link></p>)}</>}{detail.tenancies?.map(stay=><p key={stay.review_id??stay.property_id}><Link href={`/admin/properties?id=${stay.property_id}`}>{stay.name}</Link> · {displayDate(stay.start)} → {stay.end?displayDate(stay.end):"Current"}{stay.review_id&&<> · <Link href={`/admin/reviews?id=${stay.review_id}`}>Tenant review</Link></>}</p>)}{detail.cases?.map(investigation=><p key={investigation.id}><Link href={`/admin/disputes?id=${investigation.id}`}>{investigation.kind} investigation · {investigation.status}</Link></p>)}<div className="review-actions"><AuditHistory events={detail.history ?? []} title="Record audit history"/>{kind==="properties"&&<><Link className="review-action" href={`/admin/rental-eligibility?q=${encodeURIComponent(detail.name)}`}>Rental eligibility</Link><Link className="review-action" href={`/admin/women-recommendations?property=${detail.id}`}>Women recommendations</Link></>}<Link className="review-action" href={`/admin/audit?entity=${detail.id}`}>Complete record audit</Link></div></section>}
+    <p className="admin-results-summary" role="status"><strong>{data.total}</strong> matching {kind} · Page {f.page}</p>{!data.rows.length?<section className="empty-state"><h2>No matching records</h2><p>Clear filters or return when new records are submitted.</p></section>:kind==="reviews"?<div className="admin-review-list">{data.rows.map(row=><ReviewCard row={row} key={row.id}/>)}</div>:<div className="admin-table-wrap" tabIndex={0} role="region" aria-label={`${titles[kind]} table`}><table className="admin-table"><caption className="sr-only">{titles[kind]} records</caption><thead><tr>{headers.map(label=><th key={label} scope="col" className={label==="Actions"?"admin-action-cell":undefined}>{label}</th>)}</tr></thead><tbody>{data.rows.map(row=><TableRow row={row} kind={kind} key={row.id}/>)}</tbody></table></div>}
+    {detail && (
+      <section className="dashboard-card">
+        <div className="admin-section-heading">
+          <h2>Record details · {detail.name}</h2>
+          <AdminActionMenu label={"Record actions for " + detail.name}>
+            {kind === "properties" && !!detail.photos?.length && <AdminMedia photos={detail.photos} kind="property" />}
+            <AuditHistory events={detail.history ?? []} title="Record audit history" />
+            {kind === "properties" && (
+              <>
+                <Link href={`/admin/rental-eligibility?q=${encodeURIComponent(detail.name)}`}>Rental eligibility</Link>
+                <Link href={`/admin/women-recommendations?property=${detail.id}`}>Women recommendations</Link>
+              </>
+            )}
+            <Link href={`/admin/audit?entity=${detail.id}`}>Complete record audit</Link>
+          </AdminActionMenu>
+        </div>
+        {detail.description && <p>{detail.description}</p>}
+        {kind === "properties" && !detail.photos?.length && <p className="field-hint">No attached photos.</p>}
+        {detail.properties?.map(property => (
+          <p key={property.claim}>
+            <Link href={`/admin/properties?id=${property.id}`}>{property.name}</Link> · <Link href={`/admin/verification-management/landlord/${property.claim}`}>{property.status} claim</Link>
+          </p>
+        ))}
+        {!!detail.applications?.length && (
+          <>
+            <h3>Verification records</h3>
+            {detail.applications.map(app => (
+              <p key={app.id}>
+                <Link href={`/admin/verification-management/${app.kind}/${app.id}`}>{app.property} · {app.kind} · {app.status}</Link>
+              </p>
+            ))}
+          </>
+        )}
+        {detail.tenancies?.map(stay => (
+          <p key={stay.review_id ?? stay.property_id}>
+            <Link href={`/admin/properties?id=${stay.property_id}`}>{stay.name}</Link> · {displayDate(stay.start)} → {stay.end ? displayDate(stay.end) : "Current"}
+            {stay.review_id && <> · <Link href={`/admin/reviews?id=${stay.review_id}`}>Tenant review</Link></>}
+          </p>
+        ))}
+        {detail.cases?.map(investigation => (
+          <p key={investigation.id}>
+            <Link href={`/admin/disputes?id=${investigation.id}`}>{investigation.kind} investigation · {investigation.status}</Link>
+          </p>
+        ))}
+      </section>
+    )}
     {detail&&<PrivateNotes kind={singular[kind]} id={detail.id}/>}<nav className="pagination" aria-label="Management pages">{f.page>1&&<Link href={href(f.page-1)}>Previous</Link>}{f.page*20<data.total&&<Link href={href(f.page+1)}>Next</Link>}</nav></>;
 }

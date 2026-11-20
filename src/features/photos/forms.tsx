@@ -1,4 +1,6 @@
 "use client";
+import { AdminActionMenu } from "@/features/admin-platform/action-menu";
+import { ActionModal } from "@/components/ui/action-modal";
 import { useFeedbackAction } from "@/components/ui/use-feedback-action";
 import { ActionFeedback } from "@/components/ui/action-feedback";
 import { FilePicker } from "@/components/ui/file-picker";
@@ -77,30 +79,36 @@ export function PhotoReportCard({ report: r }: { report: PhotoReportRecord }) {
   const [s, a, p] = useFeedbackAction(decidePhotoReport, {});
   return (
     <section className="dashboard-card" id={"photo-report-" + r.id}>
-      <h3>{r.property} · photo report</h3>
+      <div className="admin-section-heading">
+        <h3>{r.property} · photo report</h3>
+        <AdminActionMenu label={`Photo report actions for ${r.property}`}>
+          <a href={"/api/photos/" + r.photo}>Inspect reported photo</a>
+          {r.status === "pending" && (
+            <ActionModal title="Decide photo report" trigger="Decide photo report" warning>
+              <form action={a} className="auth-form">
+                <input name="report" type="hidden" value={r.id} />
+                <label>
+                  Photo report decision
+                  <select name="decision">
+                    <option value="kept">Keep photo</option>
+                    <option value="removed">Remove photo</option>
+                  </select>
+                </label>
+                <label>
+                  Photo decision reason
+                  <textarea name="reason" required minLength={10} maxLength={2000} />
+                </label>
+                <button disabled={p}>Save photo decision</button>
+                <ActionFeedback receipt={s} message={s.message} status={s.status}/>
+              </form>
+            </ActionModal>
+          )}
+        </AdminActionMenu>
+      </div>
       <p>{r.reason}</p>
       <p>
         {r.status} · {r.decision_reason}
       </p>
-      <a href={"/api/photos/" + r.photo}>Inspect reported photo</a>
-      {r.status === "pending" && (
-        <form action={a} className="auth-form">
-          <input name="report" type="hidden" value={r.id} />
-          <label>
-            Photo report decision
-            <select name="decision">
-              <option value="kept">Keep photo</option>
-              <option value="removed">Remove photo</option>
-            </select>
-          </label>
-          <label>
-            Photo decision reason
-            <textarea name="reason" required minLength={10} maxLength={2000} />
-          </label>
-          <button disabled={p}>Save photo decision</button>
-          <ActionFeedback receipt={s} message={s.message} status={s.status}/>
-        </form>
-      )}
     </section>
   );
 }

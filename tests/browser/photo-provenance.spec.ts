@@ -9,6 +9,8 @@ const c = localBackendConfiguration();
 if (!c) throw new Error("Local backend required");
 test("landlord photos preserve source, change verification with claims and obey moderation", async ({
   page,
+  browser,
+  baseURL,
 }, info) => {
   test.setTimeout(90000);
   const service = createClient(c.url, c.serviceKey, {
@@ -87,7 +89,7 @@ test("landlord photos preserve source, change verification with claims and obey 
     await page
       .getByRole("button", { name: "Add landlord photo", exact: true })
       .click();
-    await expect(page.locator(".gallery-photo-tools").getByRole("status")).toContainText("Choose a valid");
+    await expect(page.locator(".gallery-photo-tools").getByRole("alert")).toContainText("Choose a valid");
     await page
       .getByLabel("Landlord photo", { exact: true })
       .setInputFiles({
@@ -98,7 +100,7 @@ test("landlord photos preserve source, change verification with claims and obey 
     await page
       .getByRole("button", { name: "Add landlord photo", exact: true })
       .click();
-    await expect(page.getByRole("status")).toContainText(
+    await expect(page.locator(".success-toast")).toContainText(
       "Landlord photo added",
     );
     const own = await client.rpc("get_my_property_photos", {
@@ -153,28 +155,46 @@ test("landlord photos preserve source, change verification with claims and obey 
       path: info.outputPath("landlord-photo-approved.png"),
       fullPage: true,
     });
-    await page.getByText("Report a property photo", { exact: true }).click();
-    const report = page.locator(".gallery-photo-tools").filter({ has: page.getByText("Report a property photo", { exact: true }) });
-    await report.getByText("Report this photo", { exact: true }).click();
-    await report
-      .getByLabel("Photo report reason")
-      .fill("Synthetic photo report for moderation test");
-    await report.getByRole("button", { name: "Submit photo report" }).click();
-    await expect(report.getByRole("status")).toContainText("Photo reported");
+    const reporter = await browser.newPage({ baseURL });
+    try {
+      await reporter.goto("/sign-in");
+      await reporter.getByLabel("Email address").fill(reviewerEmail);
+      await reporter.getByLabel("Password", { exact: true }).fill(password);
+      await reporter.getByRole("button", { name: "Sign in", exact: true }).click();
+      await expect(reporter).toHaveURL(/\/account$/);
+      await reporter.goto("/properties/" + property);
+      const report = reporter.locator(".gallery-photo-tools").filter({ hasText: "Report a property photo" });
+      await report.getByText("Report a property photo", { exact: true }).click();
+      await report.getByText("Report this photo", { exact: true }).click();
+      await report.getByLabel("Photo report reason").fill("Synthetic photo report for moderation test");
+      await report.getByRole("button", { name: "Submit photo report" }).click();
+      await expect(reporter.locator(".success-toast")).toContainText("Photo reported");
+    } finally {
+      await reporter.close();
+    }
     await page.goto("/admin/reports");
     const card = page
       .locator("section.dashboard-card")
       .filter({ hasText: "Synthetic photo report for moderation test" });
-    await card.getByLabel("Photo report decision").selectOption("removed");
-    await card
+    await card.getByRole("button", { name: /^Photo report actions for/ }).click();
+    const actions = card.getByRole("group", { name: /^Photo report actions for/ });
+    await expect(actions.getByRole("link", { name: "Inspect reported photo" })).toBeVisible();
+    await actions.getByRole("button", { name: "Decide photo report" }).click();
+    const decision = card.getByRole("dialog", { name: "Decide photo report" });
+    await decision.getByLabel("Photo report decision").selectOption("removed");
+    await decision
       .getByLabel("Photo decision reason")
       .fill("Synthetic moderation removal after inspection");
-    await card.getByRole("button", { name: "Save photo decision" }).click();
+    await decision.getByRole("button", { name: "Save photo decision" }).click();
     await expect(card).toContainText("removed");
     expect((await page.request.get(url)).status()).toBe(404);
     fixtureAdmin(user, false);
   } finally {
-    if(reviewer) expect((await service.auth.admin.deleteUser(reviewer)).error).toBeNull();
+    if (reviewer) {
+      fixtureAdmin(reviewer, false);
+      cleanupReviewUser(reviewer);
+      expect((await service.auth.admin.deleteUser(reviewer)).error).toBeNull();
+    }
     fixtureAdmin(user, false);
     if (paths.length)
       expect(

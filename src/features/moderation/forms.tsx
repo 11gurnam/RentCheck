@@ -1,4 +1,5 @@
 "use client";
+import { AdminActionMenu } from "@/features/admin-platform/action-menu";
 import { useFeedbackAction } from "@/components/ui/use-feedback-action";
 import { ActionModal } from "@/components/ui/action-modal";
 import { displayDate } from "@/lib/display-date";
@@ -120,29 +121,25 @@ export function DuplicateCard({ d }: { d: Duplicate }) {
   const [s, a, p] = useFeedbackAction(markDistinct, {});
   return (
     <section className="dashboard-card">
-      <h2>
-        {d.source_name} / {d.target_name}
-      </h2>
+      <div className="admin-section-heading">
+        <h2>{d.source_name} / {d.target_name}</h2>
+        {d.status === "pending" && (
+          <AdminActionMenu label={`Actions for ${d.source_name} and ${d.target_name}`}>
+            <a href={"/admin/merge?source=" + d.source + "&target=" + d.target}>Inspect merge resolutions</a>
+            <ActionModal title="Keep profiles distinct" trigger="Keep profiles distinct">
+              <form action={a} className="auth-form" onReset={event => event.preventDefault()}>
+                <input type="hidden" name="candidate" value={d.id} />
+                <Reason />
+                <button disabled={p}><ActionIcon name="check" />Keep profiles distinct</button>
+                <ActionFeedback receipt={s} message={s.message} status={s.status} />
+              </form>
+            </ActionModal>
+          </AdminActionMenu>
+        )}
+      </div>
       <p>
         {d.status} · {d.reason}
       </p>
-      {d.status === "pending" && (
-        <>
-          <a href={"/admin/merge?source=" + d.source + "&target=" + d.target}>
-            Inspect merge resolutions
-          </a>
-          <form
-            action={a}
-            className="auth-form"
-            onReset={(e) => e.preventDefault()}
-          >
-            <input type="hidden" name="candidate" value={d.id} />
-            <Reason />
-            <button disabled={p}><ActionIcon name="check" />Keep profiles distinct</button>
-          </form>
-        </>
-      )}
-      <ActionFeedback receipt={s} message={s.message} status={s.status} />
     </section>
   );
 }
